@@ -1,6 +1,6 @@
 function loadLoginForm()
 {
-    fetch('/pages/login.html')
+    fetch('/front/pages/login.html')
         .then(response => response.text())
         .then(html =>
 		{
