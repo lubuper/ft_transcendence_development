@@ -1,0 +1,62 @@
+body {
+    background-color: #00001a; /* Deep space background color */
+    color: #ffffff; /* Text color */
+    font-family: 'Courier New', Courier, monospace; /* A classic monospace font for a sci-fi feel */
+    transition: background-color 0.5s ease; /* Add a transition effect to the background color */
+  }
+  
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #272737; /* Space station control room background color */
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Add a subtle shadow effect */
+    animation: fade-in 1s ease-out forwards; /* Add a fade-in animation */
+  }
+  
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .nav__link {
+    color: #ffffff;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s ease, transform 0.2s ease; /* Add a transition effect to the background color and transform property */
+    transform: translateZ(0); /* Add a subtle 3D effect */
+    will-change: transform; /* Improve performance by indicating that the transform property will be changed */
+  }
+  
+  .nav__link:hover {
+    background-color: #3c3c4f; /* Highlighted link background color */
+    transform: translateY(-2px); /* Add a subtle hover effect */
+  }
+  
+  #app {
+    background-color: #1a1a27; /* Spacecraft control panel background color */
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Add a subtle shadow effect */
+    animation: fade-in 1s ease-out forwards; /* Add a fade-in animation */
+  }
+  
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
