@@ -49,3 +49,9 @@ VALUES (1, NULL, NULL);
 
 INSERT INTO user_colors (user_id, skin_color_hex, head_color_hex, chest_color_hex, legs_color_hex, feet_color_hex)
 VALUES (1, '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF');
+
+INSERT INTO user_scores (user_id, rank, top_score)
+VALUES (1, NULL, NULL);
+
+INSERT INTO user_colors (user_id, skin_color_hex, head_color_hex, chest_color_hex, legs_color_hex, feet_color_hex)
+VALUES (1, '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF');
