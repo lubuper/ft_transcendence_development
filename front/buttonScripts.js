@@ -31,6 +31,8 @@ function loadPage(url) {
     }, 500);
 }
 
+const audio = document.getElementById('audioplayer');
+audio.volume = 0.3;
 
 //REPLACEMENT CODE FOR SANITIZING THE HTML STRINGS TO PREVENT VULNERABILITIES. DO NOT FORGET TO INSTALL DOMPURIFY LIB
 /* import DOMPurify from 'dompurify';

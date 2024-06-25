@@ -28,135 +28,123 @@ const geometry_ball = new THREE.CircleGeometry(0.05, 32);
 const material_ball = new THREE.MeshBasicMaterial({color: 0xffffff, side: THREE.DoubleSide});
 const ball = new THREE.Mesh(geometry_ball, material_ball);
 scene.add(ball);
-ball.position.set(0, 0);
+ball.position.set(0, 0, 0);
 ball.velocity = new THREE.Vector3(0.02, 0.02, 0);
 
-// Create a square (plane)
+// Create the box (plane)
 const geometry = new THREE.PlaneGeometry(5, 2.8);
-
-// Create a material
 const material = new THREE.LineBasicMaterial({ color: 0x00ff00 });
-
-// Create edges geometry from the square
 const edges = new THREE.EdgesGeometry(geometry);
+const box = new THREE.LineSegments(edges, material);
+scene.add(box);
 
-// Create a line segments object to represent the square's edges
-const perimeter = new THREE.LineSegments(edges, material);
 
-// Add the line to the scene
-scene.add(perimeter);
-
-// Function to reset the ball to the center
 function resetBall() {
 	ball.position.set(0, 0, 0);
-	ball.velocity.set(0.02, 0.02, 0); // Reset velocity if needed
+	ball.velocity.set(0.04, 0.04, 0); // Reset velocity if needed
 }
 
-// Initialize score variables
 let scorePlayer1 = 0;
 let scorePlayer2 = 0;
 
-// Function to update the score display
 function updateScoreDisplay() {
 	document.getElementById('scorePlayer1').textContent = `Player 1: ${scorePlayer1}`;
 	document.getElementById('scorePlayer2').textContent = `Player 2: ${scorePlayer2}`;
 }
 
-// Player movement
-window.addEventListener('keydown', function(event) {
-	switch (event.key) {
-		case 's':
-			player1.position.y -= 0.1;
-			break;
-		case 'w':
-			player1.position.y += 0.1;
-			break;
-		case 'l':
-			player2.position.y -= 0.1;
-			break;
-		case 'o':
-			player2.position.y += 0.1;
-			break;
-}
-});
-
-
-let player1Ready = false;
-let player2Ready = false;
+let player1Ready = -1;
+let init = 1;
 
 document.getElementById('readyPlayer1').addEventListener('click', function() {
-player1Ready = true;
-checkBothPlayersReady();
+	player1Ready *= -1;
+	startGame();
+	console.log("player 1 ready");
 });
 
-document.getElementById('readyPlayer2').addEventListener('click', function() {
-player2Ready = true;
-checkBothPlayersReady();
+
+//monitor keys to player movement
+const keysPressed = {};
+
+window.addEventListener('keydown', function(event) {
+    keysPressed[event.key] = true;
 });
 
-function checkBothPlayersReady() {
-if (player1Ready && player2Ready) {
-	// Commence the game
-	startGame(); // Assuming startGame() is the function that starts the game
-}
-}
-
-function startGame()
-{
-animate();
-updateScoreDisplay(); // Ensure the score is displayed when the game starts
-window.addEventListener('unload', function()
-{
-	if (document.body.contains(renderer.domElement))
-		{
-			player2Ready = false;
-			player1Ready = false;
-			document.body.removeChild(renderer.domElement);
-		}
+window.addEventListener('keyup', function(event) {
+    keysPressed[event.key] = false;
 });
+
+
+function startGame() {
+	if (player1Ready == 1 && init == 1)
+	{
+		animate();
+		updateScoreDisplay();
+		init = 0;
+	}
 }
 
-// Start the game when the page is fully loaded
+const maxY = geometry.parameters.height / 2 - geometry_player1.parameters.height / 2;
+const minY = -geometry.parameters.height / 2 + geometry_player1.parameters.height / 2;
 
+function beginnerAI() {
+	if (ball.position.y > player2.position.y && player2.position.y <= maxY)
+		player2.position.y += 0.03;
+	if (ball.position.y < player2.position.y && player2.position.y >= minY)
+		player2.position.y -= 0.03;
+}
 
-
-// Animation loop
 function animate() {
-requestAnimationFrame(animate);
-ball.position.add(ball.velocity);
-
-// Check for scoring
-if (ball.position.x + ball.geometry.parameters.radius > geometry.parameters.width / 2) {
-scorePlayer2++;
-updateScoreDisplay();
-resetBall();
-} else if (ball.position.x - ball.geometry.parameters.radius < -geometry.parameters.width / 2) {
-scorePlayer1++;
-updateScoreDisplay();
-resetBall();
+	requestAnimationFrame(animate);
+	if (keysPressed['s'] && player1.position.y >= minY) {
+		player1.position.y -= 0.03;
+	}
+	if (keysPressed['w'] && player1.position.y <= maxY) {
+		player1.position.y += 0.03;
+	}
+	beginnerAI();
+	ball.position.add(ball.velocity);
+	// Check for scoring
+	if (ball.position.x + ball.geometry.parameters.radius > geometry.parameters.width / 2) {
+		scorePlayer1++;
+		updateScoreDisplay();
+		resetBall();
+	}
+	else if (ball.position.x - ball.geometry.parameters.radius < -geometry.parameters.width / 2) {
+		scorePlayer2++;
+		updateScoreDisplay();
+		resetBall();
+	}
+	// Ball collision with walls
+	if (ball.position.y + ball.geometry.parameters.radius > geometry.parameters.height / 2 || 
+		ball.position.y - ball.geometry.parameters.radius < -geometry.parameters.height / 2) {
+		ball.velocity.y *= -1;
+	}
+	// Ball collision with players
+	// Player 1
+	if (ball.position.x - ball.geometry.parameters.radius < player1.position.x + geometry_player1.parameters.width / 2 &&
+		ball.position.x + ball.geometry.parameters.radius > player1.position.x - geometry_player1.parameters.width / 2 &&
+		ball.position.y + ball.geometry.parameters.radius > player1.position.y - geometry_player1.parameters.height / 2 &&
+		ball.position.y - ball.geometry.parameters.radius < player1.position.y + geometry_player1.parameters.height / 2) {
+		ball.velocity.x *= -1;
+		let diff = ball.position.y - player1.position.y;
+		ball.velocity.y += diff * 0.1;
+	}
+	// Player 2
+	if (ball.position.x - ball.geometry.parameters.radius < player2.position.x + geometry_player2.parameters.width / 2 &&
+		ball.position.x + ball.geometry.parameters.radius > player2.position.x - geometry_player2.parameters.width / 2 &&
+		ball.position.y + ball.geometry.parameters.radius > player2.position.y - geometry_player2.parameters.height / 2 &&
+		ball.position.y - ball.geometry.parameters.radius < player2.position.y + geometry_player2.parameters.height / 2) {
+		ball.velocity.x *= -1;
+		let diff = ball.position.y - player2.position.y;
+		ball.velocity.y += diff * 0.1;
+	}
+	renderer.render(scene, camera);
 }
 
-// Ball collision with top and bottom walls
-if (ball.position.y + ball.geometry.parameters.radius > geometry.parameters.height / 2 || 
-	ball.position.y - ball.geometry.parameters.radius < -geometry.parameters.height / 2) {
-ball.velocity.y *= -1;
-}
-
-// Ball collision with players
-// Player 1
-if (ball.position.x - ball.geometry.parameters.radius < player1.position.x + geometry_player1.parameters.width / 2 &&
-	ball.position.x + ball.geometry.parameters.radius > player1.position.x - geometry_player1.parameters.width / 2 &&
-	ball.position.y + ball.geometry.parameters.radius > player1.position.y - geometry_player1.parameters.height / 2 &&
-	ball.position.y - ball.geometry.parameters.radius < player1.position.y + geometry_player1.parameters.height / 2) {
-ball.velocity.x *= -1;
-}
-// Player 2
-if (ball.position.x - ball.geometry.parameters.radius < player2.position.x + geometry_player2.parameters.width / 2 &&
-	ball.position.x + ball.geometry.parameters.radius > player2.position.x - geometry_player2.parameters.width / 2 &&
-	ball.position.y + ball.geometry.parameters.radius > player2.position.y - geometry_player2.parameters.height / 2 &&
-	ball.position.y - ball.geometry.parameters.radius < player2.position.y + geometry_player2.parameters.height / 2) {
-ball.velocity.x *= -1;
-}
-
-renderer.render(scene, camera);
+function cleanupGame() {
+	if (document.body.contains(renderer.domElement)) {
+		document.body.removeChild(renderer.domElement);
+	}
+	player1Ready = -1;
+	init = 1;
 }

@@ -37,8 +37,9 @@
 				background-color: black;
 			}
         </style>
-        <audio id="player" autoplay loop>
-            <source src="/front/assets/silence.mp3" type="audio/mp3">
+        <audio id="audioplayer" autoplay loop>
+			<source src="/front/assets/silence.mp3" type="audio/mp3">
+            <source src="/front/assets/main.mp3" type="audio/mp3">
         </audio>
     </head>
     <body class="fade overflow-hidden">
@@ -61,6 +62,7 @@
                 </div>
             </div>
         </div>
+		<script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.0/dist/purify.min.js"></script>
         <script src="/front/buttonScripts.js"></script>
     </body>
 </html>
