@@ -52,13 +52,11 @@ function updateScoreDisplay() {
 	document.getElementById('scorePlayer2').textContent = `Player 2: ${scorePlayer2}`;
 }
 
-let player1Ready = -1;
 let init = 1;
 
 document.getElementById('readyPlayer1').addEventListener('click', function() {
-	player1Ready *= -1;
+	console.log("player 1 raady");
 	startGame();
-	console.log("player 1 ready");
 });
 
 
@@ -75,7 +73,7 @@ window.addEventListener('keyup', function(event) {
 
 
 function startGame() {
-	if (player1Ready == 1 && init == 1)
+	if (init == 1)
 	{
 		animate();
 		updateScoreDisplay();
@@ -145,6 +143,5 @@ function cleanupGame() {
 	if (document.body.contains(renderer.domElement)) {
 		document.body.removeChild(renderer.domElement);
 	}
-	player1Ready = -1;
 	init = 1;
 }
