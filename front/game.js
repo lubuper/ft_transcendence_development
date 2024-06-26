@@ -55,7 +55,6 @@ function updateScoreDisplay() {
 let init = 1;
 
 document.getElementById('readyPlayer1').addEventListener('click', function() {
-	console.log("player 1 raady");
 	startGame();
 });
 
