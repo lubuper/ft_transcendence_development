@@ -16,9 +16,12 @@ window.addEventListener('popstate', function(event) {
 
 window.addEventListener('load', function() {
     document.body.classList.add('show');
+
 });
 
 function loadPage(url) {
+	const contentGame = document.getElementById('content_game');
+	if (contentGame) contentGame.remove();
     document.body.classList.remove('show');
     setTimeout(function () {
         fetch(url)

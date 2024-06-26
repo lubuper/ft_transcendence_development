@@ -1,3 +1,5 @@
+let animationFrameID;
+
 // Create a scene
 const scene = new THREE.Scene();
 
@@ -54,7 +56,7 @@ function updateScoreDisplay() {
 
 let init = 1;
 
-document.getElementById('readyPlayer1').addEventListener('click', function() {
+document.getElementById('playButton').addEventListener('click', function() {
 	startGame();
 });
 
@@ -75,8 +77,8 @@ function startGame() {
 	if (init == 1)
 	{
 		animate();
-		updateScoreDisplay();
 		init = 0;
+		document.getElementById('playButton').style.display = 'none';
 	}
 }
 
@@ -91,7 +93,7 @@ function beginnerAI() {
 }
 
 function animate() {
-	requestAnimationFrame(animate);
+	animationFrameID = requestAnimationFrame(animate);
 	if (keysPressed['s'] && player1.position.y >= minY) {
 		player1.position.y -= 0.03;
 	}
@@ -101,6 +103,8 @@ function animate() {
 	beginnerAI();
 	ball.position.add(ball.velocity);
 	// Check for scoring
+	if (scorePlayer1 >= 5 || scorePlayer2 >= 5)
+		cleanupGame();
 	if (ball.position.x + ball.geometry.parameters.radius > geometry.parameters.width / 2) {
 		scorePlayer1++;
 		updateScoreDisplay();
@@ -142,5 +146,40 @@ function cleanupGame() {
 	if (document.body.contains(renderer.domElement)) {
 		document.body.removeChild(renderer.domElement);
 	}
-	init = 1;
+	cancelAnimationFrame(animationFrameID);
+	updateScoreDisplay();
+	if (scorePlayer1 > scorePlayer2) {
+		document.getElementById('gameResult').textContent = "Congratulations! You WIN!";
+	}
+	else if (scorePlayer1 < scorePlayer2) {
+		document.getElementById('gameResult').textContent = "You LOSE. Try again!";
+	}
+	document.getElementById('playAgain').style.display = 'block';
 }
+
+function playAgain() {
+    // Reset scores
+    scorePlayer1 = 0;
+    scorePlayer2 = 0;
+    updateScoreDisplay();
+    document.getElementById('gameResult').textContent = '';
+
+    // Reset player and ball positions
+    player1.position.set(-2.3, 0.2, 0);
+    player2.position.set(2.3, -0.2, 0);
+    resetBall();
+
+    // Ensure the renderer is added back to the DOM if removed
+    if (!document.body.contains(renderer.domElement)) {
+        document.body.appendChild(renderer.domElement);
+    }
+
+    // Hide the Play Again button
+    document.getElementById('playAgain').style.display = 'none';
+
+    // Restart the animation loop
+    cancelAnimationFrame(animationFrameID); // Cancel any previous animation frame to avoid duplicates
+    animate();
+}
+
+document.getElementById('playAgain').addEventListener('click', playAgain);
