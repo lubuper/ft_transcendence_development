@@ -1,3 +1,3 @@
-import App from './app/helpers/App.js'
+import App from './helpers/App.js'
 
 document.addEventListener('DOMContentLoaded', App)

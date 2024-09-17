@@ -1,14 +1,14 @@
 // Assuming you have the paths to the images
 const avatarPaths = [
-	'/app/assets/ships/splash/1.png',
-	'/app/assets/ships/splash/2.png',
-	'/app/assets/ships/splash/3.png',
-	'/app/assets/ships/splash/4.png',
-	'/app/assets/ships/splash/5.png',
-	'/app/assets/ships/splash/6.png',
-	'/app/assets/ships/splash/7.png',
-	'/app/assets/ships/splash/8.png',
-	'/app/assets/ships/splash/9.png'
+	'/static/media/assets/ships/splash/1.png',
+	'/static/media/assets/ships/splash/2.png',
+	'/static/media/assets/ships/splash/3.png',
+	'/static/media/assets/ships/splash/4.png',
+	'/static/media/assets/ships/splash/5.png',
+	'/static/media/assets/ships/splash/6.png',
+	'/static/media/assets/ships/splash/7.png',
+	'/static/media/assets/ships/splash/8.png',
+	'/static/media/assets/ships/splash/9.png'
 ];
 
 export function saveMatchHistory(match) {
