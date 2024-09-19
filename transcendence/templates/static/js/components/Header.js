@@ -11,18 +11,18 @@ export default function Header() {
 		</nav>
 		<div style="position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 100;">
 			<audio id="audioplayer" controls autoplay loop style="max-width: 300px; width: 100%;">
-				<source src="/app/assets/music/track1.mp3" type="audio/mp3">
+				<source src="/static/media/assets/music/track1.mp3" type="audio/mp3">
 			</audio>
 			<select id="musicSelection" style="display: block; margin: 0 auto;">
-				<option value="/app/assets/music/track1.mp3">Hungarian Dance</option>
-				<option value="/app/assets/music/track2.mp3">The Ascent (version a)</option>
-				<option value="/app/assets/music/track3.mp3">Midnight Explosion</option>
-				<option value="/app/assets/music/track4.mp3">Maximum Overdrive</option>
+				<option value="/static/media/assets/music/track1.mp3">Hungarian Dance</option>
+				<option value="/static/media/assets/music/track2.mp3">The Ascent (version a)</option>
+				<option value="/static/media/assets/music/track3.mp3">Midnight Explosion</option>
+				<option value="/static/media/assets/music/track4.mp3">Maximum Overdrive</option>
 			</select>
 		</div>
 		<video id="videoplayer" autoplay loop muted
 			style="pointer-events: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;">
-			<source src="/app/assets/1.mp4" type="video/mp4">
+			<source src="/static/media/assets/1.mp4" type="video/mp4">
 		</video>
 	`;
 	const audioPlayer = $header.querySelector('#audioplayer');

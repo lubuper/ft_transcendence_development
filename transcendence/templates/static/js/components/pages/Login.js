@@ -3,6 +3,9 @@ export default function Login() {
 	$loginForm.innerHTML = `
 		<div class="vh-100 d-flex align-items-center justify-content-center position-relative">
 			<div class="container row justify-content-center col-md-2">
+			
+				<!--	Action chama o uma View no Django		-->
+				<!--	action="/your-name/" method="post"		-->
 				<form>
 					<div class="form-group">
 						<label for="username" class="text-white">Username</label>

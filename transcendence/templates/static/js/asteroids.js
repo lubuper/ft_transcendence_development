@@ -1,4 +1,4 @@
-import { saveMatchHistory } from '/app/components/pages/Dashboard.js';
+import { saveMatchHistory } from './components/pages/Dashboard.js';
 
 class Level {
 	constructor(number, asteroids, sAsteroids, AIShips, powerups) {
@@ -211,14 +211,14 @@ class Game {
 	createEnvironment() {
 		const envGeometry = new THREE.PlaneGeometry(this.boundaryX * 2, this.boundaryY * 2, 1, 1);
 		const envMaterial = new THREE.MeshLambertMaterial({ side: THREE.DoubleSide });
-		this.loader.load('/app/assets/mway.jpg', (texture) => {
+		this.loader.load('/static/media/assets/mway.jpg', (texture) => {
 			envMaterial.map = texture;
 			envMaterial.needsUpdate = true;
 			this.env = new THREE.Mesh(envGeometry, envMaterial);
 			this.scene.add(this.env);	
 		});
 		const frameGeometry = new THREE.PlaneGeometry(this.boundaryX * 2 * 1.1, this.boundaryY * 2 * 1.2, 1, 1);
-		this.loader.load('/app/assets/frame1.png', (frameTexture) => {
+		this.loader.load('/static/media/assets/frame1.png', (frameTexture) => {
 			const frameMaterial = new THREE.MeshBasicMaterial({ map: frameTexture, transparent: true, opacity: 1, depthTest: true, depthWrite: false });
 			const frame = new THREE.Mesh(frameGeometry, frameMaterial);
 			frame.position.set(0, 0, 15);
@@ -226,7 +226,7 @@ class Game {
 			frame.material.needsUpdate = true;
 		});
 		const levelCompleteDisp = new THREE.PlaneGeometry(170, 80, 1);
-		this.loader.load('/app/assets/levelComplete.png', (frameTexture) => {
+		this.loader.load('/static/media/assets/levelComplete.png', (frameTexture) => {
 			const localMaterial = new THREE.MeshBasicMaterial({ map: frameTexture, transparent: true, opacity: 0, depthTest: true, depthWrite: false });
 			this.lvlCompleteScreen = new THREE.Mesh(levelCompleteDisp, localMaterial);
 			this.lvlCompleteScreen.position.set(0, 0, 13);
@@ -264,9 +264,9 @@ class Game {
 		this.player.position.set(0, 0, 5);
 		this.player.velocity = { x: 0, y: 0 };
 		
-		this.fbxloader.load('/app/assets/ships/ship4.fbx', (ship) => {
+		this.fbxloader.load('/static/media/assets/ships/ship4.fbx', (ship) => {
 			// Load the texture
-			this.loader.load('/app/assets/ships/ship4.png', (texture) => {
+			this.loader.load('/static/media/assets/ships/ship4.png', (texture) => {
 				let trymesh = new THREE.MeshLambertMaterial({ 
 					map: texture, // Apply the loaded texture
 					visible: true 
@@ -310,12 +310,12 @@ class Game {
 		}
 
 		if (type === 'asteroid') {
-			material = new THREE.MeshLambertMaterial({ map: this.loader.load('app/assets/asteroid.jpg'), side: THREE.DoubleSide });
+			material = new THREE.MeshLambertMaterial({ map: this.loader.load('/static/media/assets/asteroid.jpg'), side: THREE.DoubleSide });
 			geometry = new THREE.SphereGeometry(size, 7, heightSegments, 0, 6.283185307179586, 0, 6.283185307179586);
 		}
 		else if (type === 'sAsteroid') {
 			geometry = new THREE.SphereGeometry(size + 0.5, 7, 8, 0, 6.28, 3.4, 6.28);
-			material = new THREE.MeshLambertMaterial({ map: this.loader.load('app/assets/clouds.jpg'), side: THREE.DoubleSide });
+			material = new THREE.MeshLambertMaterial({ map: this.loader.load('/static/media/assets/clouds.jpg'), side: THREE.DoubleSide });
 		}
 		const asteroid = new THREE.Mesh(geometry, material);
 		asteroid.size = size;
@@ -383,10 +383,10 @@ class Game {
 			const collisionBox = new THREE.Mesh(collisionBoxGeometry, collisionBoxMaterial);
 	
 			// Load the texture for the FBX model
-			const texture = new THREE.TextureLoader().load('app/assets/ships/ship8.png');
+			const texture = new THREE.TextureLoader().load('/static/media/assets/ships/ship8.png');
 			const material = new THREE.MeshLambertMaterial({ map: texture });
 			const loader = new THREE.FBXLoader();
-			loader.load('app/assets/ships/ship8.fbx', (modelAI) => {
+			loader.load('/static/media/assets/ships/ship8.fbx', (modelAI) => {
 				modelAI.scale.set(0.035, 0.035, 0.035);
 				modelAI.rotation.x = -Math.PI / 2;
 				modelAI.rotation.y = -Math.PI / 2;
@@ -430,7 +430,7 @@ class Game {
 			if (event.key === 'e' && this.playerIsActive && this.shield.lifetime > 0) {
 				event.preventDefault();
 				if (!this.actionStates.shield.pressed) {
-					this.playSound('/app/assets/sounds/shield.mp3', 0.4);
+					this.playSound('/static/media/assets/sounds/shield.mp3', 0.4);
 				}
 				this.shield.visible = true;
 				this.actionStates.shield.pressed = true;
@@ -465,13 +465,13 @@ class Game {
 	shoot(method, isPlayer) {
 		if (method === 1) {
 			this.createProjectile(this.player, 0, isPlayer);
-			this.playSound('/app/assets/sounds/laser7.mp3', 0.9);
+			this.playSound('/static/media/assets/sounds/laser7.mp3', 0.9);
 		}
 		else if (method === 2) {
 			this.createProjectile(this.player, -15, isPlayer); // Left 
 			this.createProjectile(this.player, 0, isPlayer);
 			this.createProjectile(this.player, 15, isPlayer); // Right
-			this.playSound('/app/assets/sounds/3shot.mp3', 1);
+			this.playSound('/static/media/assets/sounds/3shot.mp3', 1);
 		}
 		else if (method === 3) {
 
@@ -504,7 +504,7 @@ class Game {
 				x: Math.sin(playerAngle) * speed,
 				y: -Math.cos(playerAngle) * speed
 			};
-			this.playSound('/app/assets/sounds/laser7.mp3', 0.9);
+			this.playSound('/static/media/assets/sounds/laser7.mp3', 0.9);
 		}
 		this.scene.add(laser);
 		this.projectiles.push(laser);
@@ -532,7 +532,7 @@ class Game {
 	}
 
 	playerDeath() {
-		this.playSound('/app/assets/sounds/explosion2.mp3', 2);
+		this.playSound('/static/media/assets/sounds/explosion2.mp3', 2);
 		this.scene.remove(this.player);
 		this.playerLives--;
 		if (this.checkLives()) {
@@ -541,7 +541,7 @@ class Game {
 				this.scene.add(this.player);
 				this.playerIsActive = true;
 				this.shield.visible = true;
-				this.playSound('/app/assets/sounds/shield.mp3', 0.4)
+				this.playSound('/static/media/assets/sounds/shield.mp3', 0.4)
 				this.shield.spawnTime = 100;
 				if (this.shield.lifetime < 40) {
 					this.shield.lifetime = 80;
@@ -581,7 +581,7 @@ class Game {
 	displayLives() {
 		for (let i = 0; i < 4; i++) {
 			let ship;
-			this.fbxloader.load('/app/assets/ships/ship4original.fbx', (fbx) => {
+			this.fbxloader.load('/static/media/assets/ships/ship4original.fbx', (fbx) => {
 				ship = fbx;
 				ship.scale.set(0.011, 0.011, 0.011);
 				ship.position.set(i * 5 - 7.5, -44, 16);
@@ -807,7 +807,7 @@ class Game {
 			for (let j = this.asteroids.length - 1; j >= 0; j--) {
 				const asteroid = this.asteroids[j];
 				if (this.checkCollision(projectile, asteroid)) {
-					this.playSound('/app/assets/sounds/explosion.mp3', 2);
+					this.playSound('/static/media/assets/sounds/explosion.mp3', 2);
 					if (asteroid.size > 1) {
 						asteroid.size -= 1;
 						for (let k = 0; k < 3; k++) {
@@ -826,7 +826,7 @@ class Game {
 			for (let j = this.sAsteroids.length - 1; j >= 0; j--) {
 				const sAsteroid = this.sAsteroids[j];
 				if (this.checkCollision(projectile, sAsteroid)) {
-					this.playSound('/app/assets/sounds/hit.mp3', 0.3);
+					this.playSound('/static/media/assets/sounds/hit.mp3', 0.3);
 					sAsteroid.velocity.x += projectile.velocity.x * 0.2;
 					sAsteroid.velocity.y += projectile.velocity.y * 0.2;
 					this.scene.remove(projectile);
@@ -839,7 +839,7 @@ class Game {
 				for (let j = this.AIShips.length - 1; j >= 0; j--) {
 					const AIShip = this.AIShips[j];
 					if (this.checkCollision(projectile, AIShip)) {
-						this.playSound('/app/assets/sounds/explosion.mp3', 2);
+						this.playSound('/static/media/assets/sounds/explosion.mp3', 2);
 						this.scene.remove(AIShip);
 						this.AIShips.splice(j, 1);
 						this.scene.remove(projectile);

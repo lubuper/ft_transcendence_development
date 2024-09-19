@@ -1,4 +1,4 @@
-import { saveMatchHistory } from '/app/components/pages/Dashboard.js';
+import { saveMatchHistory } from './components/pages/Dashboard.js';
 
 class Game {
 	constructor() {
@@ -278,7 +278,7 @@ class Game {
 		const envMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
 		this.env = new THREE.Mesh(envGeometry, envMaterial);
 	 		this.scene.add(this.env);
-			this.loader.load('/app/assets/mway8.jpg', function(texture) {
+			this.loader.load('/static/media/assets/mway8.jpg', function(texture) {
 				texture.wrapS = THREE.RepeatWrapping;
 				texture.wrapT = THREE.RepeatWrapping;
 				envMaterial.map = texture;
@@ -287,7 +287,7 @@ class Game {
 
 		// Planet 1
 		const planetGeometry = new THREE.SphereGeometry(1, 20, 20); // radius, widthSegments, heightSegments
-		let moonTexture = new THREE.MeshLambertMaterial({ map: this.loader.load('/app/assets/moon.jpg') });
+		let moonTexture = new THREE.MeshLambertMaterial({ map: this.loader.load('/static/media/assets/moon.jpg') });
 		this.moon = new THREE.Mesh(planetGeometry, moonTexture);
 		this.scene.add(this.moon);
 		this.env.add(this.moon);
@@ -297,7 +297,7 @@ class Game {
 		
 		// Planet 2
 		const sphereGeometry = new THREE.SphereGeometry(3, 32, 32);
-		let earthTexture = new THREE.MeshLambertMaterial({ map: this.loader.load('/app/assets/earthnight.jpg'), reflectivity: 1 });
+		let earthTexture = new THREE.MeshLambertMaterial({ map: this.loader.load('/static/media/assets/earthnight.jpg'), reflectivity: 1 });
 		this.planetEarth = new THREE.Mesh(sphereGeometry, earthTexture);
 		this.scene.add(this.planetEarth);
 		this.env.add(this.planetEarth);
@@ -307,14 +307,14 @@ class Game {
 
 		const cloudsGeometry = new THREE.SphereGeometry(3.05, 32, 32);
 		let cloudsMaterial = new THREE.MeshLambertMaterial({
-			map: this.loader.load('/app/assets/clouds.jpg'), transparent: true, opacity: 0.2 });
+			map: this.loader.load('/static/media/assets/clouds.jpg'), transparent: true, opacity: 0.2 });
 		this.clouds = new THREE.Mesh(cloudsGeometry, cloudsMaterial);
 		this.planetEarth.add(this.clouds);
 
 		// Sun
 
 		const sunGeometry = new THREE.SphereGeometry(1, 32, 32);
-		let sunMaterial = new THREE.MeshBasicMaterial({ map: this.loader.load ('/app/assets/sun.jpg') })
+		let sunMaterial = new THREE.MeshBasicMaterial({ map: this.loader.load ('/static/media/assets/sun.jpg') })
 		this.sun = new THREE.Mesh(sunGeometry, sunMaterial);
 		this.sun.position.set(-40, -1, -1);
 		this.scene.add(this.sun);
@@ -338,7 +338,7 @@ class Game {
 
 	createBall() {
 		const geometry_ball = new THREE.SphereGeometry(0.07, 32, 32);
-		let ball_tex = new THREE.MeshLambertMaterial({ map: this.loader.load('/app/assets/ball.jpg') });
+		let ball_tex = new THREE.MeshLambertMaterial({ map: this.loader.load('/static/media/assets/ball.jpg') });
 		this.ball = new THREE.Mesh(geometry_ball, ball_tex);
 		this.scene.add(this.ball);
 		this.ball.position.set(0, 0, -0.01);
@@ -348,13 +348,13 @@ class Game {
 
 	createPlayers() {
 		this.geometry_player1 = new THREE.BoxGeometry(0.01, 0.5, 0.1);
-		const material_player1 = new THREE.MeshStandardMaterial({ map: this.loader.load('/app/assets/metal.png'), side: THREE.DoubleSide, transparent: true, opacity: 0.3 });
+		const material_player1 = new THREE.MeshStandardMaterial({ map: this.loader.load('/static/media/assets/metal.png'), side: THREE.DoubleSide, transparent: true, opacity: 0.3 });
 		this.player1 = new THREE.Mesh(this.geometry_player1, material_player1);
 		this.scene.add(this.player1);
 		this.player1.position.set((-this.geox / 2) + 0.1, 0.2, 0);
 		
 		this.geometry_player2 = new THREE.BoxGeometry(0.01, 0.5, 0.1);
-		const material_player2 = new THREE.MeshStandardMaterial({ map: this.loader.load('/app/assets/metal.png'), side: THREE.DoubleSide, transparent: true, opacity: 0.3 });
+		const material_player2 = new THREE.MeshStandardMaterial({ map: this.loader.load('/static/media/assets/metal.png'), side: THREE.DoubleSide, transparent: true, opacity: 0.3 });
 		this.player2 = new THREE.Mesh(this.geometry_player2, material_player2);
 		this.scene.add(this.player2);
 		this.player2.position.set((this.geox / 2) - 0.1, -0.2, 0);
@@ -365,7 +365,7 @@ class Game {
 		const powerupTypes = ['paddleIncrease', 'ballSpeedUp', 'invertSpeed', 'protectiveBarrier'];
 		const type = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
 		const powerGeometry = new THREE.SphereGeometry(0.07, 32, 32);
-		const powerMaterial = new THREE.MeshLambertMaterial({ map: this.loader.load('/app/assets/metal2.jpg') });
+		const powerMaterial = new THREE.MeshLambertMaterial({ map: this.loader.load('/static/media/assets/metal2.jpg') });
 		const powerup = new THREE.Mesh(powerGeometry, powerMaterial);
 		powerup.position.set((Math.random() - 0.5) * this.geox, (Math.random() - 0.5) * this.geoy, 0);
 		powerup.type = type;
@@ -405,34 +405,34 @@ class Game {
 		let shipMesh;
 		switch(shipNumber) {
 			case 1:
-				shipMesh = '/app/assets/ships/ship1.fbx';
+				shipMesh = '/static/media/assets/ships/ship1.fbx';
 				break;
 			case 2:
-				shipMesh = '/app/assets/ships/ship2.fbx';
+				shipMesh = '/static/media/assets/ships/ship2.fbx';
 				break;
 			case 3:
-				shipMesh = '/app/assets/ships/ship3.fbx';
+				shipMesh = '/static/media/assets/ships/ship3.fbx';
 				break;
 			case 4:
-				shipMesh = '/app/assets/ships/ship4.fbx';
+				shipMesh = '/static/media/assets/ships/ship4.fbx';
 				break;
 			case 5:
-				shipMesh = '/app/assets/ships/ship5.fbx';
+				shipMesh = '/static/media/assets/ships/ship5.fbx';
 				break;
 			case 6:
-				shipMesh = '/app/assets/ships/ship6.fbx';
+				shipMesh = '/static/media/assets/ships/ship6.fbx';
 				break;
 			case 7:
-				shipMesh = '/app/assets/ships/ship7.fbx';
+				shipMesh = '/static/media/assets/ships/ship7.fbx';
 				break;
 			case 8:
-				shipMesh = '/app/assets/ships/ship8.fbx';
+				shipMesh = '/static/media/assets/ships/ship8.fbx';
 				break;
 			case 9:
-				shipMesh = '/app/assets/ships/ship9.fbx';
+				shipMesh = '/static/media/assets/ships/ship9.fbx';
 				break;
 			default:
-				shipMesh = '/app/assets/ships/tie-fighter.fbx';
+				shipMesh = '/static/media/assets/ships/tie-fighter.fbx';
 				break;
 		}
 		return shipMesh;
@@ -442,34 +442,34 @@ class Game {
 		let shipTex;
 		switch(shipNumber) {
 			case 1:
-				shipTex = '/app/assets/ships/ship1.png';
+				shipTex = '/static/media/assets/ships/ship1.png';
 				break;
 			case 2:
-				shipTex = '/app/assets/ships/ship22.png';
+				shipTex = '/static/media/assets/ships/ship22.png';
 				break;
 			case 3:
-				shipTex = '/app/assets/ships/ship3.png';
+				shipTex = '/static/media/assets/ships/ship3.png';
 				break;
 			case 4:
-				shipTex = '/app/assets/ships/ship4.png';
+				shipTex = '/static/media/assets/ships/ship4.png';
 				break;
 			case 5:
-				shipTex = '/app/assets/ships/ship5.png';
+				shipTex = '/static/media/assets/ships/ship5.png';
 				break;
 			case 6:
-				shipTex = '/app/assets/ships/ship6.png';
+				shipTex = '/static/media/assets/ships/ship6.png';
 				break;
 			case 7:
-				shipTex = '/app/assets/ships/ship7.png';
+				shipTex = '/static/media/assets/ships/ship7.png';
 				break;
 			case 8:
-				shipTex = '/app/assets/ships/ship8.png';
+				shipTex = '/static/media/assets/ships/ship8.png';
 				break;
 			case 9:
-				shipTex = '/app/assets/ships/ship9.png';
+				shipTex = '/static/media/assets/ships/ship9.png';
 				break;
 			default:
-				shipTex = '/app/assets/metal.png';
+				shipTex = '/static/media/assets/metal.png';
 				break;
 		}
 		return shipTex;
@@ -797,7 +797,7 @@ class Game {
 			this.scoreboard.player2[i].ball.visible = i < this.scorePlayer2;
 			this.scoreboard.player2[i].ring.visible = i < this.scorePlayer2;
 		}
-		this.playSound('/app/assets/sounds/fireball.mp3', 0.2);
+		this.playSound('/static/media/assets/sounds/fireball.mp3', 0.2);
 	}
 
 	animateRings() {
@@ -930,14 +930,14 @@ class Game {
 				powerup.geometry.dispose();
 				powerup.material.dispose();
 				this.activatePowerup(powerup.type, this.player1);
-				this.playSound('/app/assets/sounds/tp.mp3', 0.2);
+				this.playSound('/static/media/assets/sounds/tp.mp3', 0.2);
 			}
 		});
 		// Ball collision with walls
 		if (this.ball.position.y + this.ball.geometry.parameters.radius > this.geoy / 2 || 
 			this.ball.position.y - this.ball.geometry.parameters.radius < -this.geoy / 2) {
 				this.ball.velocity.y *= -1;
-				this.playSound('/app/assets/sounds/laser0.mp3', 0.4);
+				this.playSound('/static/media/assets/sounds/laser0.mp3', 0.4);
 		}
 		// Ball collision with players
 		// Player 1
