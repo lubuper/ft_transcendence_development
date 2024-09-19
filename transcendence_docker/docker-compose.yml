@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:16.4
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: transcendence_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+
+  web:
+    build: ./django
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
