@@ -68,7 +68,6 @@ class Game {
 		this.powerups = [];
 		this.powerupTimer = 0;
 		this.animate = this.animate.bind(this);
-		this.init();
 		setTimeout(() => {
 			this.animate();
 		}, 1000);
@@ -141,7 +140,7 @@ class Game {
 		this.scoreboard = { player1: [], player2: [] };
 	}
 
-	cleanUp() {
+	cleanup() {
 		cancelAnimationFrame(this.animationFrameID);
 		this.cleanUpScore();
 		this.cleanUpHexagons();
@@ -581,7 +580,7 @@ class Game {
 			timestamp: formattedTimestamp
 		};
 		saveMatchHistory(match);
-		this.cleanUp();
+		this.cleanup();
 		document.getElementById('gameOver').style.display = 'flex';
 	}
 
@@ -599,7 +598,7 @@ class Game {
 			timestamp: formattedTimestamp
 		};
 		saveMatchHistory(match);
-		this.cleanUp();
+		this.cleanup();
 		document.getElementById('gameWin').style.display = 'flex';
 	}
 	
@@ -984,5 +983,7 @@ class Game {
 };
 
 export default function Pong() {
-	new Game();
+	const game = new Game();
+	game.init();
+	return game;
 }

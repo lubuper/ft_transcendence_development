@@ -29,23 +29,38 @@ export default function App() {
 		'/aboutus': AboutUs
 	};
 	
+	let currentGameI = null;
+
 	function navigate(path) {
 		const allowedPaths = Object.keys(routes); // list of allowed paths for validation
 		if (allowedPaths.includes(path)) {
 			const existingCanvas = document.querySelector('canvas');
 			if (existingCanvas) {
+				if (currentGameI && typeof currentGameI.cleanup === 'function') {
+					currentGameI.cleanup();
+				}
 				existingCanvas.parentNode.removeChild(existingCanvas);
 				// I would add something like cleanUp() here
 			}
 			document.getElementById('gameOver').style.display = 'none';
 			document.getElementById('gameWin').style.display = 'none';
-			const page = routes[path](); // This might return undefined
-			$dynamic.innerHTML = ''; // Clear the current page
-			if (page instanceof HTMLElement) { 	// Only append if page is a DOM element
-				$dynamic.appendChild(page);
-			}	
+			const PageComponent = routes[path];
+			$dynamic.innerHTML = '';
+			if (PageComponent) {
+				const page = PageComponent();
+				if (page instanceof HTMLElement) {
+					$dynamic.appendChild(page);
+				}
+				if (path === '/asteroids' || path === '/pong') {
+					currentGameI = page;
+				}
+				else {
+					currentGameI = null;
+				}
+			}
 			history.pushState({ path: path }, '', path);
-		} else { // Redirect to the error page if the path is not allowed
+		}
+		else { // Redirect to the error page if the path is not allowed
 			navigate('/error');
 		}		
 	}

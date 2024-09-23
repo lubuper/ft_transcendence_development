@@ -886,33 +886,7 @@ class Game {
 }
 
 export default function Asteroids() {
-	new Game();
+	const game = new Game();
+	game.init();
+	return game;
 }
-
-/* Suggestion of AI
-
-const gameStateManager = {
-	currentGame: null,
-	startGame(game) {
-		if (this.currentGame && typeof this.currentGame.stop === 'function') {
-			this.currentGame.stop();
-		}
-		this.currentGame = game;
-		if (game && typeof game.start === 'function') {
-			game.start();
-		}
-	},
-	stopCurrentGame() {
-		if (this.currentGame && typeof this.currentGame.stop === 'function') {
-			this.currentGame.stop();
-			this.currentGame = null;
-		}
-	}
-};
-
-function navigate(path) {
-	gameStateManager.stopCurrentGame(); // Stop any running game logic
-	// Existing navigation logic...
-}
-
-*/
