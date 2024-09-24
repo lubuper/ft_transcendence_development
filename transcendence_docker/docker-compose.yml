@@ -1,17 +1,21 @@
 services:
-  db:
-    image: postgres:16.4
+  transcendence_db:
+    build:
+      context: ./postgreSQL
+      dockerfile: Dockerfile
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: transcendence_db
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
 
   web:
-    build: ./django
+    build:
+      context: ./django
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      - transcendence_db
+    command: ["sh", "-c", "./wait_for_db.sh && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"]
 

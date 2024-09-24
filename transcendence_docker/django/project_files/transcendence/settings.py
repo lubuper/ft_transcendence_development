@@ -89,7 +89,7 @@ DATABASES = {
         'NAME': 'transcendence_db',
         'USER': 'admin',
         'PASSWORD': 'admin',
-        'HOST': 'localhost',
+        'HOST': 'transcendence_db',
         'PORT': '5432'
     }
 }
