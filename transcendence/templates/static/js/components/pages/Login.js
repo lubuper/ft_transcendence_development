@@ -41,7 +41,7 @@ export default function Login() {
 		const loginMessage = document.getElementById('login-message');
 
 		if (response.ok) {
-			loginMessage.innerHTML = '<p class="text-success">Login successful! Redirecting...</p>';
+			loginMessage.innerHTML = '<p class="text-success">Login successful!</p>';
 			setTimeout(() => {
 				window.location.href = '/';
 			}, 1000);

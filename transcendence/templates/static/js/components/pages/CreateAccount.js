@@ -58,10 +58,13 @@ export default function CreateAccount() {
 
 			if (response.ok) {
 				messageDiv.innerText = 'Account created successfully!';
-				//messageDiv.classList.add('text-success');  // not working
+				messageDiv.classList.add('text-success');  // not working
+				setTimeout(() => {
+					window.location.href = '/';  // era suposto ir para login page mas nao vai, so a home page funciona
+				}, 2000);
 			} else {
 				messageDiv.innerText = 'Failed to create account: ' + (result.message || 'Unknown error');
-				//messageDiv.classList.add('text-error');  // not working
+				messageDiv.classList.add('text-error');  // not working
 			}
 		} catch (error) {
 			console.error('Error:', error);

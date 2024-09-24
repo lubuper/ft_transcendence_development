@@ -9,6 +9,7 @@ import ErrorPage from '../components/pages/ErrorPage.js';
 import AboutUs from '../components/pages/AboutUs.js';
 import Asteroids from '../asteroids.js';
 import Pong from '../pong.js';
+import Profile from "../components/pages/Profile.js";
 
 export default function App() {
 	const $root = document.getElementById('content-static');
@@ -26,7 +27,8 @@ export default function App() {
 		'/error': ErrorPage,
 		'/asteroids': Asteroids,
 		'/pong': Pong,
-		'/aboutus': AboutUs
+		'/aboutus': AboutUs,
+		'/profile': Profile
 	};
 	
 	let currentGameI = null;

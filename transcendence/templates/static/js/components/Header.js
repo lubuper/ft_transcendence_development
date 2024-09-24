@@ -53,7 +53,6 @@ export default function Header() {
 	fetch('/current-user/')
 		.then(async (response) => {
 			const user = await response.json();
-			console.log(user)
 
 			$header.innerHTML = `
 			<nav class="navbar navbar-expand-lg d-flex justify-content-between" style="background: transparent;">
@@ -76,8 +75,6 @@ export default function Header() {
 					location.reload(); // Reload the page to update the header
 				});
 			}
-
-
 
 		})
 		.catch((error) => {
