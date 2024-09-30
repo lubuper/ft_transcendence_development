@@ -25,7 +25,7 @@ class Game {
 		this.nextLevelTimer = 0;
 		this.playerLives = 5;
 		this.level = 1;
-		this.GameIsRunning = true;
+		this.GameIsRunning = false;
 		this.env = null;
 		this.scene = new THREE.Scene();
 		this.loader = new THREE.TextureLoader();
@@ -68,10 +68,15 @@ class Game {
 		this.fbxloader = new THREE.FBXLoader();
 		this.animationFrameID;
 		this.animate = this.animate.bind(this);
-		this.init();
+		if (this.loader !== null && this.level !== null) {
+			this.init();
+		}
 	}
 
 	init() {
+		if (this.loader === null) {
+			this.cleanup();
+		}
 		const light = new THREE.AmbientLight(0xFFFFFF);
 		this.camera.position.set(0, 0, 60);
 		this.camera.lookAt(this.scene.position);
@@ -90,11 +95,13 @@ class Game {
 		this.setupEventListeners();
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
 		document.body.appendChild(this.renderer.domElement);
+		this.GameIsRunning = true;
 		this.animate();
 	}
 
 	cleanup() {
 		cancelAnimationFrame(this.animationFrameID);
+		delete this.level;
 		window.removeEventListener('keydown', this.handleKeyDown);
 		window.removeEventListener('keyup', this.handleKeyUp);
 		this.lives.forEach((life) => {
@@ -117,10 +124,10 @@ class Game {
 		}
 		this.scene.traverse(object => {
 			if (object.isMesh) {
-			  object.geometry.dispose();
-			  if (object.material) {
+			object.geometry.dispose();
+			if (object.material) {
 				if (Array.isArray(object.material)) {
-				  object.material.forEach(material => {
+				object.material.forEach(material => {
 					material.dispose();
 					// Dispose of textures
 					if (material.map) material.map.dispose();
@@ -133,28 +140,28 @@ class Game {
 					if (material.envMap) material.envMap.dispose();
 					if (material.lightMap) material.lightMap.dispose();
 					if (material.bumpMap) material.bumpMap.dispose();
-				  });
+				});
 				} else {
-				  object.material.dispose();
-				  if (object.material.map) object.material.map.dispose();
-				  if (object.material.normalMap) object.material.normalMap.dispose();
-				  if (object.material.specularMap) object.material.specularMap.dispose();
-				  if (object.material.roughnessMap) object.material.roughnessMap.dispose();
-				  if (object.material.metalnessMap) object.material.metalnessMap.dispose();
-				  if (object.material.aoMap) object.material.aoMap.dispose();
-				  if (object.material.emissiveMap) object.material.emissiveMap.dispose();
-				  if (object.material.envMap) object.material.envMap.dispose();
-				  if (object.material.lightMap) object.material.lightMap.dispose();
-				  if (object.material.bumpMap) object.material.bumpMap.dispose();
+				object.material.dispose();
+				if (object.material.map) object.material.map.dispose();
+				if (object.material.normalMap) object.material.normalMap.dispose();
+				if (object.material.specularMap) object.material.specularMap.dispose();
+				if (object.material.roughnessMap) object.material.roughnessMap.dispose();
+				if (object.material.metalnessMap) object.material.metalnessMap.dispose();
+				if (object.material.aoMap) object.material.aoMap.dispose();
+				if (object.material.emissiveMap) object.material.emissiveMap.dispose();
+				if (object.material.envMap) object.material.envMap.dispose();
+				if (object.material.lightMap) object.material.lightMap.dispose();
+				if (object.material.bumpMap) object.material.bumpMap.dispose();
 				}
-			  }
 			}
-		  });
-	  
+			}
+		});
+	
 		if (document.body.contains(this.renderer.domElement)) {
-		  document.body.removeChild(this.renderer.domElement);
+		document.body.removeChild(this.renderer.domElement);
 		}
-	  
+	
 		this.renderer.dispose();
 		this.scene.clear();
 
@@ -167,18 +174,18 @@ class Game {
 
 		delete this.audioLoader;
 		delete this.loader;
-	  	THREE.Cache.clear();
-	  }
+		THREE.Cache.clear();
+	}
 
 	gameOver() {
 		this.GameIsRunning = false;
 		for (let i = 0; i < 1000; i++) {}
 		const timestamp = new Date();
 		const formattedTimestamp = `
-        <span style="color: blue;">Asteroids:</span> 
-        <span style="color: white;">${timestamp.toISOString().split('T')[0]}</span> 
-        at 
-        <span style="color: grey;">${timestamp.toTimeString().split(' ')[0]}</span> `;
+		<span style="color: blue;">Asteroids:</span> 
+		<span style="color: white;">${timestamp.toISOString().split('T')[0]}</span> 
+		at 
+		<span style="color: grey;">${timestamp.toTimeString().split(' ')[0]}</span> `;
 		const match = {
 			result: '<span style="color: red;">loss</span>',
 			score: this.level,
@@ -194,10 +201,10 @@ class Game {
 		for (let i = 0; i < 1000; i++) {}
 		const timestamp = new Date();
 		const formattedTimestamp = `
-        <span style="color: blue;">Asteroids:</span> 
-        <span style="color: white;">${timestamp.toISOString().split('T')[0]}</span> 
-        at 
-        <span style="color: grey;">${timestamp.toTimeString().split(' ')[0]}</span> `;
+		<span style="color: blue;">Asteroids:</span> 
+		<span style="color: white;">${timestamp.toISOString().split('T')[0]}</span> 
+		at 
+		<span style="color: grey;">${timestamp.toTimeString().split(' ')[0]}</span> `;
 		const match = {
 			result: '<span style="color: green;">win</span>',
 			score: this.level,
@@ -401,11 +408,11 @@ class Game {
 				});
 				collisionBox.add(modelAI);
 				const speed = 0.05 + Math.random() * 0.2;
-            	const angle = Math.random() * Math.PI * 2;
-            	collisionBox.velocity = {
-            	    x: Math.cos(angle) * speed,
-            	    y: Math.sin(angle) * speed
-            	};
+				const angle = Math.random() * Math.PI * 2;
+				collisionBox.velocity = {
+					x: Math.cos(angle) * speed,
+					y: Math.sin(angle) * speed
+				};
 				collisionBox.position.set(-this.boundaryX, 0, 5);
 				collisionBox.shootTimer = Math.floor(Math.random() * (200 - 60 + 1)) + 60;
 				this.scene.add(collisionBox);
@@ -450,16 +457,18 @@ class Game {
 	}
 
 	playSound = (soundFilePath, volume) => {
-		const sound = new THREE.Audio(this.listener);
-		this.audioLoader.load(soundFilePath, (buffer) => {
-			sound.setBuffer(buffer);
-			sound.setVolume(volume); // Set volume; adjust as needed
-			sound.play();
-			sound.source.onended = () => {
-				sound.stop();
-				sound.disconnect();
-			};
-		});
+		if (this.audioLoader) {
+			const sound = new THREE.Audio(this.listener);
+			this.audioLoader.load(soundFilePath, (buffer) => {
+				sound.setBuffer(buffer);
+				sound.setVolume(volume); // Set volume; adjust as needed
+				sound.play();
+				sound.source.onended = () => {
+					sound.stop();
+					sound.disconnect();
+				};
+			});
+		}
 	};
 
 	shoot(method, isPlayer) {
@@ -693,6 +702,10 @@ class Game {
 	}
 
 	animate() {
+		if (this.GameIsRunning === false) {
+			cancelAnimationFrame(this.animate);
+			return;
+		}
 		this.animationFrameID = requestAnimationFrame(this.animate);
 		if (this.env) {
 			if (this.env.position.x > this.boundaryX) {
@@ -886,33 +899,7 @@ class Game {
 }
 
 export default function Asteroids() {
-	new Game();
+	const game = new Game();
+	game.init();
+	return game;
 }
-
-/* Suggestion of AI
-
-const gameStateManager = {
-	currentGame: null,
-	startGame(game) {
-		if (this.currentGame && typeof this.currentGame.stop === 'function') {
-			this.currentGame.stop();
-		}
-		this.currentGame = game;
-		if (game && typeof game.start === 'function') {
-			game.start();
-		}
-	},
-	stopCurrentGame() {
-		if (this.currentGame && typeof this.currentGame.stop === 'function') {
-			this.currentGame.stop();
-			this.currentGame = null;
-		}
-	}
-};
-
-function navigate(path) {
-	gameStateManager.stopCurrentGame(); // Stop any running game logic
-	// Existing navigation logic...
-}
-
-*/

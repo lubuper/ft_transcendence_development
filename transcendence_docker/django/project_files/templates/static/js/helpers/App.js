@@ -9,6 +9,7 @@ import ErrorPage from '../components/pages/ErrorPage.js';
 import AboutUs from '../components/pages/AboutUs.js';
 import Asteroids from '../asteroids.js';
 import Pong from '../pong.js';
+import Profile from "../components/pages/Profile.js";
 
 export default function App() {
 	const $root = document.getElementById('content-static');
@@ -26,26 +27,43 @@ export default function App() {
 		'/error': ErrorPage,
 		'/asteroids': Asteroids,
 		'/pong': Pong,
-		'/aboutus': AboutUs
+		'/aboutus': AboutUs,
+		'/profile': Profile
 	};
 	
+	let currentGameI = null;
+
 	function navigate(path) {
 		const allowedPaths = Object.keys(routes); // list of allowed paths for validation
 		if (allowedPaths.includes(path)) {
 			const existingCanvas = document.querySelector('canvas');
 			if (existingCanvas) {
-				existingCanvas.parentNode.removeChild(existingCanvas);
-				// I would add something like cleanUp() here
+				if (currentGameI && typeof currentGameI.cleanup === 'function') {
+					currentGameI.cleanup();
+				}
+				if (existingCanvas.parentNode !== null) {
+					existingCanvas.parentNode.removeChild(existingCanvas);
+				}
 			}
 			document.getElementById('gameOver').style.display = 'none';
 			document.getElementById('gameWin').style.display = 'none';
-			const page = routes[path](); // This might return undefined
-			$dynamic.innerHTML = ''; // Clear the current page
-			if (page instanceof HTMLElement) { 	// Only append if page is a DOM element
-				$dynamic.appendChild(page);
-			}	
+			const PageComponent = routes[path];
+			$dynamic.innerHTML = '';
+			if (PageComponent) {
+				const page = PageComponent();
+				if (page instanceof HTMLElement) {
+					$dynamic.appendChild(page);
+				}
+				if (path === '/asteroids' || path === '/pong') {
+					currentGameI = page;
+				}
+				else {
+					currentGameI = null;
+				}
+			}
 			history.pushState({ path: path }, '', path);
-		} else { // Redirect to the error page if the path is not allowed
+		}
+		else { // Redirect to the error page if the path is not allowed
 			navigate('/error');
 		}		
 	}
