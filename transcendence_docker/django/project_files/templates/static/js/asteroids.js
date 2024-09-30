@@ -100,6 +100,7 @@ class Game {
 	}
 
 	cleanup() {
+		this.GameIsRunning = false;
 		cancelAnimationFrame(this.animationFrameID);
 		delete this.level;
 		window.removeEventListener('keydown', this.handleKeyDown);
