@@ -23,13 +23,13 @@ stop:
 	@docker-compose -p $(NAME) stop
 	@echo "Containers stopped [OK]\n"
 
-fullclean: down
+fclean: down
 	@echo "Pruning system..."
 	@docker system prune -a --volumes
 	@echo "System pruned [OK]\n"
 
-re: fullclean up
+re: fclean up
 
-.PHONY: up down start stop fullclean
+.PHONY: up down start stop fclean
 
 .SILENT:
