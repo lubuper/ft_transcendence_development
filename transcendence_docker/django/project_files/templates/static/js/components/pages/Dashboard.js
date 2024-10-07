@@ -70,10 +70,11 @@ export default function DashBoard() {
 					</div>
 					<div class="col-md-3">
 						<div class="card bg-dark text-white mb-3">
-							<div class="card-header">Chat</div>
+							<div class="card-header">Friends</div>
 							<div class="card-body">
-								<p>Message 1</p>
-								<p>Message 2</p>
+								<p>Friend 1</p>
+								<p>Friend 2</p>
+								<p>Friend 3</p>
 							</div>
 						</div>
 						<div class="card bg-dark text-white mb-3">
