@@ -3,7 +3,8 @@ export default function AboutUs() {
 	$aboutUs.innerHTML = `
 		<div class="vh-100 d-flex flex-column align-items-center justify-content-center text-center">
 			<h1 class="text-white">About Me</h1>
-			<p class="text-white">I am Luis Pereira, a student at 42Porto working on my last project. I've made changes to most of the sound effects, unrwapped and textured the ships and developed the games.</p>
+			<p class="text-white">We are a 42 Porto group of students in the last project: ft_transcdendence</p>
+			<p class="text-white"><a href="https://github.com/lubuper" target="_blank">Luis Pereira</a>, <a href="https://github.com/macastanm" target="_blank">Maria Marques</a>, <a href="https://github.com/Zpedro99" target="_blank">Jose Goncalves</a>, <a href="https://github.com/RafaelSoares1" target="_blank">Emidio Vieira</a></p>
 			<p class="text-white">Apologies for the mistakes, the learning curve is always steep!</p>
 			<p class="text-white">You can find my projects on <a href="https://github.com/lubuper" target="_blank">GitHub</a>.</p>
 			<h4 class="text-white">Special thanks to the authors of the models, textures and sound effects modified or/and used in this project:</h4>
