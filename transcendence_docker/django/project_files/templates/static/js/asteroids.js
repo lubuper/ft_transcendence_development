@@ -68,9 +68,6 @@ class Game {
 		this.fbxloader = new THREE.FBXLoader();
 		this.animationFrameID;
 		this.animate = this.animate.bind(this);
-		if (this.loader !== null && this.level !== null) {
-			this.init();
-		}
 	}
 
 	init() {
@@ -590,17 +587,33 @@ class Game {
 
 	displayLives() {
 		for (let i = 0; i < 4; i++) {
-			let ship;
-			this.fbxloader.load('/static/media/assets/ships/ship4original.fbx', (fbx) => {
-				ship = fbx;
-				ship.scale.set(0.011, 0.011, 0.011);
-				ship.position.set(i * 5 - 7.5, -44, 16);
-				ship.rotation.x = -Math.PI / 2;
-				//ship.rotation.z = Math.PI;
-				this.scene.add(ship);
-				this.lives.push(ship);
+			const imageGeometry = new THREE.PlaneGeometry(7,7,7);
+			this.loader.load('/static/media/assets/lives.png', (livesTex) => {
+				const imageMaterial = new THREE.MeshBasicMaterial({ map: livesTex, transparent: true, opacity: 1, depthTest: true, depthWrite: false });
+				const LivesImage = new THREE.Mesh(imageGeometry, imageMaterial);
+				LivesImage.position.set(i * 5 - 7.5, -44, 16);
+				this.scene.add(LivesImage);
+				this.lives.push(LivesImage);
+				LivesImage.material.needsUpdate = true;
 			});
 		}
+	}
+
+	checkLives() {
+		this.lives
+		if (this.playerLives <= 0) {
+			this.gameOver();
+			return 0;
+		}
+		else if (this.lives.length >= this.playerLives) {
+			if (this.lives.length > 0) {
+				const life = this.lives.pop();
+				this.scene.remove(life);
+				life.geometry.dispose();
+				life.material.dispose();
+			}
+		}   
+		return 1;
 	}
 
 	displayShieldBar() {
@@ -626,29 +639,6 @@ class Game {
 				this.levelDisplay.position.set(this.level - this.boundaryX + 7, this.boundaryY + 2, 16);
 				this.scene.add(this.levelDisplay);
 		}
-	}
-
-	checkLives() {
-		this.lives
-		if (this.playerLives <= 0) {
-			this.gameOver();
-			return 0;
-		}
-		else if (this.lives.length >= this.playerLives) {
-			if (this.lives.length > 0) {
-				const life = this.lives.pop();
-				this.scene.remove(life);
-				/* life.traverse((child) => {
-					if (child.material) {
-						child.material.dispose();
-					}
-					if (child.geometry) {
-						child.geometry.dispose();
-					}
-				}); */
-			}
-		}	
-		return 1;
 	}
 
 	levelUp() {
