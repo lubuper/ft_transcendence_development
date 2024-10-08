@@ -71,6 +71,7 @@ export default function DashBoard() {
 					<div class="col-md-3">
 						<div class="card bg-dark text-white mb-3">
 							<div class="card-header">Friends</div>
+							<input type="text" class="form-control mb-3" id="searchInput" placeholder="Search friends to add...">
 							<div class="card-body">
 								<p>Friend 1</p>
 								<p>Friend 2</p>
