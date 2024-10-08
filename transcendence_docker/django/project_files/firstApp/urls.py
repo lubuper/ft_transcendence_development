@@ -1,5 +1,7 @@
 from django.urls import path, re_path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 from .views import create_account, login_view, current_user, logout_view, profile, update_profile
 
 #urlpatterns = [
@@ -16,3 +18,7 @@ urlpatterns = [
     path('profile/', profile, name='profile'),
     path('update_profile/', update_profile, name='update_profile'),
 ]
+
+# Serve media files during development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

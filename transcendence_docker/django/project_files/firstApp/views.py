@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import check_password, make_password
 from django.views.decorators.csrf import csrf_exempt
 import json  #
+from .models import Profile
 
 # Create your views here.
 from .models import *
@@ -18,15 +19,21 @@ def homepage(request):
 @login_required
 def profile(request):
     user = request.user
-
+    profile = Profile.objects.get(user=user)
     return JsonResponse({
         'username': user.username,
         'email': user.email,
+        'profile_picture': request.build_absolute_uri(profile.profile_picture.url) if profile.profile_picture else None,
     })
 
 @login_required
 def current_user(request):
-    return JsonResponse({'username': request.user.username})
+    user = request.user
+    profile = Profile.objects.get(user=user)
+    return JsonResponse({
+        'username': user.username,
+        'profile_picture': request.build_absolute_uri(profile.profile_picture.url) if profile.profile_picture else None,
+    })
 
 @csrf_exempt
 def logout_view(request):
@@ -77,6 +84,7 @@ def create_account(request):
         else:
             user = User.objects.create_user(username=username, email=email, password=password)
             user.save()  # This ensures the user is stored in the database
+            Profile.objects.create(user=user)
             return JsonResponse({'message': 'Account created successfully'}, status=200)
 
     return JsonResponse({'message': 'Invalid request method'}, status=405)

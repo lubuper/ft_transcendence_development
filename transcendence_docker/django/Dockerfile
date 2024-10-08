@@ -12,6 +12,8 @@ WORKDIR /transcendence
 
 COPY project_files/. .
 
+RUN pip3 install Pillow
+
 #RUN python3 manage.py migrate
 
 COPY wait_for_db.sh .

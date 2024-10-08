@@ -72,9 +72,9 @@ export default function Profile() {
                     if (response.ok) {
                         messageDivP.innerText = 'Account updated successfully!';
                         //messageDiv.classList.add('text-success');  // not working
-                        setTimeout(() => {
+                        /*setTimeout(() => {
                             window.location.href = '/';  // era suposto ir para login page mas nao vai, so a home page funciona
-                        }, 2000);
+                        }, 2000);*/
                     } else {
                         messageDivP.innerText = 'Failed to update account: ' + (result.message || 'Unknown error');
                         //messageDiv.classList.add('text-error');  // not working

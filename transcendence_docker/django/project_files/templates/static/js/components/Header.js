@@ -56,23 +56,26 @@ export default function Header() {
 
 			$header.innerHTML = `
 			<nav class="navbar navbar-expand-lg d-flex justify-content-between" style="background: transparent;">
-				<h1 class="fw-bold text-center text-white display-6 ms-3" data-path="/">ft_transcendence</h1>
-				<div class="d-flex">
-					<button class="btn btn-purple btn-custom mx-1 nav-link text-white shadow-lg" data-path="/profile">
-					${user.username}
-					</button>
-					<button class="btn btn-danger btn-custom mx-1 nav-link text-white shadow-lg" id="logout-btn">Logout</button>
-					<button class="btn btn-purple btn-custom mx-1 nav-link text-white shadow-lg" data-path="/dashboard">Dashboard</button>
-				</div>
-			</nav>
-			${base}
+            <h1 class="fw-bold text-center text-white display-6 ms-3" data-path="/">ft_transcendence</h1>
+            <div class="d-flex align-items-center">
+                <button class="btn btn-purple btn-custom mx-1 nav-link text-white shadow-lg d-flex align-items-center" data-path="/profile">
+                    <img src="../../../media/profile_pics/default_profile.jpg" alt="${user.username}'s profile picture" style="width: 30px; height: 30px; border-radius: 50%; margin-right: 8px;">
+                    ${user.username}
+                </button>
+                <button class="btn btn-danger btn-custom mx-1 nav-link text-white shadow-lg" id="logout-btn">Logout</button>
+                <button class="btn btn-purple btn-custom mx-1 nav-link text-white shadow-lg" data-path="/dashboard">Dashboard</button>
+            </div>
+        </nav>
+        	${base}
 	`;
 
 			if (user.username) {
 				const logoutButton = $header.querySelector('#logout-btn');
 				logoutButton.addEventListener('click', async () => {
 					await fetch('/logout/', { method: 'POST', credentials: 'same-origin' });
-					location.reload(); // Reload the page to update the header
+					setTimeout(() => {
+						window.location.href = '/';  // Redirect to home page after 1 seconds
+					}, 1000);
 				});
 			}
 
