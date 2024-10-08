@@ -1,7 +1,8 @@
 import { saveMatchHistory } from './components/pages/Dashboard.js';
 
 class Game {
-	constructor() {
+	constructor(gameMode) {
+		this.gameMode = gameMode;
 		this.isRunning = true;
 		this.env = null;
 		this.renderer = new THREE.WebGLRenderer({
@@ -891,9 +892,13 @@ class Game {
 			this.cameratoggle = (this.cameratoggle + 1) % 3;
 			this.keysPressed['c'] = false;
 		}
-		//this.beginnerAI();
-		//this.advancedAI();
-		this.normalAI();
+		if (gameMode === 0)
+		{
+			//this.beginnerAI();
+			//this.advancedAI();
+			this.normalAI();
+		}
+			
 		this.ball.position.add(this.ball.velocity);
 		// Check for scoring
 		if (this.scorePlayer2 >= 5)
@@ -982,8 +987,8 @@ class Game {
 	}
 };
 
-export default function Pong() {
-	const game = new Game();
+export default function Pong(gameMode) {
+	const game = new Game(gameMode);
 	game.init();
 	return game;
 }

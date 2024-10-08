@@ -1,7 +1,7 @@
-import Header from '../components/Header.js'
-import Footer from '../components/Footer.js'
-import Home from '../components/pages/Home.js'
-import PlayVsAI from '../components/pages/PlayVSAI.js'
+import Header from '../components/Header.js';
+import Footer from '../components/Footer.js';
+import Home from '../components/pages/Home.js';
+import LocalPlay from '../components/pages/LocalPlay.js';
 import CreateAccount from '../components/pages/CreateAccount.js';
 import Login from '../components/pages/Login.js';
 import DashBoard from '../components/pages/Dashboard.js';
@@ -23,7 +23,7 @@ export default function App() {
 		'/login': Login,
 		'/dashboard': DashBoard,
 		'/createaccount': CreateAccount,
-		'/playvsai': PlayVsAI,
+		'/localplay': LocalPlay,
 		'/error': ErrorPage,
 		'/asteroids': Asteroids,
 		'/pong': Pong,
@@ -35,7 +35,11 @@ export default function App() {
 
 	function navigate(path) {
 		const allowedPaths = Object.keys(routes); // list of allowed paths for validation
-		if (allowedPaths.includes(path)) {
+		const [basePath, queryString] = path.split('?');
+		const queryParams = new URLSearchParams(queryString);
+		const gameMode = queryParams.get('mode');
+
+		if (allowedPaths.includes(basePath)) {
 			const existingCanvas = document.querySelector('canvas');
 			if (existingCanvas) {
 				if (currentGameI && typeof currentGameI.cleanup === 'function') {
@@ -45,27 +49,37 @@ export default function App() {
 					existingCanvas.parentNode.removeChild(existingCanvas);
 				}
 			}
-			document.getElementById('gameOver').style.display = 'none';
-			document.getElementById('gameWin').style.display = 'none';
-			const PageComponent = routes[path];
+
+			const PageComponent = routes[basePath];
 			$dynamic.innerHTML = '';
 			if (PageComponent) {
-				const page = PageComponent();
+				const page = PageComponent(gameMode);
 				if (page instanceof HTMLElement) {
 					$dynamic.appendChild(page);
 				}
-				if (path === '/asteroids' || path === '/pong') {
+				if (basePath === '/asteroids' || basePath === '/pong') {
 					currentGameI = page;
-				}
-				else {
+				} else {
 					currentGameI = null;
 				}
 			}
 			history.pushState({ path: path }, '', path);
-		}
-		else { // Redirect to the error page if the path is not allowed
+
+			// Conditionally render the footer
+			const $footer = document.querySelector('footer');
+			if (basePath === '/') {
+				if (!$footer) {
+					$root.appendChild(Footer());
+				}
+			} else {
+				if ($footer) {
+					$footer.remove();
+				}
+			}
+		} else {
+			// Redirect to the error page if the path is not allowed
 			navigate('/error');
-		}		
+		}
 	}
 
 	function initSPA() {
