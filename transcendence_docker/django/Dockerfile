@@ -1,6 +1,6 @@
 FROM debian:bullseye
 
-RUN apt update && \
+RUN apt-get update && \
     apt upgrade -y && \
     apt install -y python3-pip netcat && \
     pip3 install django psycopg2-binary
