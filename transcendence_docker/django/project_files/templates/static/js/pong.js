@@ -3,6 +3,8 @@ import { saveMatchHistory } from './components/pages/Dashboard.js';
 class Game {
 	constructor(gameMode) {
 		this.gameMode = gameMode;
+		console.log(this.gameMode);
+		console.log(gameMode);
 		this.isRunning = true;
 		this.env = null;
 		this.renderer = new THREE.WebGLRenderer({
@@ -892,13 +894,43 @@ class Game {
 			this.cameratoggle = (this.cameratoggle + 1) % 3;
 			this.keysPressed['c'] = false;
 		}
-		if (gameMode === 0)
+		if (this.gameMode === '1')
 		{
 			//this.beginnerAI();
 			//this.advancedAI();
 			this.normalAI();
 		}
-			
+		if (this.gameMode === '2')
+		{
+			if (this.keysPressed['l'] && this.ship1) {
+				this.env.rotation.x += 0.007;
+				if (this.player2.position.y >= this.minY) {
+					this.player2.position.y -= 0.03;
+					this.ship2.position.y -= 0.03;
+					const tweenLeft = new TWEEN.Tween(this.ship1.rotation)
+						.to({ z: THREE.Math.degToRad(30) }, 400) // Rotate 20 degrees to the left
+						   .easing(TWEEN.Easing.Quadratic.Out)
+						.start();
+				}
+			}
+			if (this.keysPressed['j'] && this.ship1) {
+				this.env.rotation.x -= 0.007;
+				if (this.player2.position.y <= this.maxY) {
+					this.player2.position.y += 0.03;
+					this.ship2.position.y += 0.03;
+					const tweenRight = new TWEEN.Tween(this.ship2.rotation)
+						.to({ z: THREE.Math.degToRad(-30) }, 400) // Rotate 20 degrees to the right
+						.easing(TWEEN.Easing.Quadratic.Out)
+						.start();
+				}
+			}
+			if (!this.keysPressed['j'] && !this.keysPressed['l'] && this.ship1) {
+				const tweeBack = new TWEEN.Tween(this.ship2.rotation)
+					.to({ z: THREE.Math.degToRad(-0) }, 400)
+					.easing(TWEEN.Easing.Quadratic.Out)
+					.start();
+			}
+		}
 		this.ball.position.add(this.ball.velocity);
 		// Check for scoring
 		if (this.scorePlayer2 >= 5)
