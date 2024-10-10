@@ -32,13 +32,20 @@ export default function App() {
     };
     
     let currentGameI = null;
+    let gameIsActive = false;
+    let currentPath = null;
 
     function navigate(path) {
+        if (path === currentPath) {
+            return;
+        }
+        currentPath = path;
+
         const allowedPaths = Object.keys(routes); // list of allowed paths for validation
         if (allowedPaths.includes(path)) {
             const existingCanvas = document.querySelector('canvas');
             if (existingCanvas) {
-                if (currentGameI && typeof currentGameI.cleanup === 'function') {
+                if (currentGameI && typeof currentGameI.cleanup === 'function' && path !== '/asteroids' && path !== '/pong') {
                     currentGameI.cleanup();
                 }
                 if (existingCanvas.parentNode !== null) {
@@ -55,7 +62,12 @@ export default function App() {
                 }
                 if (path === '/asteroids' || path === '/pong') {
                     currentGameI = page;
+                    gameIsActive = true;
                 } else {
+                    if (gameIsActive && currentGameI && typeof currentGameI.cleanup === 'function') {
+                        currentGameI.cleanup(); // Call cleanup when leaving the game page
+                    }
+                    gameIsActive = false; // Reset the flag
                     currentGameI = null;
                 }
             }
@@ -78,7 +90,8 @@ export default function App() {
     }
 
     function initSPA() {
-        history.replaceState({ path: '/' }, '', '/'); // to set the initial browser to history state
+        const initialPath = window.location.pathname;
+        history.replaceState({ path: initialPath }, '', initialPath); // to set the initial browser to history state
         window.addEventListener('popstate', function(event) {
             if (event.state && event.state.path && routes[event.state.path]) {
                 navigate(event.state.path);
@@ -92,6 +105,23 @@ export default function App() {
                 navigate(path);
             }
         });
+
+        // Directly render the initial path if it's a game path
+        if (initialPath === '/asteroids' || initialPath === '/pong') {
+            const PageComponent = routes[initialPath];
+            if (PageComponent) {
+                const gameMode = getSelectedGameMode();
+                const page = PageComponent(gameMode);
+                if (page instanceof HTMLElement) {
+                    $dynamic.appendChild(page);
+                }
+                currentGameI = page;
+                gameIsActive = true;
+                currentPath = initialPath;
+            }
+        } else {
+            navigate(initialPath);
+        }
     }
 
     initSPA();

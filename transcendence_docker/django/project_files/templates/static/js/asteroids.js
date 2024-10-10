@@ -650,7 +650,6 @@ class Game {
 		this.level++;
 		this.shield.visible = false;
 		this.shield.spawnTime = 100;
-		console.log(this.level)
 		this.nextLevelTimer = 0;
 		if (this.level <= this.levels.length) {
 			this.spawnAsteroids(this.levels[this.level].asteroids, 'asteroid');
@@ -889,8 +888,14 @@ class Game {
 	}
 }
 
+let gameInstance = null;
+
 export default function Asteroids() {
-	const game = new Game();
-	game.init();
-	return game;
+	if (!gameInstance) {
+		gameInstance = new Game();
+		setTimeout(() => {
+			gameInstance.init();
+		}, 1000);
+	}
+	return gameInstance;
 }

@@ -31,7 +31,6 @@ export default function LocalPlay(navigate) {
             event.preventDefault();
             const path = event.target.getAttribute('data-path');
             selectedGameMode = document.querySelector('input[name="gameMode"]:checked').value;
-            console.log(`Selected game mode: ${selectedGameMode}`);
             navigate(path);
         }
     });

@@ -3,8 +3,6 @@ import { saveMatchHistory } from './components/pages/Dashboard.js';
 class Game {
 	constructor(gameMode) {
 		this.gameMode = gameMode;
-		console.log(this.gameMode);
-		console.log(gameMode);
 		this.isRunning = true;
 		this.env = null;
 		this.renderer = new THREE.WebGLRenderer({
@@ -70,10 +68,6 @@ class Game {
 		this.lastDirection = 0;
 		this.powerups = [];
 		this.powerupTimer = 0;
-		this.animate = this.animate.bind(this);
-		setTimeout(() => {
-			this.animate();
-		}, 1000);
 	}
 
 	init () {
@@ -106,6 +100,10 @@ class Game {
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
 		document.body.appendChild(this.renderer.domElement);
 		this.createScoreboard();
+		this.animate = this.animate.bind(this);
+		setTimeout(() => {
+			this.animate();
+		}, 1000);
 	}
 
 	cleanUpHexagons() {
@@ -660,7 +658,7 @@ class Game {
 
 	checkBallOverHexagon() {
 		const colorChangeAOE = 0.4;
-		const opacityChangeAOE = 0.8;
+		//const opacityChangeAOE = 0.8;
 		this.hexagons = this.hexGroup.children; // Access hexagons from hexGroup
 		this.hexagons.forEach(hexagon => {
 			const distance = this.ball.position.distanceTo(hexagon.position);
@@ -768,8 +766,10 @@ class Game {
 	};
 
 	createScoreboard() {
+		if (this.scoreboard && this.scoreboard.player1 && this.scoreboard.player1.length > 0 && this.scoreboard.player2 && this.scoreboard.player2.length > 0) {
+			return;
+		}
 		this.scoreboard = { player1: [], player2: [] };
-	
 		for (let i = 0; i < 4; i++) {
 			let scoreBallPlayer1 = this.ball.clone();
 			let scoreBallPlayer2 = this.ball.clone();
@@ -794,10 +794,10 @@ class Game {
 	
 	updateScore(scorePlayer1, scorePlayer2) {
 		for (let i = 0; i < 4; i++) {
-			this.scoreboard.player1[i].ball.visible = i < this.scorePlayer1;
-			this.scoreboard.player1[i].ring.visible = i < this.scorePlayer1;
-			this.scoreboard.player2[i].ball.visible = i < this.scorePlayer2;
-			this.scoreboard.player2[i].ring.visible = i < this.scorePlayer2;
+			this.scoreboard.player1[i].ball.visible = i < scorePlayer1;
+			this.scoreboard.player1[i].ring.visible = i < scorePlayer1;
+			this.scoreboard.player2[i].ball.visible = i < scorePlayer2;
+			this.scoreboard.player2[i].ring.visible = i < scorePlayer2;
 		}
 		this.playSound('/static/media/assets/sounds/fireball.mp3', 0.2);
 	}
