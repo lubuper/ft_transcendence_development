@@ -20,10 +20,10 @@ export default function CreateAccount() {
                         <label for="confirmPassword" class="text-white">Confirm Password</label>
                         <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
                     </div>
-                    <div class="form-group">
-                        <label for="captcha" class="text-white">Captcha</label>
-                        <input type="text" class="form-control" id="captcha" name="captcha" required>
-                    </div>
+<!--                    <div class="form-group">-->
+<!--                        <label for="captcha" class="text-white">Captcha</label>-->
+<!--                        <input type="text" class="form-control" id="captcha" name="captcha" required>-->
+<!--                    </div>-->
                     <button type="submit" class="btn btn-purple btn-custom mt-3 text-white">Create Account</button>
                 	<div id="message" class="text-white mt-3"></div>
                 </form>
@@ -59,9 +59,9 @@ export default function CreateAccount() {
 			if (response.ok) {
 				messageDiv.innerText = 'Account created successfully!';
 				messageDiv.classList.add('text-success');  // not working
-				setTimeout(() => {
+				/*setTimeout(() => {
 					window.location.href = '/';  // era suposto ir para login page mas nao vai, so a home page funciona
-				}, 2000);
+				}, 2000);*/
 			} else {
 				messageDiv.innerText = 'Failed to create account: ' + (result.message || 'Unknown error');
 				messageDiv.classList.add('text-error');  // not working

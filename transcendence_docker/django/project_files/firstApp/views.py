@@ -9,6 +9,9 @@ from django.contrib.auth.hashers import check_password, make_password
 from django.views.decorators.csrf import csrf_exempt
 import json  #
 from .models import Profile
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+import os
 
 # Create your views here.
 from .models import *
@@ -19,11 +22,18 @@ def homepage(request):
 @login_required
 def profile(request):
     user = request.user
-    profile = Profile.objects.get(user=user)
+    try:
+        profile = Profile.objects.get(user=user)
+    except Profile.DoesNotExist:
+        return JsonResponse({'message': 'Profile does not exist'}, status=404)
+
+        # Construct the absolute URL for the profile picture
+    profile_picture_url = profile.profile_picture.url if profile.profile_picture else None
+
     return JsonResponse({
-        'username': user.username,
-        'email': user.email,
-        'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
+            'username': user.username,
+            'email': user.email,
+            'profile_picture': profile_picture_url,
     })
 
 @login_required
@@ -85,7 +95,8 @@ def create_account(request):
         else:
             user = User.objects.create_user(username=username, email=email, password=password)
             user.save()  # This ensures the user is stored in the database
-            Profile.objects.create(user=user)
+#             Profile.objects.create(user=user)
+#             profile.save()
             return JsonResponse({'message': 'Account created successfully'}, status=200)
 
     return JsonResponse({'message': 'Invalid request method'}, status=405)
@@ -97,6 +108,8 @@ def update_profile(request):
         user = request.user
 
         data = json.loads(request.body)
+
+        profile_picture = request.FILES.get('profile-picture')
 
         new_username = data.get('username')
         new_email = data.get('email')
@@ -125,7 +138,17 @@ def update_profile(request):
         if new_password:
             user.password = make_password(new_password)  # Hash the new password
 
+        if profile_picture:
+                    profile, created = Profile.objects.get_or_create(user=user)
+                    # Delete old profile picture if exists and is not default
+                    if profile.profile_picture and profile.profile_picture.name != 'profile_pics/default_profile.jpg':
+                        if os.path.isfile(profile.profile_picture.path):
+                            os.remove(profile.profile_picture.path)
+                    profile.profile_picture = profile_picture
+                    profile.save()
+
         user.save()
+
         return JsonResponse({'message': 'Account updated successfully'}, status=200)
 
     return JsonResponse({'message': 'Invalid request method'}, status=405)
