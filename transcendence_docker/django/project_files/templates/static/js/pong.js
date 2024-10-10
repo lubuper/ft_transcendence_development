@@ -64,7 +64,7 @@ class Game {
 		this.scorePlayer1 = 0;
 		this.scorePlayer2 = 0;
 		this.scoreboard = [];
-		this.player2moving = false;
+		this.player1pup = false;
 		this.lastDirection = 0;
 		this.powerups = [];
 		this.powerupTimer = 0;
@@ -752,6 +752,53 @@ class Game {
 		}
 	}
 
+	gameControls() {
+		switch (this.gameMode) {
+			case '1':
+				if (this.keysPressed['l'] && this.ship2) {
+					this.env.rotation.x += 0.007;
+					if (this.player2.position.y >= this.minY) {
+						this.player2.position.y -= 0.03;
+						this.ship2.position.y -= 0.03;
+						const tweenLeft = new TWEEN.Tween(this.ship2.rotation)
+							.to({ z: THREE.Math.degToRad(-30) }, 400) // Rotate 20 degrees to the left
+							.easing(TWEEN.Easing.Quadratic.Out)
+							.start();
+					}
+				}
+				if (this.keysPressed['j'] && this.ship2) {
+					this.env.rotation.x -= 0.007;
+					if (this.player2.position.y <= this.maxY) {
+						this.player2.position.y += 0.03;
+						this.ship2.position.y += 0.03;
+						const tweenRight = new TWEEN.Tween(this.ship2.rotation)
+							.to({ z: THREE.Math.degToRad(30) }, 400) // Rotate 20 degrees to the right
+							.easing(TWEEN.Easing.Quadratic.Out)
+							.start();
+					}
+				}
+				if (!this.keysPressed['j'] && !this.keysPressed['l'] && this.ship2) {
+					const tweenBack = new TWEEN.Tween(this.ship2.rotation)
+						.to({ z: THREE.Math.degToRad(-0) }, 400)
+						.easing(TWEEN.Easing.Quadratic.Out)
+						.start();
+				}
+				break;
+			case '2':
+				this.beginnerAI();
+				break;
+			case '3':
+				this.advancedAI();
+				break;
+			case '4':
+				this.normalAI();
+				break;
+			default:
+				console.warn(`Unknown game mode: ${this.gameMode}`);
+				break;
+		}
+	}
+
 	playSound = (soundFilePath, volume) => {
 		const sound = new THREE.Audio(this.listener);
 		this.audioLoader.load(soundFilePath, (buffer) => {
@@ -889,48 +936,11 @@ class Game {
 		if (keysPressed['w'] && player1.position.x <= maxX) {
 			player1.position.x += 0.03;
 		} */
-		// bigger paddle powerup!
 		if (this.keysPressed['c']) {
 			this.cameratoggle = (this.cameratoggle + 1) % 3;
 			this.keysPressed['c'] = false;
 		}
-		if (this.gameMode === '1')
-		{
-			//this.beginnerAI();
-			//this.advancedAI();
-			this.normalAI();
-		}
-		if (this.gameMode === '2')
-		{
-			if (this.keysPressed['l'] && this.ship1) {
-				this.env.rotation.x += 0.007;
-				if (this.player2.position.y >= this.minY) {
-					this.player2.position.y -= 0.03;
-					this.ship2.position.y -= 0.03;
-					const tweenLeft = new TWEEN.Tween(this.ship1.rotation)
-						.to({ z: THREE.Math.degToRad(30) }, 400) // Rotate 20 degrees to the left
-						   .easing(TWEEN.Easing.Quadratic.Out)
-						.start();
-				}
-			}
-			if (this.keysPressed['j'] && this.ship1) {
-				this.env.rotation.x -= 0.007;
-				if (this.player2.position.y <= this.maxY) {
-					this.player2.position.y += 0.03;
-					this.ship2.position.y += 0.03;
-					const tweenRight = new TWEEN.Tween(this.ship2.rotation)
-						.to({ z: THREE.Math.degToRad(-30) }, 400) // Rotate 20 degrees to the right
-						.easing(TWEEN.Easing.Quadratic.Out)
-						.start();
-				}
-			}
-			if (!this.keysPressed['j'] && !this.keysPressed['l'] && this.ship1) {
-				const tweeBack = new TWEEN.Tween(this.ship2.rotation)
-					.to({ z: THREE.Math.degToRad(-0) }, 400)
-					.easing(TWEEN.Easing.Quadratic.Out)
-					.start();
-			}
-		}
+		this.gameControls();
 		this.ball.position.add(this.ball.velocity);
 		// Check for scoring
 		if (this.scorePlayer2 >= 5)
@@ -965,7 +975,10 @@ class Game {
 				this.powerups.splice(index, 1);
 				powerup.geometry.dispose();
 				powerup.material.dispose();
-				this.activatePowerup(powerup.type, this.player1);
+				if (this.player1pup === true)
+					this.activatePowerup(powerup.type, this.player1);
+				if (this.player1pup === false)
+					this.activatePowerup(powerup.type, this.player2);
 				this.playSound('/static/media/assets/sounds/tp.mp3', 0.2);
 			}
 		});
@@ -982,6 +995,7 @@ class Game {
 			this.ball.position.y + this.ball.geometry.parameters.radius > this.player1.position.y - this.geometry_player1.parameters.height * this.player1.scale.y / 2 &&
 			this.ball.position.y - this.ball.geometry.parameters.radius < this.player1.position.y + this.geometry_player1.parameters.height * this.player1.scale.y / 2) {
 				this.ball.velocity.x *= -1;
+				this.player1pup = true;
 			if (this.keysPressed['a']) {
 				this.ball.velocity.y -= 0.03;
 			}
@@ -995,8 +1009,13 @@ class Game {
 			this.ball.position.y + this.ball.geometry.parameters.radius > this.player2.position.y - this.geometry_player2.parameters.height / 2 &&
 			this.ball.position.y - this.ball.geometry.parameters.radius < this.player2.position.y + this.geometry_player2.parameters.height / 2) {
 				this.ball.velocity.x *= -1;
-			if (this.player2moving)
-				this.ball.velocity.y *= 1.2;
+				this.player1pup = false;
+			if (this.keysPressed['l']) {
+				this.ball.velocity.y -= 0.03;
+			}
+			if (this.keysPressed['j']) {
+				this.ball.velocity.y += 0.03;
+			}
 		}
 		// Ball stuck fix
 		this.ballStuckTimer++;
