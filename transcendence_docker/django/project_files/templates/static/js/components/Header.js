@@ -54,12 +54,14 @@ export default function Header() {
 		.then(async (response) => {
 			const user = await response.json();
 
+			console.log( 'user', user)
+
 			$header.innerHTML = `
 			<nav class="navbar navbar-expand-lg d-flex justify-content-between" style="background: transparent;">
             <h1 class="fw-bold text-center text-white display-6 ms-3" data-path="/">ft_transcendence</h1>
             <div class="d-flex align-items-center">
                 <button class="btn btn-purple btn-custom mx-1 nav-link text-white shadow-lg d-flex align-items-center" data-path="/profile">
-                    <img src="../../../media/profile_pics/default_profile.jpg" alt="${user.username}'s profile picture" style="width: 30px; height: 30px; border-radius: 50%; margin-right: 8px;">
+                    <img src="/static/${user.profile_picture}" alt="${user.username}'s profile picture" style="width: 30px; height: 30px; border-radius: 50%; margin-right: 8px;">
                     ${user.username}
                 </button>
                 <button class="btn btn-danger btn-custom mx-1 nav-link text-white shadow-lg" id="logout-btn">Logout</button>

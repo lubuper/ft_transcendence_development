@@ -12,9 +12,14 @@ export default function Profile() {
             const user = await response.json();
             console.log(user)
 
+            const profilePicHTML = user.profile_picture
+                ? `<img src="/static/${user.profile_picture}" alt="Profile Picture" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 20px;">`
+                : '<div>No profile picture available</div>';
+
             $ProfileForm.innerHTML = `
 			<div class="vh-100 d-flex align-items-center justify-content-center position-relative">
             <div class="container row justify-content-center col-md-2">
+                ${profilePicHTML}
                 <form id="profile-form">
                     <div class="form-group">
                         <label for="username" class="text-white">Username</label>
@@ -41,7 +46,6 @@ export default function Profile() {
                 </form>
             </div>
             </div>
-			${base}
 	        `;
 
             const formP = $ProfileForm.querySelector('#profile-form');

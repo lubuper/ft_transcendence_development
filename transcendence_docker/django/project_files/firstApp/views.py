@@ -23,7 +23,7 @@ def profile(request):
     return JsonResponse({
         'username': user.username,
         'email': user.email,
-        'profile_picture': request.build_absolute_uri(profile.profile_picture.url) if profile.profile_picture else None,
+        'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
     })
 
 @login_required
@@ -32,7 +32,8 @@ def current_user(request):
     profile = Profile.objects.get(user=user)
     return JsonResponse({
         'username': user.username,
-        'profile_picture': request.build_absolute_uri(profile.profile_picture.url) if profile.profile_picture else None,
+#         'profile_picture': request.build_absolute_uri(profile.profile_picture.url) if profile.profile_picture else None,
+        'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
     })
 
 @csrf_exempt
