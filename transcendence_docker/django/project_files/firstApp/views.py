@@ -81,7 +81,6 @@ def create_account(request):
         email = data.get('email')
         password = data.get('password')
         confirm_password = data.get('confirmPassword')
-        captcha = data.get('captcha')
 
         if User.objects.filter(username=username).exists():
             return JsonResponse({'message': 'Username already exists'}, status=400)
@@ -95,8 +94,6 @@ def create_account(request):
         else:
             user = User.objects.create_user(username=username, email=email, password=password)
             user.save()  # This ensures the user is stored in the database
-#             Profile.objects.create(user=user)
-#             profile.save()
             return JsonResponse({'message': 'Account created successfully'}, status=200)
 
     return JsonResponse({'message': 'Invalid request method'}, status=405)
@@ -111,7 +108,7 @@ def update_profile(request):
 
         profile_picture = request.FILES.get('profile-picture')
 
-        new_username = data.get('username')
+#         new_username = data.get('username')
         new_email = data.get('email')
         old_password = data.get('password')
         new_password = data.get('new-password')
@@ -123,14 +120,14 @@ def update_profile(request):
         if new_password != new_confirm_password:
             return JsonResponse({'message': 'New passwords do not match'}, status=400)
 
-        if new_username and User.objects.filter(username=new_username).exists() and new_username != user.username:
-            return JsonResponse({'message': 'Username already exists'}, status=400)
+#         if new_username and User.objects.filter(username=new_username).exists() and new_username != user.username:
+#             return JsonResponse({'message': 'Username already exists'}, status=400)
 
         if new_email and User.objects.filter(email=new_email).exists() and new_email != user.email:
             return JsonResponse({'message': 'Email already exists!'}, status=400)
 
-        if new_username and new_username != user.username:
-            user.username = new_username
+#         if new_username and new_username != user.username:
+#             user.username = new_username
 
         if new_email and new_email != user.email:
             user.email = new_email

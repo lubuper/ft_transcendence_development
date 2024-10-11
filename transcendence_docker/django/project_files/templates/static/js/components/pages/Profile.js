@@ -36,7 +36,7 @@ export default function Profile() {
                     </div>
                     <div class="form-group">
                         <label for="username" class="text-white">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" value="${user.username}" required>
+                        <input type="text" class="form-control" id="username" name="username" value="${user.username}" readonly required>
                     </div>
                     <div class="form-group">
                         <label for="email" class="text-white">Email</label>
