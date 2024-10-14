@@ -108,6 +108,10 @@ def update_profile(request):
 
         profile_picture = request.FILES.get('profile-picture')
 
+        print('===================================')
+        print(profile_picture)
+        print('===================================')
+
 #         new_username = data.get('username')
         new_email = data.get('email')
         old_password = data.get('password')
@@ -138,7 +142,7 @@ def update_profile(request):
         if profile_picture:
                     profile, created = Profile.objects.get_or_create(user=user)
                     # Delete old profile picture if exists and is not default
-                    if profile.profile_picture and profile.profile_picture.name != 'profile_pics/default_profile.jpg':
+                    if profile.profile_picture and profile.profile_picture.name != 'profile_pics/default_profile.png':
                         if os.path.isfile(profile.profile_picture.path):
                             os.remove(profile.profile_picture.path)
                     profile.profile_picture = profile_picture

@@ -17,9 +17,9 @@ export default function Profile() {
             console.log(user)
 
             // Apply cache busting to ensure the latest image is fetched
-            const profilePicURL = `static/${user.profile_picture}`
-                // ? `static/${user.profile_picture}?${new Date().getTime()}`
-                // : 'static/media/profile_pics/default_profile.jpg'; // Path to default image
+            const profilePicURL = user.profile_picture
+                 ? `static/${user.profile_picture}?${new Date().getTime()}`
+                 : 'static/media/profile_pics/default_profile.png'; // Path to default image
 
             const profilePicHTML = user.profile_picture
                 ? `<img src="${profilePicURL}" alt="Profile Picture" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 20px;">`
@@ -69,6 +69,8 @@ export default function Profile() {
                 const formPData = new FormData(formP);
 
                 const data = Object.fromEntries(formPData.entries());
+
+                console.log('data: ', data)
 
                 try {
                     const response = await fetch('/update_profile/', {

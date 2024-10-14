@@ -7,10 +7,6 @@ from django.dispatch import receiver
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-#     profile_picture = models.ImageField(
-#         upload_to='profile_pics/',
-#         default='profile_pics/default_profile.png'  # Ensure the path is correct
-#     )
     profile_picture = models.ImageField(
             upload_to="profile_pics/",
             default='profile_pics/default_profile.png',
