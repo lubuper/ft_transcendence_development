@@ -397,6 +397,7 @@ class Game {
 				this.ball.velocity.y *= -1;
 				break;
 			case 'protectiveBarrier':
+				
 				break;
 		}
 	}
@@ -970,7 +971,7 @@ class Game {
 				this.ball.position.x + this.ball.geometry.parameters.radius > powerup.position.x - powerup.geometry.parameters.radius &&
 				this.ball.position.y + this.ball.geometry.parameters.radius > powerup.position.y - powerup.geometry.parameters.radius &&
 				this.ball.position.y - this.ball.geometry.parameters.radius < powerup.position.y + powerup.geometry.parameters.radius) {
-				console.log(powerup.type);
+				console.log("DEBUG", powerup.type);
 				this.playingSurface.remove(powerup);
 				this.powerups.splice(index, 1);
 				powerup.geometry.dispose();

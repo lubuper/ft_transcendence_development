@@ -39,8 +39,8 @@ export default function LocalPlay(navigate) {
 				</div>
 			</div>
 		</div>
-		<div class="position-absolute top-50 start-0 translate-middle-y" style="left: 10%; opacity: 0.8;">
-			<div class="card bg-dark text-white" style="width: 18rem; border: 10px solid #343a40;">
+		<div class="position-absolute top-50 translate-middle-y" style="left: 15%; opacity: 0.6;">
+			<div class="card bg-dark text-white" style="width: 18rem; border: 1px solid #343a40;">
 				<div class="card-body">
 					<h5 class="card-title text-center">How To Play</h5>
 					<p class="card-text">
@@ -50,8 +50,8 @@ export default function LocalPlay(navigate) {
 				</div>
 			</div>
 		</div>
-		<div class="position-absolute top-50 end-0 translate-middle-y" style="right: 10%; opacity: 0.8;">
-			<div class="card bg-dark text-white" style="width: 18rem; border: 10px solid #343a40;">
+		<div class="position-absolute top-50 translate-middle-y" style="right: 15%; opacity: 0.6;">
+			<div class="card bg-dark text-white" style="width: 18rem; border: 1px solid #343a40;">
 				<div class="card-body">
 					<h5 class="card-title text-center">How To Play</h5>
 					<p class="card-text">

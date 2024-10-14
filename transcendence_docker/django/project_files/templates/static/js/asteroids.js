@@ -11,7 +11,11 @@ class Level {
 }
 
 class Game {
-	constructor() {
+	constructor(gameMode) {
+		this.gameMode = gameMode;
+		if (this.gameMode !== '1' && this.gameMode !== '2' && this.gameMode !== '3' && this.gameMode !== '4') {
+			this.cleanup();
+		}
 		this.levels = [
 			new Level(0, 1, 0, 0, 0),
 			new Level(1, 2, 0, 0, 0),
@@ -66,6 +70,7 @@ class Game {
 		this.levelDisplay;
 		this.lvlCompleteScreen = 0;
 		this.fbxloader = new THREE.FBXLoader();
+		this.explosion;
 		this.animationFrameID;
 		this.animate = this.animate.bind(this);
 	}
@@ -93,7 +98,9 @@ class Game {
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
 		document.body.appendChild(this.renderer.domElement);
 		this.GameIsRunning = true;
-		this.animate();
+		setTimeout(() => {
+			this.animate();
+		}, 1000);
 	}
 
 	cleanup() {
@@ -691,6 +698,64 @@ class Game {
 		}
 	}
 
+	updateExplosion() {
+		console.log("explosion updated");
+	
+		// Iterate over each particle in the explosion group
+		for (let i = 0; i < this.explosion.children.length; i++) {
+			const particle = this.explosion.children[i];
+	
+			// Update the particle's position based on its velocity
+			particle.position.x += particle.velocity.x;
+			particle.position.y += particle.velocity.y;
+			particle.position.z += particle.velocity.z;
+	
+			console.log(`Updated Particle ${i} position:`, particle.position);
+		}
+	
+		// Remove particles if they move beyond a certain distance
+		if (this.explosion.children.length > 0) {
+			const distanceThreshold = 10; // Adjust this value as needed
+			this.explosion.children = this.explosion.children.filter(particle => {
+				return particle.position.length() < distanceThreshold;
+			});
+		}
+	
+		// Check if all particles have been removed
+		if (this.explosion.children.length === 0) {
+			this.explosion = null; // Set this.explosion to null to indicate it's been cleaned up
+		}
+	}
+
+	createExplosion(x, y, z) {
+		console.log("explosion created");
+		this.explosion = new THREE.Group();
+	
+		const numParticles = 6;
+		const particleSize = 0.1;
+		const particleSpeed = 1.5;
+	
+		for (let i = 0; i < numParticles; i++) {
+		const particle = new THREE.Mesh(
+			new THREE.SphereGeometry(particleSize, 10, 10),
+			new THREE.MeshBasicMaterial({ color: 0xff0000 })
+		);
+	
+		particle.position.x = x + (Math.random() - 0.5) * 0.1;
+		particle.position.y = y + (Math.random() - 0.5) * 0.1;
+		particle.position.z = z + (Math.random() - 0.5) * 0.1;
+	
+		particle.velocity = new THREE.Vector3(
+			(Math.random() - 0.5) * particleSpeed,
+			(Math.random() - 0.5) * particleSpeed,
+			(Math.random() - 0.5) * particleSpeed
+		);
+	
+		this.explosion.add(particle);
+		}
+		this.scene.add(this.explosion);
+	}
+
 	animate() {
 		if (this.GameIsRunning === false) {
 			cancelAnimationFrame(this.animate);
@@ -799,6 +864,8 @@ class Game {
 			sphere.rotation.z += sphere.rotationSpeed.z;
 			this.checkBoundaries(sphere);
 		});
+		if (this.explosion)
+			this.updateExplosion();
 		// projectilewise code
 		for (let i = this.projectiles.length - 1; i >= 0; i--) {
 			const projectile = this.projectiles[i];
@@ -811,6 +878,7 @@ class Game {
 				const asteroid = this.asteroids[j];
 				if (this.checkCollision(projectile, asteroid)) {
 					this.playSound('/static/media/assets/sounds/explosion.mp3', 2);
+					this.createExplosion(asteroid.position.x, asteroid.position.y, asteroid.position.z);
 					if (asteroid.size > 1) {
 						asteroid.size -= 1;
 						for (let k = 0; k < 3; k++) {
@@ -888,14 +956,8 @@ class Game {
 	}
 }
 
-let gameInstance = null;
-
-export default function Asteroids() {
-	if (!gameInstance) {
-		gameInstance = new Game();
-		setTimeout(() => {
-			gameInstance.init();
-		}, 1000);
-	}
-	return gameInstance;
+export default function Asteroids(gameMode) {
+	const game = new Game(gameMode);
+	game.init();
+	return game;
 }
