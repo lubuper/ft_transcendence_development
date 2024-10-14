@@ -12,6 +12,8 @@ from .models import Profile
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 import os
+import sys
+from django.db import IntegrityError
 
 # Create your views here.
 from .models import *
@@ -98,6 +100,7 @@ def create_account(request):
 
     return JsonResponse({'message': 'Invalid request method'}, status=405)
 
+@csrf_exempt
 @login_required
 def update_profile(request):
     if request.method == 'POST':
@@ -108,11 +111,10 @@ def update_profile(request):
 
         profile_picture = request.FILES.get('profile-picture')
 
-        print('===================================')
-        print(profile_picture)
-        print('===================================')
+#          print("Received profile picture:", profile_picture)
+#          print("Request.FILES:", request.FILES)
+#          sys.stdout.flush()
 
-#         new_username = data.get('username')
         new_email = data.get('email')
         old_password = data.get('password')
         new_password = data.get('new-password')
@@ -124,14 +126,8 @@ def update_profile(request):
         if new_password != new_confirm_password:
             return JsonResponse({'message': 'New passwords do not match'}, status=400)
 
-#         if new_username and User.objects.filter(username=new_username).exists() and new_username != user.username:
-#             return JsonResponse({'message': 'Username already exists'}, status=400)
-
         if new_email and User.objects.filter(email=new_email).exists() and new_email != user.email:
             return JsonResponse({'message': 'Email already exists!'}, status=400)
-
-#         if new_username and new_username != user.username:
-#             user.username = new_username
 
         if new_email and new_email != user.email:
             user.email = new_email
@@ -141,7 +137,6 @@ def update_profile(request):
 
         if profile_picture:
                     profile, created = Profile.objects.get_or_create(user=user)
-                    # Delete old profile picture if exists and is not default
                     if profile.profile_picture and profile.profile_picture.name != 'profile_pics/default_profile.png':
                         if os.path.isfile(profile.profile_picture.path):
                             os.remove(profile.profile_picture.path)
