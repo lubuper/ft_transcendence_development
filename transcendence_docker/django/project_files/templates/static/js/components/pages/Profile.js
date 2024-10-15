@@ -14,19 +14,11 @@ export default function Profile() {
                 throw new Error('Failed to fetch profile data');
             }
             const user = await response.json();
-            console.log(user)
+            // console.log(user)
 
             const profilePicHTML = user.profile_picture
                 ? `<img src="static/${user.profile_picture}" alt="${user.username}'s profile picture" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 20px;">`
                 : '<div>No profile picture available</div>';
-            // Apply cache busting to ensure the latest image is fetched
-            // const profilePicURL = user.profile_picture
-            //      ? `static/${user.profile_picture}?${new Date().getTime()}`
-            //      : 'static/media/profile_pics/default_profile.png'; // Path to default image
-            //
-            // const profilePicHTML = user.profile_picture
-            //     ? `<img src="${profilePicURL}" alt="Profile Picture" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 20px;">`
-            //     : '<div>No profile picture available</div>';
 
             $ProfileForm.innerHTML = `
 			<div class="vh-100 d-flex align-items-center justify-content-center position-relative">
@@ -69,11 +61,13 @@ export default function Profile() {
             formP.addEventListener('submit', async (event) => {
                 event.preventDefault(); // Prevent default form submission
 
+                console.log('aqui============')
+
                 const formPData = new FormData(formP);
 
-                // const data = Object.fromEntries(formPData.entries());
+                const data = Object.fromEntries(formPData.entries());
 
-                // console.log('data: ', data)
+                console.log('data: ', data)
 
                 try {
                     const response = await fetch('/update_profile/', {
@@ -82,8 +76,7 @@ export default function Profile() {
                             // 'Content-Type': 'application/json',
                             'X-CSRFToken': getCookie('csrftoken') // For CSRF protection
                         },
-                        // body: JSON.stringify(data)
-                        body: formPData
+                        body: JSON.stringify(data)
                     });
 
                     const messageDivP = document.getElementById('message');

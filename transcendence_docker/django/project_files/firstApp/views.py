@@ -8,12 +8,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import check_password, make_password
 from django.views.decorators.csrf import csrf_exempt
 import json  #
-from .models import Profile
+from .models import Profile, MatchHistory
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 import os
 import sys
 from django.db import IntegrityError
+from django.views.decorators.http import require_POST
 
 # Create your views here.
 from .models import *
@@ -111,10 +112,6 @@ def update_profile(request):
 
         profile_picture = request.FILES.get('profile-picture')
 
-#          print("Received profile picture:", profile_picture)
-#          print("Request.FILES:", request.FILES)
-#          sys.stdout.flush()
-
         new_email = data.get('email')
         old_password = data.get('password')
         new_password = data.get('new-password')
@@ -148,3 +145,19 @@ def update_profile(request):
         return JsonResponse({'message': 'Account updated successfully'}, status=200)
 
     return JsonResponse({'message': 'Invalid request method'}, status=405)
+
+@require_POST
+@login_required
+def save_match_history(request):
+    data = request.json()
+    match = MatchHistory.objects.create(
+        user=request.user,
+        score=data['score'],
+        result=data['result']
+    )
+    return JsonResponse({'message': 'Match history saved successfully'})
+
+@login_required
+def load_match_history(request):
+    match_history = MatchHistory.objects.filter(user=request.user).values('timestamp', 'score', 'result')
+    return JsonResponse(list(match_history), safe=False)

@@ -12,18 +12,85 @@ const avatarPaths = [
 ];
 
 export function saveMatchHistory(match) {
-	const matchHistory = loadMatchHistory();
-	matchHistory.push(match);
-	localStorage.setItem('matchHistory', JSON.stringify(matchHistory));
+	// const matchHistory = loadMatchHistory();
+	// matchHistory.push(match);
+	// localStorage.setItem('matchHistory', JSON.stringify(matchHistory));
+	console.log('a info que chega:', match);
+	fetch('/api/save-match-history/', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-CSRFToken': getCSRFToken() // Ensure CSRF protection for Django
+		},
+		body: JSON.stringify(match)
+	})
+		.then(response => response.json())
+		.then(data => {
+			console.log('Match history saved:', data);
+		})
+		.catch(error => {
+			console.error('Error saving match history:', error);
+		});
 }
 
-export function loadMatchHistory() {
-	const data = localStorage.getItem('matchHistory');
-	return data ? JSON.parse(data) : [];
+function getCSRFToken() {
+	const name = 'csrftoken';
+	const cookies = document.cookie.split(';');
+	for (let cookie of cookies) {
+		const trimmedCookie = cookie.trim();
+		if (trimmedCookie.startsWith(name + '=')) {
+			return decodeURIComponent(trimmedCookie.substring(name.length + 1));
+		}
+	}
+	return null;
+}
+
+export function getMatchHistoryHTML() {
+	return fetch('/api/load-match-history/', {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-CSRFToken': getCSRFToken() // Ensure CSRF protection for Django
+		}
+	})
+		.then(response => {
+			if (!response.ok) {
+				throw new Error('Failed to fetch match history');
+			}
+			return response.json(); // Parse the JSON data
+		})
+		.then(matchHistory => {
+			console.log('Loaded match history:', matchHistory); // Debugging log
+			// Generate the HTML for the match history
+			return `
+			<div class="card bg-dark text-white mb-3">
+				<div class="card-header">
+					<button class="btn btn-link text-white" type="button" data-bs-toggle="collapse" data-bs-target="#matchHistoryCollapse" aria-expanded="false" aria-controls="matchHistoryCollapse">
+						Match History
+					</button>
+				</div>
+				<div id="matchHistoryCollapse" class="collapse">
+					<div class="card-body">
+						${matchHistory.map(match => `
+							<p>${match.timestamp}: ${match.score} -> ${match.result}</p>
+						`).join('')}
+					</div>
+				</div>
+			</div>
+		`;
+		})
+		.catch(error => {
+			console.error('Error loading match history:', error);
+			// Return an error message if fetching fails
+			return `<p>Error loading match history.</p>`;
+		});
 }
 
 export default function DashBoard() {
-	const matchHistory = loadMatchHistory();
+	// const matchHistory = loadMatchHistory();
+
+	const matchHistoryHTML = getMatchHistoryHTML();
+	console.log('html que chega: ', matchHistoryHTML);
 
 	const $dashboard = document.createElement('dashboard');
 	$dashboard.innerHTML = `
@@ -61,9 +128,7 @@ export default function DashBoard() {
 							</div>
 							<div id="matchHistoryCollapse" class="collapse">
 								<div class="card-body">
-									${matchHistory.map(match => `
-										<p>${match.timestamp}: ${match.score} -> ${match.result}</p>
-									`).join('')}
+									${matchHistoryHTML}
 								</div>
 							</div>
 						</div>

@@ -26,3 +26,13 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
+
+
+class MatchHistory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    score = models.IntegerField()
+    result = models.CharField(max_length=10)  # Win, Lose, or Draw
+
+    def __str__(self):
+        return f'{self.user.username} - {self.result} at {self.timestamp}'
