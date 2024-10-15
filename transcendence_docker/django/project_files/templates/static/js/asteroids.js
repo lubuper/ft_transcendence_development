@@ -70,7 +70,7 @@ class Game {
 		this.levelDisplay;
 		this.lvlCompleteScreen = 0;
 		this.fbxloader = new THREE.FBXLoader();
-		this.explosion;
+		this.explosionGroup = [];
 		this.animationFrameID;
 		this.animate = this.animate.bind(this);
 	}
@@ -493,8 +493,12 @@ class Game {
 	}
 
 	createProjectile(origin, offsetAngle, isPlayer) {
+		let proj_color = 0xff0000;
+		if (!isPlayer) {
+			proj_color = 0x00ff00;
+		}
 		const geometry = new THREE.SphereGeometry(0.3, 3, 3);
-		const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+		const material = new THREE.MeshBasicMaterial({ color: proj_color });
 		const laser = new THREE.Mesh(geometry, material);
 		laser.scale.set(0.4, 1, 2);
 		laser.position.x = origin.position.x;
@@ -692,68 +696,71 @@ class Game {
 			}
 			this.shield.visible = true;
 			this.nextLevelTimer++;
-			if (this.nextLevelTimer === 100) {
+			if (this.nextLevelTimer === 200) {
 				this.levelUp();
 			}
 		}
 	}
 
 	updateExplosion() {
-		console.log("explosion updated");
-	
-		// Iterate over each particle in the explosion group
-		for (let i = 0; i < this.explosion.children.length; i++) {
-			const particle = this.explosion.children[i];
-	
-			// Update the particle's position based on its velocity
-			particle.position.x += particle.velocity.x;
-			particle.position.y += particle.velocity.y;
-			particle.position.z += particle.velocity.z;
-	
-			console.log(`Updated Particle ${i} position:`, particle.position);
-		}
-	
-		// Remove particles if they move beyond a certain distance
-		if (this.explosion.children.length > 0) {
-			const distanceThreshold = 10; // Adjust this value as needed
-			this.explosion.children = this.explosion.children.filter(particle => {
-				return particle.position.length() < distanceThreshold;
-			});
-		}
-	
-		// Check if all particles have been removed
-		if (this.explosion.children.length === 0) {
-			this.explosion = null; // Set this.explosion to null to indicate it's been cleaned up
+		for (let i = this.explosionGroup.length - 1; i >= 0; i--) {
+			const explosion = this.explosionGroup[i];
+			explosion.lifetime--;
+			for (let j = explosion.particles.length - 1; j >= 0; j--) {
+				const particle = explosion.particles[j];
+				particle.position.add(particle.velocity);
+
+				particle.material.opacity = explosion.lifetime / 10;
+				particle.material.needsUpdate = true;
+				if (particle.position.x < -this.boundaryX || particle.position.x > this.boundaryX || particle.position.y < -this.boundaryY || particle.position.y > this.boundaryY) {
+					this.scene.remove(particle);
+					particle.geometry.dispose();
+					particle.material.dispose();
+					explosion.particles.splice(j, 1);
+				}
+			}
+			if (explosion.lifetime <= 0) {
+				explosion.particles.forEach(particle => {
+					this.scene.remove(particle);
+					particle.geometry.dispose();
+					particle.material.dispose();
+				});
+				this.explosionGroup.splice(i, 1);
+			}
 		}
 	}
 
-	createExplosion(x, y, z) {
-		console.log("explosion created");
-		this.explosion = new THREE.Group();
-	
-		const numParticles = 6;
-		const particleSize = 0.1;
-		const particleSpeed = 1.5;
-	
+	createExplosion(x, y, size) {
+		const explosion = {
+			particles: [],
+			lifetime: 60 // Adjust the lifetime as needed
+		};
+		const numParticles = Math.floor(Math.random() * 5) + 4;
+		const colors = [0xffffff, 0xffff00, 0xff0000];
 		for (let i = 0; i < numParticles; i++) {
-		const particle = new THREE.Mesh(
-			new THREE.SphereGeometry(particleSize, 10, 10),
-			new THREE.MeshBasicMaterial({ color: 0xff0000 })
-		);
+			const particleSize = Math.random() * 0.2 + 0.1;
+			const particleSpeed = Math.random() * 0.4 + 0.6;
+			const color = colors[Math.floor(Math.random() * colors.length)];
 	
-		particle.position.x = x + (Math.random() - 0.5) * 0.1;
-		particle.position.y = y + (Math.random() - 0.5) * 0.1;
-		particle.position.z = z + (Math.random() - 0.5) * 0.1;
-	
-		particle.velocity = new THREE.Vector3(
-			(Math.random() - 0.5) * particleSpeed,
-			(Math.random() - 0.5) * particleSpeed,
-			(Math.random() - 0.5) * particleSpeed
-		);
-	
-		this.explosion.add(particle);
+			const particle = new THREE.Mesh(
+				new THREE.PlaneGeometry(particleSize, particleSize + (size / 10)),
+				new THREE.MeshBasicMaterial({ color: color, transparent: true })
+			);
+			particle.position.set(
+				x + (Math.random() - 0.5) * 0.1,
+				y + (Math.random() - 0.5) * 0.1,
+				5 // Fixed z position
+			);
+			particle.velocity = new THREE.Vector3(
+				(Math.random() - 0.5) * particleSpeed,
+				(Math.random() - 0.5) * particleSpeed,
+				0
+			);
+			explosion.particles.push(particle);
+			this.scene.add(particle);
 		}
-		this.scene.add(this.explosion);
+	
+		this.explosionGroup.push(explosion);
 	}
 
 	animate() {
@@ -864,7 +871,7 @@ class Game {
 			sphere.rotation.z += sphere.rotationSpeed.z;
 			this.checkBoundaries(sphere);
 		});
-		if (this.explosion)
+		if (this.explosionGroup.length > 0)
 			this.updateExplosion();
 		// projectilewise code
 		for (let i = this.projectiles.length - 1; i >= 0; i--) {
@@ -878,7 +885,7 @@ class Game {
 				const asteroid = this.asteroids[j];
 				if (this.checkCollision(projectile, asteroid)) {
 					this.playSound('/static/media/assets/sounds/explosion.mp3', 2);
-					this.createExplosion(asteroid.position.x, asteroid.position.y, asteroid.position.z);
+					this.createExplosion(asteroid.position.x, asteroid.position.y, 0);
 					if (asteroid.size > 1) {
 						asteroid.size -= 1;
 						for (let k = 0; k < 3; k++) {
@@ -940,6 +947,7 @@ class Game {
 			for (let i = this.asteroids.length - 1; i >= 0; i--) {
 				const asteroid = this.asteroids[i];
 				if (this.checkCollision(this.player, asteroid)) {
+					this.createExplosion(this.player.position.x, this.player.position.y, 2);
 					this.playerDeath();
 					break;
 				}
@@ -947,6 +955,7 @@ class Game {
 			for (let i = this.sAsteroids.length - 1; i >= 0; i--) {
 				const sAsteroid = this.sAsteroids[i];
 				if (this.checkCollision(this.player, sAsteroid)) {
+					this.createExplosion(this.player.position.x, this.player.position.y, 3);
 					this.playerDeath();
 					break;
 				}
