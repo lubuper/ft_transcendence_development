@@ -55,6 +55,7 @@ class Game {
 		this.sunMaterial;
 		this.hemiLight;
 		this.ball;
+		this.barrier
 		this.ballLastPosition;
 		this.ballStuckTimer = 0;
 		this.hexagons;
@@ -362,7 +363,7 @@ class Game {
 
 
 	generatePowerup() {
-		const powerupTypes = ['paddleIncrease', 'ballSpeedUp', 'invertSpeed', 'protectiveBarrier'];
+		const powerupTypes = ['paddleIncrease', 'ballSpeedUp', 'invertSpeed', 'protectiveBarrier', 'extralife'];
 		const type = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
 		const powerGeometry = new THREE.SphereGeometry(0.07, 32, 32);
 		const powerMaterial = new THREE.MeshLambertMaterial({ map: this.loader.load('/static/media/assets/metal2.jpg') });
@@ -371,6 +372,24 @@ class Game {
 		powerup.type = type;
 		this.powerups.push(powerup);
 		this.playingSurface.add(powerup);
+	}
+
+	createBarrier(player) {
+		const barrierGeometry = new THREE.PlaneGeometry(this.geox, 0.1);
+		const barrierMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 1 });
+		const barrier = new THREE.Mesh(barrierGeometry, barrierMaterial);
+		barrier.position.set(0, player.position.y + (player.scale.y / 2) + 0.1, 0);
+		this.playingSurface.add(barrier);
+		this.barrier = barrier;
+		new TWEEN.Tween(this.barrier.material)
+            .to({ opacity: 0 }, 1000)
+            .onComplete(() => {
+                this.playingSurface.remove(this.barrier);
+                this.barrier.geometry.dispose();
+                this.barrier.material.dispose();
+                this.barrier = null;
+            })
+            .start();
 	}
 
 	activatePowerup(type, player) {
@@ -383,7 +402,7 @@ class Game {
 						new TWEEN.Tween(player.scale)
 							.to({ x: 1, y: 1, z: 1 }, 500)
 							.easing(TWEEN.Easing.Quadratic.In)
-							.delay(10000) // Delay the start of the tween by 5 seconds
+							.delay(15000) // Delay the start of the tween by 5 seconds
 							.start();
 					})
 					.start();
@@ -397,7 +416,18 @@ class Game {
 				this.ball.velocity.y *= -1;
 				break;
 			case 'protectiveBarrier':
-				
+				this.createBarrier(player)
+				break;
+			case 'extralife':
+				if (player == this.player1) {
+					this.scorePlayer2--;
+				}
+				else {
+					this.player1.score--;
+				}
+				this.updateScore(this.player1, this.player2);
+				console.log(this.scorePlayer1);
+				console.log(this.scorePlayer2);
 				break;
 		}
 	}
