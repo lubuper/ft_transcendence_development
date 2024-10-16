@@ -185,16 +185,21 @@ class Game {
 	gameOver() {
 		this.GameIsRunning = false;
 		for (let i = 0; i < 1000; i++) {}
-		const timestamp = new Date();
-		const formattedTimestamp = `
-		<span style="color: blue;">Asteroids:</span> 
-		<span style="color: white;">${timestamp.toISOString().split('T')[0]}</span> 
-		at 
-		<span style="color: grey;">${timestamp.toTimeString().split(' ')[0]}</span> `;
+		// const timestamp = new Date();
+		// const formattedTimestamp = `
+		// <span style="color: blue;">Asteroids:</span>
+		// <span style="color: white;">${timestamp.toISOString().split('T')[0]}</span>
+		// at
+		// <span style="color: grey;">${timestamp.toTimeString().split(' ')[0]}</span> `;
+		// const match = {
+		// 	result: '<span style="color: red;">loss</span>',
+		// 	score: this.level,
+		// 	timestamp: formattedTimestamp
+		// };
 		const match = {
-			result: '<span style="color: red;">loss</span>',
+			result: `loss`,
 			score: this.level,
-			timestamp: formattedTimestamp
+			game: `Asteroids`,
 		};
 		saveMatchHistory(match);
 		this.cleanup();
@@ -204,17 +209,22 @@ class Game {
 	gameWin() {
 		this.GameIsRunning = false;
 		for (let i = 0; i < 1000; i++) {}
-		const timestamp = new Date();
-		const formattedTimestamp = `
-		<span style="color: blue;">Asteroids:</span> 
-		<span style="color: white;">${timestamp.toISOString().split('T')[0]}</span> 
-		at 
-		<span style="color: grey;">${timestamp.toTimeString().split(' ')[0]}</span> `;
+		// const timestamp = new Date();
+		// const formattedTimestamp = `
+		// <span style="color: blue;">Asteroids:</span>
+		// <span style="color: white;">${timestamp.toISOString().split('T')[0]}</span>
+		// at
+		// <span style="color: grey;">${timestamp.toTimeString().split(' ')[0]}</span> `;
 		const match = {
-			result: '<span style="color: green;">win</span>',
-			score: this.level,
-			timestamp: formattedTimestamp
+			result: `win`,
+			score: `level ${this.level}`,
+			game: `Asteroids`,
 		};
+		// const match = {
+		// 	result: '<span style="color: green;">win</span>',
+		// 	score: this.level,
+		// 	timestamp: formattedTimestamp
+		// };
 		saveMatchHistory(match);
 		this.cleanup();
 		document.getElementById('gameWin').style.display = 'flex';

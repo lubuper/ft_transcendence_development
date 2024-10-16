@@ -602,16 +602,16 @@ class Game {
 
 	gameOver() {
 		this.isRunning = false;
-		const timestamp = new Date();
-		const formattedTimestamp = `
-        <span style="color: orange;">Pong:</span> 
-        <span style="color: white;">${timestamp.toISOString().split('T')[0]}</span> 
-        at 
-        <span style="color: grey;">${timestamp.toTimeString().split(' ')[0]}</span> `;
+		// const timestamp = new Date();
+		// const formattedTimestamp = `
+        // <span style="color: orange;">Pong:</span>
+        // <span style="color: white;">${timestamp.toISOString().split('T')[0]}</span>
+        // at
+        // <span style="color: grey;">${timestamp.toTimeString().split(' ')[0]}</span> `;
 		const match = {
-			result: '<span style="color: red;">loss</span>',
+			result: `loss`,
 			score: `${this.scorePlayer1}-${this.scorePlayer2}`,
-			timestamp: formattedTimestamp
+			game: `Pong`,
 		};
 		saveMatchHistory(match);
 		this.cleanup();
@@ -629,6 +629,7 @@ class Game {
 		const match = {
 			result: `win`,
 			score: `${this.scorePlayer1}-${this.scorePlayer2}`,
+			game: `Pong`,
 		};
 		saveMatchHistory(match);
 		this.cleanup();

@@ -104,8 +104,21 @@ export default function DashBoard() {
 							<div id="matchHistoryCollapse" class="collapse">
 								<div class="card-body">
 									${matchHistory.map(match => `
-                                        <p>${new Date(match.timestamp).toLocaleString()}: ${match.score} -> ${match.result}</p>
-                                    `).join('')}
+        								<p>
+           									${match.game}: ${match.score} -> 
+            								<span style="color: ${match.result === 'win' ? 'green' : 'red'};">
+                								${match.result}
+           									</span> 
+            								at ${new Date(match.timestamp).toLocaleString('en-GB', {
+												day: '2-digit',
+												month: '2-digit',
+												year: 'numeric',
+												hour: '2-digit',
+												minute: '2-digit',
+												hour12: true
+											})}
+        								</p>
+    								`).join('')}
 								</div>
 							</div>
 						</div>

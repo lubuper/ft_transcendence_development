@@ -158,7 +158,8 @@ def save_match_history(request):
                 match = MatchHistory.objects.create(
                     user=request.user,
                     score=data['score'],
-                    result=data['result']
+                    result=data['result'],
+                    game=data['game']
                 )
 
                 # Return a success response
@@ -175,7 +176,7 @@ def save_match_history(request):
 @login_required
 def load_match_history(request):
     try:
-            match_history = MatchHistory.objects.filter(user=request.user).values('timestamp', 'score', 'result')
+            match_history = MatchHistory.objects.filter(user=request.user).values('timestamp', 'score', 'result', 'game')
             return JsonResponse(list(match_history), safe=False)
     except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)  # Return error as JSON

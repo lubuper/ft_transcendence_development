@@ -33,6 +33,7 @@ class MatchHistory(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     score = models.CharField(max_length=5)
     result = models.CharField(max_length=10)  # Win, Lose, or Draw
+    game = models.CharField(max_length=10)
 
     def __str__(self):
         return f'{self.user.username} - {self.result} at {self.timestamp}'
