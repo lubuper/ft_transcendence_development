@@ -16,21 +16,26 @@ export function saveMatchHistory(match) {
 	// matchHistory.push(match);
 	// localStorage.setItem('matchHistory', JSON.stringify(matchHistory));
 	console.log('a info que chega:', match);
-	fetch('/api/save-match-history/', {
+	return fetch('/save-match-history/', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
 			'X-CSRFToken': getCSRFToken() // Ensure CSRF protection for Django
 		},
-		body: JSON.stringify(match)
+		body: JSON.stringify(match) // Convert match object to JSON
 	})
-		.then(response => response.json())
-		.then(data => {
-			console.log('Match history saved:', data);
-		})
-		.catch(error => {
-			console.error('Error saving match history:', error);
-		});
+	.then(response => {
+		if (!response.ok) {
+			throw new Error('Failed to save match history');
+		}
+		return response.json(); // Parse the JSON response
+	})
+	.then(data => {
+		console.log('Match history saved successfully:', data);
+	})
+	.catch(error => {
+		console.error('Error saving match history:', error);
+	});
 }
 
 function getCSRFToken() {
@@ -45,54 +50,27 @@ function getCSRFToken() {
 	return null;
 }
 
-export function getMatchHistoryHTML() {
-	return fetch('/api/load-match-history/', {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json',
-			'X-CSRFToken': getCSRFToken() // Ensure CSRF protection for Django
+export async function getMatchHistoryHTML() {
+	try {
+		const response = await fetch('/api/load-match-history/');
+		if (!response.ok) {
+			throw new Error(`HTTP error! Status: ${response.status}`);
 		}
-	})
-		.then(response => {
-			if (!response.ok) {
-				throw new Error('Failed to fetch match history');
-			}
-			return response.json(); // Parse the JSON data
-		})
-		.then(matchHistory => {
-			console.log('Loaded match history:', matchHistory); // Debugging log
-			// Generate the HTML for the match history
-			return `
-			<div class="card bg-dark text-white mb-3">
-				<div class="card-header">
-					<button class="btn btn-link text-white" type="button" data-bs-toggle="collapse" data-bs-target="#matchHistoryCollapse" aria-expanded="false" aria-controls="matchHistoryCollapse">
-						Match History
-					</button>
-				</div>
-				<div id="matchHistoryCollapse" class="collapse">
-					<div class="card-body">
-						${matchHistory.map(match => `
-							<p>${match.timestamp}: ${match.score} -> ${match.result}</p>
-						`).join('')}
-					</div>
-				</div>
-			</div>
-		`;
-		})
-		.catch(error => {
-			console.error('Error loading match history:', error);
-			// Return an error message if fetching fails
-			return `<p>Error loading match history.</p>`;
-		});
+		const matchHistory = await response.json();
+		return matchHistory;
+	} catch (error) {
+		console.error('Error fetching match history:', error);
+		throw error; // Rethrow or handle the error as needed
+	}
 }
 
 export default function DashBoard() {
 	// const matchHistory = loadMatchHistory();
 
-	const matchHistoryHTML = getMatchHistoryHTML();
-	console.log('html que chega: ', matchHistoryHTML);
-
+	// const matchHistoryHTML = getMatchHistoryHTML();
+	// console.log('html que chega: ', matchHistoryHTML);
 	const $dashboard = document.createElement('dashboard');
+	getMatchHistoryHTML().then(matchHistory => {
 	$dashboard.innerHTML = `
 		<div class="vh-100 d-flex flex-column align-items-center justify-content-start position-relative" style="background-color: rgba(0, 0, 0, 0.6); color: white;">
 			<div class="container mt-3">
@@ -128,7 +106,9 @@ export default function DashBoard() {
 							</div>
 							<div id="matchHistoryCollapse" class="collapse">
 								<div class="card-body">
-									${matchHistoryHTML}
+									${matchHistory.map(match => `
+                                        <p>${new Date(match.timestamp).toLocaleString()}: ${match.score} -> ${match.result}</p>
+                                    `).join('')}
 								</div>
 							</div>
 						</div>
@@ -185,6 +165,6 @@ export default function DashBoard() {
 		localStorage.clear();
 		alert('Local storage cleared!');
 	});
-
+	});
 	return $dashboard;
 }

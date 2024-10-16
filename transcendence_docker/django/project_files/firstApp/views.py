@@ -149,15 +149,33 @@ def update_profile(request):
 @require_POST
 @login_required
 def save_match_history(request):
-    data = request.json()
-    match = MatchHistory.objects.create(
-        user=request.user,
-        score=data['score'],
-        result=data['result']
-    )
-    return JsonResponse({'message': 'Match history saved successfully'})
+	if request.method == 'POST':
+            try:
+                # Parse JSON request body
+                data = json.loads(request.body)
+
+                # Create a new MatchHistory entry
+                match = MatchHistory.objects.create(
+                    user=request.user,
+                    score=data['score'],
+                    result=data['result']
+                )
+
+                # Return a success response
+                return JsonResponse({'message': 'Match history saved successfully'}, status=200)
+            except json.JSONDecodeError:
+                return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+            except Exception as e:
+                return JsonResponse({'error': str(e)}, status=500)
+	else:
+            # Handle invalid request methods
+            return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 @login_required
 def load_match_history(request):
-    match_history = MatchHistory.objects.filter(user=request.user).values('timestamp', 'score', 'result')
-    return JsonResponse(list(match_history), safe=False)
+    try:
+            match_history = MatchHistory.objects.filter(user=request.user).values('timestamp', 'score', 'result')
+            return JsonResponse(list(match_history), safe=False)
+    except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)  # Return error as JSON

@@ -620,16 +620,15 @@ class Game {
 
 	gameWin() {
 		this.isRunning = false;
-		const timestamp = new Date();
-		const formattedTimestamp = `
-        <span style="color: orange;">Pong:</span> 
-        <span style="color: white;">${timestamp.toISOString().split('T')[0]}</span> 
-        at 
-        <span style="color: grey;">${timestamp.toTimeString().split(' ')[0]}</span> `;
+		// const timestamp = new Date();
+		// const formattedTimestamp = `
+        // <span style="color: orange;">Pong:</span>
+        // <span style="color: white;">${timestamp.toISOString().split('T')[0]}</span>
+        // at
+        // <span style="color: grey;">${timestamp.toTimeString().split(' ')[0]}</span> `;
 		const match = {
-			result: '<span style="color: green;">win</span>',
+			result: `win`,
 			score: `${this.scorePlayer1}-${this.scorePlayer2}`,
-			timestamp: formattedTimestamp
 		};
 		saveMatchHistory(match);
 		this.cleanup();
