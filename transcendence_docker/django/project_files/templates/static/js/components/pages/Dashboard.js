@@ -16,7 +16,7 @@ export function saveMatchHistory(match) {
 	// matchHistory.push(match);
 	// localStorage.setItem('matchHistory', JSON.stringify(matchHistory));
 	console.log('a info que chega:', match);
-	return fetch('/save-match-history/', {
+	return fetch('/api/save-match-history/', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ function getCSRFToken() {
 	return null;
 }
 
-export async function getMatchHistoryHTML() {
+export async function getMatchHistory() {
 	try {
 		const response = await fetch('/api/load-match-history/');
 		if (!response.ok) {
@@ -65,12 +65,9 @@ export async function getMatchHistoryHTML() {
 }
 
 export default function DashBoard() {
-	// const matchHistory = loadMatchHistory();
 
-	// const matchHistoryHTML = getMatchHistoryHTML();
-	// console.log('html que chega: ', matchHistoryHTML);
 	const $dashboard = document.createElement('dashboard');
-	getMatchHistoryHTML().then(matchHistory => {
+	getMatchHistory().then(matchHistory => {
 	$dashboard.innerHTML = `
 		<div class="vh-100 d-flex flex-column align-items-center justify-content-start position-relative" style="background-color: rgba(0, 0, 0, 0.6); color: white;">
 			<div class="container mt-3">
