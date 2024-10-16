@@ -1,7 +1,8 @@
 import { saveMatchHistory } from './components/pages/Dashboard.js';
 
 class Game {
-	constructor(gameMode) {
+	constructor(gameMode, gameType) {
+		this.gameType = gameType;
 		this.gameMode = gameMode;
 		this.isRunning = true;
 		this.env = null;
@@ -69,6 +70,7 @@ class Game {
 		this.lastDirection = 0;
 		this.powerups = [];
 		this.powerupTimer = 0;
+		this.lastAITime = 0;
 	}
 
 	init () {
@@ -416,7 +418,7 @@ class Game {
 				this.ball.velocity.y *= -1;
 				break;
 			case 'protectiveBarrier':
-				this.createBarrier(player)
+				//this.createBarrier(player)
 				break;
 			case 'extralife':
 				if (player == this.player1) {
@@ -732,6 +734,10 @@ class Game {
 	}
 
 	advancedAI() {
+		const currentTime = Date.now();
+		if (currentTime - this.lastAITime < 1000) {
+			return;
+		}
 		if (this.ball.velocity.x > 0) {
 			let timeToReachGoal = Math.abs((this.player2.position.x - this.ball.position.x) / this.ball.velocity.x); // time = (Pposx - Bposx) / Bvel
 			let predictedY = this.ball.position.y + (this.ball.velocity.y * timeToReachGoal); // y = Bposy + (Bvel * time)
@@ -752,6 +758,10 @@ class Game {
 	}
 
 	normalAI() {
+		const currentTime = Date.now();
+		if (currentTime - this.lastAITime < 1000) {
+			return;
+		}
 		this.tiltShip(0);
 		if (this.ball.velocity.x > 0 && this.ball.position.x >= 0) {
 			let timeToReachGoal = Math.abs((this.player2.position.x - this.ball.position.x) / this.ball.velocity.x);
@@ -781,6 +791,16 @@ class Game {
 				this.tiltShip(1); // Tilt right
 			}
 		}
+	}
+
+	impossibleAI() {
+	//calculus
+	const currentTime = Date.now();
+		if (currentTime - this.lastAITime < 1000) {
+			return;
+		}
+
+	//movement
 	}
 
 	gameControls() {
@@ -824,6 +844,8 @@ class Game {
 			case '4':
 				this.normalAI();
 				break;
+			case '5':
+				this.impossibleAI();
 			default:
 				console.warn(`Unknown game mode: ${this.gameMode}`);
 				break;
@@ -894,6 +916,89 @@ class Game {
 				ring.rotation.x += 0.06;
 			}
 		});
+	}
+
+	ballCollisions() {
+		// Ball collision with walls
+		if (this.ball.position.y + this.ball.geometry.parameters.radius > this.geoy / 2) {
+			this.ball.position.y = this.geoy / 2 - this.ball.geometry.parameters.radius;
+			this.ball.velocity.y *= -1;
+			this.playSound('/static/media/assets/sounds/laser0.mp3', 0.4);
+		}
+		if (this.ball.position.y - this.ball.geometry.parameters.radius < -this.geoy / 2) {
+			this.ball.position.y = -this.geoy / 2 + this.ball.geometry.parameters.radius;
+			this.ball.velocity.y *= -1;
+			this.playSound('/static/media/assets/sounds/laser0.mp3', 0.4);
+		}
+
+		// Ball collision with players
+		// Player 1
+		const player1Bounds = {
+			left: this.player1.position.x - this.geometry_player1.parameters.width * this.player1.scale.x / 2,
+			right: this.player1.position.x + this.geometry_player1.parameters.width * this.player1.scale.x / 2,
+			top: this.player1.position.y + this.geometry_player1.parameters.height * this.player1.scale.y / 2,
+			bottom: this.player1.position.y - this.geometry_player1.parameters.height * this.player1.scale.y / 2
+		};
+
+		if (this.ball.position.x - this.ball.geometry.parameters.radius < player1Bounds.right &&
+			this.ball.position.x + this.ball.geometry.parameters.radius > player1Bounds.left &&
+			this.ball.position.y + this.ball.geometry.parameters.radius > player1Bounds.bottom &&
+			this.ball.position.y - this.ball.geometry.parameters.radius < player1Bounds.top) {
+
+			// Check collision on X axis
+			if (this.ball.position.x < player1Bounds.left || this.ball.position.x > player1Bounds.right) {
+				this.ball.velocity.x *= -1;
+				this.ball.position.x = this.ball.velocity.x > 0 ? player1Bounds.right + this.ball.geometry.parameters.radius : player1Bounds.left - this.ball.geometry.parameters.radius;
+			}
+
+			// Check collision on Y axis
+			if (this.ball.velocity.y < 0 && this.ball.position.y - this.ball.geometry.parameters.radius < player1Bounds.top) {
+				this.ball.velocity.y *= -1;
+				this.ball.position.y = player1Bounds.top + this.ball.geometry.parameters.radius;
+			}
+
+			this.player1pup = true;
+			if (this.keysPressed['a']) {
+				this.ball.velocity.y -= 0.02;
+			}
+			if (this.keysPressed['d']) {
+				this.ball.velocity.y += 0.02;
+			}
+		}
+
+		// Player 2
+		const player2Bounds = {
+			left: this.player2.position.x - this.geometry_player2.parameters.width / 2,
+			right: this.player2.position.x + this.geometry_player2.parameters.width / 2,
+			top: this.player2.position.y + this.geometry_player2.parameters.height / 2,
+			bottom: this.player2.position.y - this.geometry_player2.parameters.height / 2
+		};
+
+		if (this.ball.position.x - this.ball.geometry.parameters.radius < player2Bounds.right &&
+			this.ball.position.x + this.ball.geometry.parameters.radius > player2Bounds.left &&
+			this.ball.position.y + this.ball.geometry.parameters.radius > player2Bounds.bottom &&
+			this.ball.position.y - this.ball.geometry.parameters.radius < player2Bounds.top) {
+
+			// Check collision on X axis
+			if (this.ball.position.x < player2Bounds.left || this.ball.position.x > player2Bounds.right) {
+				this.ball.velocity.x *= -1;
+				this.ball.position.x = this.ball.velocity.x > 0 ? player2Bounds.right + this.ball.geometry.parameters.radius : player2Bounds.left - this.ball.geometry.parameters.radius;
+			}
+
+			// Check collision on Y axis
+			if (this.ball.velocity.y > 0 && this.ball.position.y + this.ball.geometry.parameters.radius > player2Bounds.bottom) {
+				this.ball.velocity.y *= -1;
+				this.ball.position.y = player2Bounds.bottom - this.ball.geometry.parameters.radius;
+			}
+
+			this.player1pup = false;
+			if (this.keysPressed['l']) {
+				this.ball.velocity.y -= 0.02;
+			}
+			if (this.keysPressed['j']) {
+				this.ball.velocity.y += 0.02;
+			}
+		}
 	}
 
 	animate() {
@@ -990,10 +1095,12 @@ class Game {
 			this.updateScore(this.scorePlayer1, this.scorePlayer2);
 			this.resetBall();
 		}
-		this.powerupTimer++;
-		if (this.powerupTimer == 1000) {
-			this.generatePowerup();
-			this.powerupTimer = 0;
+		if (this.gameType == "powered") {
+			this.powerupTimer++;
+			if (this.powerupTimer == 1000) {
+				this.generatePowerup();
+				this.powerupTimer = 0;
+			}
 		}
 		// Ball colision with powerups
 		this.powerups.forEach((powerup, index) => {
@@ -1013,53 +1120,7 @@ class Game {
 				this.playSound('/static/media/assets/sounds/tp.mp3', 0.2);
 			}
 		});
-		// Ball collision with walls
-		if (this.ball.position.y + this.ball.geometry.parameters.radius > this.geoy / 2 || 
-			this.ball.position.y - this.ball.geometry.parameters.radius < -this.geoy / 2) {
-				this.ball.velocity.y *= -1;
-				this.playSound('/static/media/assets/sounds/laser0.mp3', 0.4);
-		}
-		// Ball collision with players
-		// Player 1
-		if (this.ball.position.x - this.ball.geometry.parameters.radius < this.player1.position.x + this.geometry_player1.parameters.width * this.player1.scale.x / 2 + 0.05 &&
-			this.ball.position.x + this.ball.geometry.parameters.radius > this.player1.position.x - this.geometry_player1.parameters.width * this.player1.scale.x / 2 - 0.05 &&
-			this.ball.position.y + this.ball.geometry.parameters.radius > this.player1.position.y - this.geometry_player1.parameters.height * this.player1.scale.y / 2 &&
-			this.ball.position.y - this.ball.geometry.parameters.radius < this.player1.position.y + this.geometry_player1.parameters.height * this.player1.scale.y / 2) {
-				this.ball.velocity.x *= -1;
-				this.player1pup = true;
-			if (this.keysPressed['a']) {
-				this.ball.velocity.y -= 0.03;
-			}
-			if (this.keysPressed['d']) {
-				this.ball.velocity.y += 0.03;
-			}
-		}
-		// Player 2
-		if (this.ball.position.x - this.ball.geometry.parameters.radius < this.player2.position.x + this.geometry_player2.parameters.width / 2 + 0.05 &&
-			this.ball.position.x + this.ball.geometry.parameters.radius > this.player2.position.x - this.geometry_player2.parameters.width / 2 - 0.05 &&
-			this.ball.position.y + this.ball.geometry.parameters.radius > this.player2.position.y - this.geometry_player2.parameters.height / 2 &&
-			this.ball.position.y - this.ball.geometry.parameters.radius < this.player2.position.y + this.geometry_player2.parameters.height / 2) {
-				this.ball.velocity.x *= -1;
-				this.player1pup = false;
-			if (this.keysPressed['l']) {
-				this.ball.velocity.y -= 0.03;
-			}
-			if (this.keysPressed['j']) {
-				this.ball.velocity.y += 0.03;
-			}
-		}
-		// Ball stuck fix
-		this.ballStuckTimer++;
-		if (this.ballStuckTimer >= 120) {
-			const dx = Math.abs(this.ball.position.x - this.ballLastPosition.x);
-			const dy = Math.abs(this.ball.position.y - this.ballLastPosition.y);
-			const positionMargin = 0.1; // Adjust this value as needed
-			if (dx < positionMargin && dy < positionMargin) {
-				this.resetBall();
-			}
-			this.ballLastPosition = { x: this.ball.position.x, y: this.ball.position.y };
-			this.ballStuckTimer = 0;
-		}
+		this.ballCollisions();
 		if (this.cameratoggle == 0)
 			this.renderer.render(this.scene,this.camerap1);
 		else if (this.cameratoggle == 1)
@@ -1069,8 +1130,8 @@ class Game {
 	}
 };
 
-export default function Pong(gameMode) {
-	const game = new Game(gameMode);
+export default function Pong(gameMode, gameType) {
+	const game = new Game(gameMode, gameType);
 	game.init();
 	return game;
 }

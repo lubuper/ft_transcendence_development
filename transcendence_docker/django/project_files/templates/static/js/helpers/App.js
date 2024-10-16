@@ -9,7 +9,7 @@ import AboutUs from '../components/pages/AboutUs.js';
 import Asteroids from '../asteroids.js';
 import Pong from '../pong.js';
 import Profile from "../components/pages/Profile.js";
-import LocalPlay, { getSelectedGameMode } from '../components/pages/LocalPlay.js';
+import LocalPlay, { getSelectedGameMode, getSelectedGameType } from '../components/pages/LocalPlay.js';
 
 export default function App() {
 	const $root = document.getElementById('content-static');
@@ -58,7 +58,8 @@ export default function App() {
 			$dynamic.innerHTML = '';
 			if (PageComponent) {
 				const gameMode = getSelectedGameMode();
-				const page = PageComponent(gameMode);
+				const gameType = getSelectedGameType();
+				const page = PageComponent(gameMode, gameType);
 				if (page instanceof HTMLElement) {
 					$dynamic.appendChild(page);
 				}
@@ -113,7 +114,8 @@ export default function App() {
 			const PageComponent = routes[initialPath];
 			if (PageComponent) {
 				const gameMode = getSelectedGameMode();
-				const page = PageComponent(gameMode);
+				const gameType = getSelectedGameType();
+				const page = PageComponent(gameMode, gameType);
 				if (page instanceof HTMLElement) {
 					$dynamic.appendChild(page);
 				}
