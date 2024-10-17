@@ -68,6 +68,7 @@ export default function DashBoard() {
 
 	const $dashboard = document.createElement('dashboard');
 	getMatchHistory().then(matchHistory => {
+		console.log("matchHistory: ", matchHistory)
 	$dashboard.innerHTML = `
 		<div class="vh-100 d-flex flex-column align-items-center justify-content-start position-relative" style="background-color: rgba(0, 0, 0, 0.6); color: white;">
 			<div class="container mt-3">
@@ -76,8 +77,9 @@ export default function DashBoard() {
 						<div class="card bg-dark text-white mb-3">
 							<div class="card-body text-center">
 								<img id="avatar" src="${avatarPaths[0]}" class="rounded-circle mb-3" alt="Avatar" style="width: 100px; height: 100px;">
-								<h5 class="card-title">Username</h5>
-								<p class="card-text">Player's Bio or additional info</p>
+								<h5 class="card-title">${matchHistory.username}</h5>
+								<p class="card-text">${calculateRankedStats(matchHistory.match_history, "Pong")}</p>
+								<p class="card-text">${calculateRankedStats(matchHistory.match_history, "Asteroids")}</p>
 							</div>
 						</div>
 						<div class="card bg-dark text-white mb-3">
@@ -111,7 +113,7 @@ export default function DashBoard() {
 							</div>
 							<div id="matchHistoryCollapse" class="collapse">
 								<div class="card-body">
-									${matchHistory.map(match => `
+									${matchHistory.match_history.map(match => `
         								<p>
            									${match.game}: ${match.score} -> 
             								<span style="color: ${match.result === 'win' ? 'green' : 'red'};">
@@ -152,6 +154,42 @@ export default function DashBoard() {
 			</div>
 		</div>
 	`;
+
+	function calculateRankedStats(matchHistory, gameName) {
+		const stats = { wins: 0, total: 0 };
+
+		// Loop through the match history and count victories and total games for each game
+		matchHistory.forEach(match => {
+			if (match.game === gameName) {
+				if (match.result === "win") {
+					stats.wins++;
+				}
+				stats.total++;
+			}
+		});
+
+		if (stats.total < 5) {
+			return `${gameName}: No rank ${stats.wins}/${stats.total}`;
+		} else {
+			// Calculate the win percentage
+			const winPercentage = (stats.wins / stats.total) * 100;
+
+			// Determine the rank based on win percentage
+			let rank;
+			if (winPercentage <= 20) {
+				rank = "Bronze";
+			} else if (winPercentage <= 40) {
+				rank = "Silver";
+			} else if (winPercentage <= 60) {
+				rank = "Gold";
+			} else if (winPercentage <= 80) {
+				rank = "Platinum";
+			} else {
+				rank = "Diamond";
+			}
+			return `${gameName}: ${rank} ${stats.wins}/${stats.total}`;
+		}
+	}
 
 	const avatarElement = $dashboard.querySelector('#avatar');
 	const avatarOptions = $dashboard.querySelectorAll('.avatar-option');

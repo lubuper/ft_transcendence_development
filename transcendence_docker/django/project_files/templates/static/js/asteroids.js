@@ -198,7 +198,7 @@ class Game {
 		// };
 		const match = {
 			result: `loss`,
-			score: this.level,
+			score: `Level ${this.level}`,
 			game: `Asteroids`,
 		};
 		saveMatchHistory(match);
@@ -217,7 +217,7 @@ class Game {
 		// <span style="color: grey;">${timestamp.toTimeString().split(' ')[0]}</span> `;
 		const match = {
 			result: `win`,
-			score: `level ${this.level}`,
+			score: `Level ${this.level}`,
 			game: `Asteroids`,
 		};
 		// const match = {
