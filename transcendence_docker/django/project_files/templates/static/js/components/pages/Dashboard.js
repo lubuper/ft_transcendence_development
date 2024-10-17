@@ -81,6 +81,14 @@ export default function DashBoard() {
 							</div>
 						</div>
 						<div class="card bg-dark text-white mb-3">
+							<div class="card-header">Select Ship</div>
+							<div class="card-body">
+								<div class="d-flex flex-wrap">
+									${avatarPaths.map(path => `<img src="${path}" class="avatar-option rounded-circle m-1" alt="Avatar" style="width: 50px; height: 50px; cursor: pointer;">`).join('')}
+								</div>
+							</div>
+						</div>
+						<div class="card bg-dark text-white mb-3">
 							<div class="card-header">
 								<button class="btn btn-link text-white" type="button" data-bs-toggle="collapse" data-bs-target="#tournamentsCollapse" aria-expanded="false" aria-controls="tournamentsCollapse">
 									Tournaments
@@ -131,14 +139,6 @@ export default function DashBoard() {
 								<p>Friend 1</p>
 								<p>Friend 2</p>
 								<p>Friend 3</p>
-							</div>
-						</div>
-						<div class="card bg-dark text-white mb-3">
-							<div class="card-header">Select Ship</div>
-							<div class="card-body">
-								<div class="d-flex flex-wrap">
-									${avatarPaths.map(path => `<img src="${path}" class="avatar-option rounded-circle m-1" alt="Avatar" style="width: 50px; height: 50px; cursor: pointer;">`).join('')}
-								</div>
 							</div>
 						</div>
 						<div class="card bg-dark text-white mb-3">
