@@ -84,14 +84,16 @@ export default function DashBoard() {
 								<p class="card-text">
 									<img src="/static/media/rank/${pongRank.rank}.png" 
 										alt="${pongRank.rank}" 
-										style="width: 64px; height: 64px; margin-right: 8px;">
+										style="width: 64px; height: 64px; margin-right: 2px;">
 									${pongRank.result}
+									<span class="tooltiptext">The game ranking starts after 5 matches, and there are 5 of them. Good luck!</span>
 								</p>
 								<p class="card-text">
 									<img src="/static/media/rank/${astRank.rank}.png" 
 										alt="${astRank.rank}" 
-										style="width: 64px; height: 64px; margin-right: 8px;">
+										style="width: 64px; height: 64px; margin-right: 2px;">
 									${astRank.result}
+									<span class="tooltiptext">The game ranking starts after 5 matches, and there are 5 of them. Good luck!</span>
 								</p>
 							</div>
 						</div>
