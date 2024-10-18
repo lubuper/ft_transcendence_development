@@ -69,6 +69,9 @@ export default function DashBoard() {
 	const $dashboard = document.createElement('dashboard');
 	getMatchHistory().then(matchHistory => {
 		console.log("matchHistory: ", matchHistory)
+
+		const pongRank = calculateRankedStats(matchHistory.match_history, "Pong")
+		const astRank = calculateRankedStats(matchHistory.match_history, "Asteroids")
 	$dashboard.innerHTML = `
 		<div class="vh-100 d-flex flex-column align-items-center justify-content-start position-relative" style="background-color: rgba(0, 0, 0, 0.6); color: white;">
 			<div class="container mt-3">
@@ -78,8 +81,18 @@ export default function DashBoard() {
 							<div class="card-body text-center">
 								<img id="avatar" src="${avatarPaths[0]}" class="rounded-circle mb-3" alt="Avatar" style="width: 100px; height: 100px;">
 								<h5 class="card-title">${matchHistory.username}</h5>
-								<p class="card-text">${calculateRankedStats(matchHistory.match_history, "Pong")}</p>
-								<p class="card-text">${calculateRankedStats(matchHistory.match_history, "Asteroids")}</p>
+								<p class="card-text">
+									<img src="/static/media/rank/${pongRank.rank}.png" 
+										alt="${pongRank.rank}" 
+										style="width: 64px; height: 64px; margin-right: 8px;">
+									${pongRank.result}
+								</p>
+								<p class="card-text">
+									<img src="/static/media/rank/${astRank.rank}.png" 
+										alt="${astRank.rank}" 
+										style="width: 64px; height: 64px; margin-right: 8px;">
+									${astRank.result}
+								</p>
 							</div>
 						</div>
 						<div class="card bg-dark text-white mb-3">
@@ -157,8 +170,6 @@ export default function DashBoard() {
 
 	function calculateRankedStats(matchHistory, gameName) {
 		const stats = { wins: 0, total: 0 };
-
-		// Loop through the match history and count victories and total games for each game
 		matchHistory.forEach(match => {
 			if (match.game === gameName) {
 				if (match.result === "win") {
@@ -168,14 +179,15 @@ export default function DashBoard() {
 			}
 		});
 
+		let resultString;
+		let rank;
+
 		if (stats.total < 5) {
-			return `${gameName}: No rank ${stats.wins}/${stats.total}`;
+			resultString = `${gameName}: No rank ${stats.wins}/${stats.total}`;
+			rank = "NoRank";
 		} else {
-			// Calculate the win percentage
 			const winPercentage = (stats.wins / stats.total) * 100;
 
-			// Determine the rank based on win percentage
-			let rank;
 			if (winPercentage <= 20) {
 				rank = "Bronze";
 			} else if (winPercentage <= 40) {
@@ -187,8 +199,12 @@ export default function DashBoard() {
 			} else {
 				rank = "Diamond";
 			}
-			return `${gameName}: ${rank} ${stats.wins}/${stats.total}`;
+			resultString = `${gameName}: ${rank} ${stats.wins}/${stats.total}`;
 		}
+		return {
+			result: resultString,
+			rank: rank
+		};
 	}
 
 	const avatarElement = $dashboard.querySelector('#avatar');
