@@ -46,3 +46,11 @@ class MatchHistory(models.Model):
 
     def __str__(self):
         return f'{self.user.username} - {self.result} at {self.timestamp}'
+
+class GameCustomization(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    ship = models.IntegerField()
+    color = models.CharField(max_length=10)
+
+    def __str__(self):
+        return f'{self.user.username} - {self.ship} and {self.color}'

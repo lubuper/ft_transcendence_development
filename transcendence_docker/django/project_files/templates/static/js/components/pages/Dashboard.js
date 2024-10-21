@@ -11,6 +11,13 @@ const avatarPaths = [
 	'/static/media/assets/ships/splash/9.png'
 ];
 
+const colorPaths = [
+	'/static/media/assets/color/Green.png',
+	'/static/media/assets/color/Cyan.png',
+	'/static/media/assets/color/Orange.png',
+	'/static/media/assets/color/Purple.png'
+];
+
 export function saveMatchHistory(match) {
 	// const matchHistory = loadMatchHistory();
 	// matchHistory.push(match);
@@ -102,6 +109,16 @@ export default function DashBoard() {
 							<div class="card-body">
 								<div class="d-flex flex-wrap">
 									${avatarPaths.map(path => `<img src="${path}" class="avatar-option rounded-circle m-1" alt="Avatar" style="width: 50px; height: 50px; cursor: pointer;">`).join('')}
+								</div>
+							</div>
+						</div>
+						<div class="card bg-dark text-white mb-3">
+							<div class="card-header">Select Color</div>
+							<div class="card-body">
+								<div class="d-flex flex-wrap">
+									 ${colorPaths.map((path, index) =>
+										`<img src="${path}" class="color-option rounded-circle m-1 ${index === 0 ? 'selected-color' : ''}" alt="Color" style="width: 50px; height: 50px; cursor: pointer;">`
+									).join('')}
 								</div>
 							</div>
 						</div>
@@ -227,6 +244,33 @@ export default function DashBoard() {
 	const storedAvatarUrl = localStorage.getItem('selectedAvatarUrl');
 	if (storedAvatarUrl) {
 		avatarElement.src = storedAvatarUrl;
+	}
+
+	const colorOptions = document.querySelectorAll('.color-option');
+
+	colorOptions.forEach(option => {
+		option.addEventListener('click', function() {
+				// Remove the red border from all color options
+			colorOptions.forEach(opt => opt.classList.remove('selected-color'));
+
+				// Add the red border to the clicked color
+			this.classList.add('selected-color');
+
+				// Store selected color in localStorage
+			const selectedColorUrl = this.src;
+			localStorage.setItem('selectedColorUrl', selectedColorUrl);
+			console.log('Selected color URL:', selectedColorUrl); // Debugging log
+		});
+	});
+
+
+	const storedColorUrl = localStorage.getItem('selectedColorUrl');
+	if (storedColorUrl) {
+		colorOptions.forEach(option => {
+			if (option.src === storedColorUrl) {
+				option.classList.add('selected-color');
+			}
+		});
 	}
 
 	clearStorageButton.addEventListener('click', function() {

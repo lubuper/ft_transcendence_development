@@ -97,6 +97,13 @@ def create_account(request):
         else:
             user = User.objects.create_user(username=username, email=email, password=password)
             user.save()  # This ensures the user is stored in the database
+
+            game_customization = GameCustomization.objects.create(
+            	user=user,
+                ship = 1,
+                color = '0x00ff00'
+            )
+            game_customization.save()  # Save the customization entry
             return JsonResponse({'message': 'Account created successfully'}, status=200)
 
     return JsonResponse({'message': 'Invalid request method'}, status=405)
