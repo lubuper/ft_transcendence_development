@@ -37,7 +37,7 @@ class Game {
 		this.player2;
 		this.ship1;
 		this.ship2;
-		this.ship1Number = 7; // Player 1 ship - change here 
+		this.ship1Number = 1; // Player 1 ship - change here 
 		this.ship2Number = 4;  // Player 2 ship - change here 
 		this.geometry_player1;
 		this.geometry_player2;
@@ -60,6 +60,7 @@ class Game {
 		this.ballLastPosition;
 		this.ballStuckTimer = 0;
 		this.hexagons;
+		this.hexagoncolor = 0x00ff00;
 		this.hexGroup = new THREE.Group();
 		this.planetEarth;
 		this.shake = 0;
@@ -211,7 +212,7 @@ class Game {
 	createHexagon(size, opac) {
 		const hexGeometry = new THREE.CircleGeometry(size, 6);
 		const edges = new THREE.EdgesGeometry(hexGeometry);
-		const material = new THREE.LineBasicMaterial({ color: 0x00ff00, opacity: opac, transparent: true });
+		const material = new THREE.LineBasicMaterial({ color: this.hexagoncolor, opacity: opac, transparent: true });
 		const hexagon = new THREE.LineSegments(edges, material);
 		hexagon.originalColor = material.color.clone();
 		return hexagon;
@@ -602,12 +603,6 @@ class Game {
 
 	gameOver() {
 		this.isRunning = false;
-		// const timestamp = new Date();
-		// const formattedTimestamp = `
-        // <span style="color: orange;">Pong:</span>
-        // <span style="color: white;">${timestamp.toISOString().split('T')[0]}</span>
-        // at
-        // <span style="color: grey;">${timestamp.toTimeString().split(' ')[0]}</span> `;
 		const match = {
 			result: `loss`,
 			score: `${this.scorePlayer1}-${this.scorePlayer2}`,
@@ -620,12 +615,6 @@ class Game {
 
 	gameWin() {
 		this.isRunning = false;
-		// const timestamp = new Date();
-		// const formattedTimestamp = `
-        // <span style="color: orange;">Pong:</span>
-        // <span style="color: white;">${timestamp.toISOString().split('T')[0]}</span>
-        // at
-        // <span style="color: grey;">${timestamp.toTimeString().split(' ')[0]}</span> `;
 		const match = {
 			result: `win`,
 			score: `${this.scorePlayer1}-${this.scorePlayer2}`,
@@ -1010,13 +999,13 @@ class Game {
 			this.shake -= 0.005;
 		  }
 		// boost powerup!
-		if (this.keysPressed[' '] && (this.ball.position.x - this.player1.position.x < 0.1)) {
+/* 		if (this.keysPressed[' '] && (this.ball.position.x - this.player1.position.x < 0.1)) {
 			this.keysPressed[' '] = false;
 			this.ball.velocity.set(0, 0, 0);
 			setTimeout(() => {
 				this.ball.velocity.x = 0.10;
 			}, 300);
-		}
+		} */
 		if (this.keysPressed['a'] && this.ship1) {
 			this.env.rotation.x += 0.007;
 			if (this.player1.position.y >= this.minY) {

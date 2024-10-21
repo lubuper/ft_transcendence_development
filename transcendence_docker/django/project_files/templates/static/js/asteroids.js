@@ -28,7 +28,7 @@ class Game {
 		];
 		this.nextLevelTimer = 0;
 		this.playerLives = 5;
-		this.level = 1;
+		this.level = 0;
 		this.GameIsRunning = false;
 		this.env = null;
 		this.scene = new THREE.Scene();
