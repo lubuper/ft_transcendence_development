@@ -19,11 +19,11 @@ class Game {
 		this.levels = [
 			new Level(0, 1, 0, 0, 0),
 			new Level(1, 2, 0, 0, 0),
-			new Level(2, 3, 1, 1, 0),
-			new Level(3, 0, 1, 1, 0),
-			new Level(4, 0, 0, 0, 2),
+			new Level(2, 3, 1, 0, 0),
+			new Level(3, 2, 1, 1, 0),
+			new Level(4, 2, 2, 0, 2),
 			new Level(5, 3, 2, 0, 0),
-			new Level(6, 4, 2, 0, 0),
+			new Level(6, 4, 2, 1, 0),
 			new Level(7, 4, 2, 2, 1)
 		];
 		this.nextLevelTimer = 0;
@@ -430,6 +430,7 @@ class Game {
 				};
 				collisionBox.position.set(-this.boundaryX, 0, 5);
 				collisionBox.shootTimer = Math.floor(Math.random() * (200 - 60 + 1)) + 60;
+				collisionBox.moveTimer = collisionBox.shootTimer;
 				this.scene.add(collisionBox);
 				this.AIShips.push(collisionBox);
 			});
@@ -528,6 +529,7 @@ class Game {
 		else {
 			laser.isPlayer = false;
 			let playerAngle = origin.rotation.z + THREE.Math.degToRad(offsetAngle + 90);
+			laser.rotation.z = playerAngle;
 			laser.velocity = {
 				x: Math.sin(playerAngle) * speed,
 				y: -Math.cos(playerAngle) * speed
@@ -836,9 +838,25 @@ class Game {
 					if (ship.shootTimer > 0) {
 						ship.shootTimer--;
 					}
+					if (ship.moveTimer > 0) {
+						ship.moveTimer--;
+					}
 					if (ship.shootTimer === 0) {
 						this.createProjectile(ship, 0, 0);
 						ship.shootTimer = Math.floor(Math.random() * (200 - 60 + 1)) + 60;
+					}
+					if (ship.moveTimer === 0) {
+						const randomFactorX = (Math.random() < 0.5 ? -1 : 1) * 0.05;
+						const randomFactorY = (Math.random() < 0.5 ? -1 : 1) * 0.05;
+						ship.velocity.x += randomFactorX;
+						ship.velocity.y += randomFactorY;
+						if (ship.velocity.x > 0.7) {
+							ship.velocity.x = 0.7;
+						}
+						if (ship.velocity.y > 0.7) {
+							ship.velocity.y = 0.7;
+						}
+						ship.moveTimer = 100;
 					}
 				});
 			}
