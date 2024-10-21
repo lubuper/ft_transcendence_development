@@ -970,22 +970,48 @@ class Game {
 				this.projectiles.splice(i, 1);
 			}
 		}
-		if (!this.shield.visible && this.playerIsActive)
-		{
-			for (let i = this.asteroids.length - 1; i >= 0; i--) {
-				const asteroid = this.asteroids[i];
-				if (this.checkCollision(this.player, asteroid)) {
-					this.createExplosion(this.player.position.x, this.player.position.y, 2);
-					this.playerDeath();
-					break;
+		if (this.playerIsActive) {
+			if (!this.shield.visible) {
+				for (let i = this.asteroids.length - 1; i >= 0; i--) {
+					const asteroid = this.asteroids[i];
+					if (this.checkCollision(this.player, asteroid)) {
+						this.createExplosion(this.player.position.x, this.player.position.y, 2);
+						this.playerDeath();
+						break;
+					}
+				}
+				for (let i = this.sAsteroids.length - 1; i >= 0; i--) {
+					const sAsteroid = this.sAsteroids[i];
+					if (this.checkCollision(this.player, sAsteroid)) {
+						this.createExplosion(this.player.position.x, this.player.position.y, 3);
+						this.playerDeath();
+						break;
+					}
 				}
 			}
-			for (let i = this.sAsteroids.length - 1; i >= 0; i--) {
-				const sAsteroid = this.sAsteroids[i];
-				if (this.checkCollision(this.player, sAsteroid)) {
-					this.createExplosion(this.player.position.x, this.player.position.y, 3);
-					this.playerDeath();
-					break;
+			else {
+				for (let i = this.asteroids.length - 1; i >= 0; i--) {
+					const asteroid = this.asteroids[i];
+					if (this.checkCollision(this.player, asteroid)) {
+						this.createExplosion(this.player.position.x, this.player.position.y, 2);
+
+						break;
+					}
+				}
+				for (let i = this.sAsteroids.length - 1; i >= 0; i--) {
+					const sAsteroid = this.sAsteroids[i];
+					if (this.checkCollision(this.player, sAsteroid)) {
+						this.createExplosion(this.player.position.x, this.player.position.y, 3);
+						this.playerVelocityX += sAsteroid.velocity.x * 0.5; // Adjust the factor as needed
+						this.playerVelocityY += sAsteroid.velocity.y * 0.5; // Adjust the factor as needed
+						if (this.playerVelocityX > 0.5) {
+							this.playerVelocityX = 0.5;
+						}
+						if (this.playerVelocityY > 0.5) {
+							this.playerVelocityY = 0.5;
+						}
+						break;
+					}
 				}
 			}
 		}
