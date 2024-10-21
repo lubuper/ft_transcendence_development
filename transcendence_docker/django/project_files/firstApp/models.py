@@ -13,9 +13,18 @@ class Profile(models.Model):
             blank=True,
             null=True,
     )
+    friends = models.ManyToManyField(User, related_name="friends", blank=True)
+    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def get_friends(self):
+        return self.friends.all()
+
+    def get_friends_no(self):
+        return self.friends.all().count()
 
     def __str__(self):
-        return f"{self.user.username}'s profile"
+        return f"{self.user.username}"
 
 
 @receiver(post_save, sender=User)

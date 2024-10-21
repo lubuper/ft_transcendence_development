@@ -151,11 +151,13 @@ export default function DashBoard() {
 					<div class="col-md-3">
 						<div class="card bg-dark text-white mb-3">
 							<input type="text" class="form-control mb-3" id="searchInput" placeholder="Search friends to add...">
-							<div class="card-header">Friends</div>
+							<div class="card-header">Friends: ${matchHistory.friends_count}</div>
 							<div class="card-body">
-								<p>Friend 1</p>
-								<p>Friend 2</p>
-								<p>Friend 3</p>
+							${matchHistory.friends.map(friend => `
+							<p>
+								${friend}
+							</p>
+						`).join('')}
 							</div>
 						</div>
 						<div class="card bg-dark text-white mb-3">
