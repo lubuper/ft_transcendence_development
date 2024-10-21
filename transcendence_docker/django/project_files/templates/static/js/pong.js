@@ -930,7 +930,7 @@ class Game {
 			this.ball.velocity.y *= -1;
 			this.playSound('/static/media/assets/sounds/laser0.mp3', 0.4);
 		}
-
+	
 		// Ball collision with players
 		// Player 1
 		const player1Bounds = {
@@ -939,24 +939,15 @@ class Game {
 			top: this.player1.position.y + this.geometry_player1.parameters.height * this.player1.scale.y / 2,
 			bottom: this.player1.position.y - this.geometry_player1.parameters.height * this.player1.scale.y / 2
 		};
-
+	
 		if (this.ball.position.x - this.ball.geometry.parameters.radius < player1Bounds.right &&
 			this.ball.position.x + this.ball.geometry.parameters.radius > player1Bounds.left &&
 			this.ball.position.y + this.ball.geometry.parameters.radius > player1Bounds.bottom &&
 			this.ball.position.y - this.ball.geometry.parameters.radius < player1Bounds.top) {
-
-			// Check collision on X axis
-			if (this.ball.position.x < player1Bounds.left || this.ball.position.x > player1Bounds.right) {
-				this.ball.velocity.x *= -1;
-				this.ball.position.x = this.ball.velocity.x > 0 ? player1Bounds.right + this.ball.geometry.parameters.radius : player1Bounds.left - this.ball.geometry.parameters.radius;
-			}
-
-			// Check collision on Y axis
-			if (this.ball.velocity.y < 0 && this.ball.position.y - this.ball.geometry.parameters.radius < player1Bounds.top) {
-				this.ball.velocity.y *= -1;
-				this.ball.position.y = player1Bounds.top + this.ball.geometry.parameters.radius;
-			}
-
+			// Reflect the ball's X velocity
+			this.ball.velocity.x *= -1.04;
+			// Adjust the ball's position to avoid sticking
+			this.ball.position.x = player1Bounds.right + this.ball.geometry.parameters.radius + 0.05;
 			this.player1pup = true;
 			if (this.keysPressed['a']) {
 				this.ball.velocity.y -= 0.02;
@@ -965,7 +956,6 @@ class Game {
 				this.ball.velocity.y += 0.02;
 			}
 		}
-
 		// Player 2
 		const player2Bounds = {
 			left: this.player2.position.x - this.geometry_player2.parameters.width / 2,
@@ -973,24 +963,15 @@ class Game {
 			top: this.player2.position.y + this.geometry_player2.parameters.height / 2,
 			bottom: this.player2.position.y - this.geometry_player2.parameters.height / 2
 		};
-
+	
 		if (this.ball.position.x - this.ball.geometry.parameters.radius < player2Bounds.right &&
 			this.ball.position.x + this.ball.geometry.parameters.radius > player2Bounds.left &&
 			this.ball.position.y + this.ball.geometry.parameters.radius > player2Bounds.bottom &&
 			this.ball.position.y - this.ball.geometry.parameters.radius < player2Bounds.top) {
-
-			// Check collision on X axis
-			if (this.ball.position.x < player2Bounds.left || this.ball.position.x > player2Bounds.right) {
-				this.ball.velocity.x *= -1;
-				this.ball.position.x = this.ball.velocity.x > 0 ? player2Bounds.right + this.ball.geometry.parameters.radius : player2Bounds.left - this.ball.geometry.parameters.radius;
-			}
-
-			// Check collision on Y axis
-			if (this.ball.velocity.y > 0 && this.ball.position.y + this.ball.geometry.parameters.radius > player2Bounds.bottom) {
-				this.ball.velocity.y *= -1;
-				this.ball.position.y = player2Bounds.bottom - this.ball.geometry.parameters.radius;
-			}
-
+			// Reflect the ball's X velocity
+			this.ball.velocity.x *= -1.04;
+			// Adjust the ball's position to avoid sticking
+			this.ball.position.x = player2Bounds.left - this.ball.geometry.parameters.radius - 0.05;
 			this.player1pup = false;
 			if (this.keysPressed['l']) {
 				this.ball.velocity.y -= 0.02;
