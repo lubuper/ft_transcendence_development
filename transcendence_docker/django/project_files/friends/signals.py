@@ -19,3 +19,11 @@ def post_save_add_to_friends(sender, created, instance, **kwargs):
         receiver_.friends.add(sender_.user)
         sender_.save()
         receiver_.save()
+
+@receiver(post_save, sender=Relationship)
+def post_save_rejected(sender, instance, **kwargs):
+    if instance.status == 'rejected':
+        """ post_save.disconnect(post_save_refuse_friend_request, sender=Relationship) """
+        instance.status = None
+        instance.save()
+        """ post_save.connect(post_save_refuse_friend_request, sender=Relationship) """
