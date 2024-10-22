@@ -167,12 +167,16 @@ export default function DashBoard() {
 					</div>
 					<div class="col-md-3">
 						<div class="card bg-dark text-white mb-3">
-							<input type="text" class="form-control mb-3" id="searchInput" placeholder="Search friends to add...">
+							<form id="send-friend-request">
+								<input type="text" class="form-control mb-3" id="searchInput" name="username" placeholder="Search friends to add...">
+								<button id="SearchButton" type="submit" class="btn btn-purple btn-custom mx-3 nav-link text-white shadow-lg">Search</button>
+								<div class="card-body" id="friend-message"></div>
+							</form>
 							<div class="card-header">Friends: ${matchHistory.friends_count}</div>
 							<div class="card-body">
 							${matchHistory.friends.map(friend => `
 							<p>
-								${friend}
+								${friend ? friend : 'You currently have no friends.'}
 							</p>
 						`).join('')}
 							</div>
@@ -277,6 +281,37 @@ export default function DashBoard() {
 		localStorage.clear();
 		alert('Local storage cleared!');
 	});
+
+	document.getElementById('SearchButton').addEventListener('click', async function() {
+		event.preventDefault();
+		const username = document.getElementById('searchInput').value;
+
+		const response = await fetch('/send-friend-request/', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded', // or 'application/json'
+				'X-CSRFToken':getCSRFToken() // Make sure you include your CSRF token
+			},
+			body: JSON.stringify({
+				'username': username
+			})
+		})
+		// .then(response => response.json())
+		const result = await response.json();	
+		const friendMessage = document.getElementById('friend-message');
+
+		if (response.ok) {
+			friendMessage.innerHTML = '<p class="text-success">Friend request sent successfully!</p>';
+		} else {
+			friendMessage.innerHTML = `<p class="text-danger">Failed to send friend request! ${result.message} </p>`;
+		}
+		// .catch(error => {
+		// 	console.error('Error:', error);
+		// 	alert('There was an error sending the friend request.');
+		// });
+	});
+
 	});
 	return $dashboard;
 }
+

@@ -15,6 +15,7 @@ import os
 import sys
 from django.db import IntegrityError
 from django.views.decorators.http import require_POST
+from friends.models import Relationship
 
 # Create your views here.
 from .models import *
@@ -185,7 +186,8 @@ def load_match_history(request):
     try:
             match_history = MatchHistory.objects.filter(user=request.user).values('timestamp', 'score', 'result', 'game')
             friends = Profile.objects.filter(user=request.user).values_list('friends__username', flat=True)
-            friends_count = Profile.objects.filter(user=request.user).values('friends').count()
+            profile = Profile.objects.get(user=request.user)
+            friends_count = profile.friends.count()
             user = request.user
             return JsonResponse({
             'username': user.username,

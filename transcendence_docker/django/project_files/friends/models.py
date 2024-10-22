@@ -5,7 +5,7 @@ from firstApp.models import Profile
 # Create your models here.
 
 STATUS_CHOICES = (
-    ('send', 'send'),
+    ('sent', 'sent'),
     ('accepted', 'accepted'),
     ('rejected', 'rejected'),
 )
