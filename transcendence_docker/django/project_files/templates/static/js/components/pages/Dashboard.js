@@ -172,12 +172,20 @@ export default function DashBoard() {
 								<button id="SearchButton" type="submit" class="btn btn-purple btn-custom mx-3 nav-link text-white shadow-lg">Search</button>
 								<div class="card-body" id="friend-message"></div>
 							</form>
-							<div class="card-header">Friends: ${matchHistory.friends_count}</div>
+							<div class="card-header">Friend22s: ${matchHistory.friends_count}</div>
 							<div class="card-body">
 							${matchHistory.friends.map(friend => `
 							<p>
-								${friend ? friend : 'You currently have no friends.'}
-							</p>
+      							${friend ? friend : 'You currently have no friends.'}
+      							${friend ? `
+      							  <img src="/static/media/icons/chat-icon.png" 
+      							       class="chat-icon ml-2" 
+      							       alt="Chat" 
+      							       style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);" 
+      							       data-friend="${friend}"
+      							       title="Chat with ${friend}">
+      							` : ''}
+    						</p>
 						`).join('')}
 							</div>
 						</div>
