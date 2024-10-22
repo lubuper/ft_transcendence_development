@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import check_password, make_password
 from django.views.decorators.csrf import csrf_exempt
 import json  #
-from .models import Profile, MatchHistory
+from .models import Profile, MatchHistory, GameCustomization
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 import os
@@ -189,11 +189,43 @@ def load_match_history(request):
             profile = Profile.objects.get(user=request.user)
             friends_count = profile.friends.count()
             user = request.user
+            game_customization = GameCustomization.objects.filter(user=request.user).values('ship', 'color')
             return JsonResponse({
             'username': user.username,
             'match_history': list(match_history),
             'friends': list(friends),
-            'friends_count': friends_count},
+            'friends_count': friends_count,
+            'game_customization': list(game_customization)},
             safe=False)
     except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)  # Return error as JSON
+
+@login_required
+def save_customization(request):
+	if request.method == 'POST':
+		try:
+			# Load JSON data from the request body
+			data = json.loads(request.body)
+
+			user = request.user
+			ship = data.get('ship')  # Get the ship ID from the JSON data
+			color = data.get('color')  # Get the color from the JSON data
+
+			# Check if the ship value is valid
+			if not ship:
+				return JsonResponse({'error': 'Ship ID is missing.'}, status=400)
+
+			# Validate and convert the ship to an integer
+			try:
+				ship = int(ship)
+			except ValueError:
+				 return JsonResponse({'error': 'Invalid ship ID.'}, status=400)
+
+			# Update or create the GameCustomization for the user
+			customization, created = GameCustomization.objects.update_or_create(
+				user=user,
+				defaults={'ship': ship, 'color': color},
+			)
+			return JsonResponse({'status': 'success', 'message': 'Customization saved.'})
+		except json.JSONDecodeError:
+			return JsonResponse({'error': 'Invalid JSON.'}, status=400)

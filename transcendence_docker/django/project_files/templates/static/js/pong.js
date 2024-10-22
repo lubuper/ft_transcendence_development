@@ -60,7 +60,7 @@ class Game {
 		this.ballLastPosition;
 		this.ballStuckTimer = 0;
 		this.hexagons;
-		this.hexagoncolor = 0x00ff00;
+		this.hexagoncolor = 0x00ff00; // color change here
 		this.hexGroup = new THREE.Group();
 		this.planetEarth;
 		this.shake = 0;

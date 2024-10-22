@@ -11,11 +11,11 @@ const avatarPaths = [
 	'/static/media/assets/ships/splash/9.png'
 ];
 
-const colorPaths = [
-	'/static/media/assets/color/Green.png',
-	'/static/media/assets/color/Cyan.png',
-	'/static/media/assets/color/Orange.png',
-	'/static/media/assets/color/Purple.png'
+const colorNames = [
+	'0x8000ff',
+	'0xff8000',
+	'0x00ff00',
+	'0x00ffff'
 ];
 
 export function saveMatchHistory(match) {
@@ -108,17 +108,17 @@ export default function DashBoard() {
 							<div class="card-header">Select Ship</div>
 							<div class="card-body">
 								<div class="d-flex flex-wrap">
-									${avatarPaths.map(path => `<img src="${path}" class="avatar-option rounded-circle m-1" alt="Avatar" style="width: 50px; height: 50px; cursor: pointer;">`).join('')}
-								</div>
+									${avatarPaths.map((path, index) =>
+										`<img src="${path}" data-ship-id="${index + 1}" class="avatar-option rounded-circle m-1" alt="Avatar" style="width: 50px; height: 50px; cursor: pointer;">`
+									).join('')}
+									</div>
 							</div>
 						</div>
 						<div class="card bg-dark text-white mb-3">
 							<div class="card-header">Select Color</div>
 							<div class="card-body">
 								<div class="d-flex flex-wrap">
-									 ${colorPaths.map((path, index) =>
-										`<img src="${path}" class="color-option rounded-circle m-1 ${index === 0 ? 'selected-color' : ''}" alt="Color" style="width: 50px; height: 50px; cursor: pointer;">`
-									).join('')}
+									${colorNames.map(names => `<img src="/static/media/assets/color/${names}.png" data-color-id="${names}" class="color-option rounded-circle m-1 ${names === matchHistory.game_customization.color ? 'selected-color' : ''}" alt="Color" style="width: 50px; height: 50px; cursor: pointer;">`).join('')}
 								</div>
 							</div>
 						</div>
@@ -232,55 +232,95 @@ export default function DashBoard() {
 		};
 	}
 
-	const avatarElement = $dashboard.querySelector('#avatar');
-	const avatarOptions = $dashboard.querySelectorAll('.avatar-option');
-	const clearStorageButton = $dashboard.querySelector('#clearStorage');
+		const avatarElement = $dashboard.querySelector('#avatar');
+		const avatarOptions = $dashboard.querySelectorAll('.avatar-option');
+		const colorOptions = document.querySelectorAll('.color-option');
+		const csrfToken = getCSRFToken();
 
-	avatarOptions.forEach(option => {
-		option.addEventListener('click', function() {
-			const selectedAvatarUrl = this.src;
-			avatarElement.src = selectedAvatarUrl;
-			console.log('Selected avatar URL:', selectedAvatarUrl); // Debugging log
-			localStorage.setItem('selectedAvatarUrl', selectedAvatarUrl);
+		let selectedAvatarUrl = null;
+		let selectedColorUrl = null;
+
+		// Event listener for avatar selection
+		// avatarOptions.forEach(option => {
+		// 	option.addEventListener('click', function() {
+		// 		selectedAvatarUrl = this.src;
+		// 		avatarElement.src = selectedAvatarUrl;
+		//
+		// 		localStorage.setItem('selectedAvatarUrl', selectedAvatarUrl);
+		// 		sendCustomizationToServer();
+		// 	});
+		// });
+		avatarOptions.forEach(option => {
+			option.addEventListener('click', function() {
+				const selectedAvatarId = this.getAttribute('data-ship-id');  // Get the ship ID
+				avatarElement.src = this.src;
+
+				localStorage.setItem('selectedAvatarId', selectedAvatarId);  // Store the ID
+				sendCustomizationToServer();  // Send to server with the correct ID
+			});
 		});
-	});
 
-	const storedAvatarUrl = localStorage.getItem('selectedAvatarUrl');
-	if (storedAvatarUrl) {
-		avatarElement.src = storedAvatarUrl;
-	}
-
-	const colorOptions = document.querySelectorAll('.color-option');
-
-	colorOptions.forEach(option => {
-		option.addEventListener('click', function() {
-				// Remove the red border from all color options
-			colorOptions.forEach(opt => opt.classList.remove('selected-color'));
-
-				// Add the red border to the clicked color
-			this.classList.add('selected-color');
-
-				// Store selected color in localStorage
-			const selectedColorUrl = this.src;
-			localStorage.setItem('selectedColorUrl', selectedColorUrl);
-			console.log('Selected color URL:', selectedColorUrl); // Debugging log
-		});
-	});
-
-
-	const storedColorUrl = localStorage.getItem('selectedColorUrl');
-	if (storedColorUrl) {
+		// Event listener for color selection
 		colorOptions.forEach(option => {
-			if (option.src === storedColorUrl) {
-				option.classList.add('selected-color');
+			option.addEventListener('click', function() {
+				colorOptions.forEach(opt => opt.classList.remove('selected-color'));
+				this.classList.add('selected-color');
+				const selectedColorId = this.getAttribute('data-color-id');  // Get the color ID
+				selectedColorUrl = this.src;
+
+				localStorage.setItem('selectedColorUrl', selectedColorId);
+				sendCustomizationToServer();
+			});
+		});
+
+		// Function to send the selected ship (avatar) and color to the Django backend
+		function sendCustomizationToServer() {
+			const selectedAvatarId = localStorage.getItem('selectedAvatarId');
+			const selectedColor = localStorage.getItem('selectedColorUrl');
+
+			console.log('ship: ', selectedAvatarId)
+			console.log('color: ', selectedColor)
+			if (selectedAvatarId || selectedColor) {
+				fetch('/save-customization/', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'X-CSRFToken': getCSRFToken(),  // Ensure CSRF token is sent
+					},
+					body: JSON.stringify({
+						ship: selectedAvatarId,
+						color: selectedColor
+					}),
+				}).then(response => response.json())
+					.then(data => {
+						if (data.status === 'success') {
+							console.log('Customization saved');
+						} else {
+							console.error('Error saving customization:', data.error);
+						}
+					});
+			} else {
+				console.error('Missing ship or color selection.');
+			}
+		}
+
+		// Load stored values from localStorage on page load
+		document.addEventListener('DOMContentLoaded', function() {
+			const storedAvatarUrl = localStorage.getItem('selectedAvatarUrl');
+			const storedColorUrl = localStorage.getItem('selectedColorUrl');
+
+			if (storedAvatarUrl) {
+				avatarElement.src = storedAvatarUrl;
+			}
+
+			if (storedColorUrl) {
+				colorOptions.forEach(option => {
+					if (option.src === storedColorUrl) {
+						option.classList.add('selected-color');
+					}
+				});
 			}
 		});
-	}
-
-	clearStorageButton.addEventListener('click', function() {
-		localStorage.clear();
-		alert('Local storage cleared!');
-	});
 
 	document.getElementById('SearchButton').addEventListener('click', async function() {
 		event.preventDefault();
@@ -290,13 +330,12 @@ export default function DashBoard() {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded', // or 'application/json'
-				'X-CSRFToken':getCSRFToken() // Make sure you include your CSRF token
+				'X-CSRFToken': getCSRFToken(), // Make sure you include your CSRF token
 			},
 			body: JSON.stringify({
 				'username': username
 			})
 		})
-		// .then(response => response.json())
 		const result = await response.json();	
 		const friendMessage = document.getElementById('friend-message');
 
@@ -305,10 +344,6 @@ export default function DashBoard() {
 		} else {
 			friendMessage.innerHTML = `<p class="text-danger">Failed to send friend request! ${result.message} </p>`;
 		}
-		// .catch(error => {
-		// 	console.error('Error:', error);
-		// 	alert('There was an error sending the friend request.');
-		// });
 	});
 
 	});

@@ -49,7 +49,7 @@ class MatchHistory(models.Model):
 
 class GameCustomization(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    ship = models.IntegerField()
+    ship = models.IntegerField(null=False)
     color = models.CharField(max_length=10)
 
     def __str__(self):

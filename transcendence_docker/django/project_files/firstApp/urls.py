@@ -2,7 +2,7 @@ from django.urls import path, re_path
 from . import views
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import create_account, login_view, current_user, logout_view, profile, update_profile, save_match_history, load_match_history
+from .views import create_account, login_view, current_user, logout_view, profile, update_profile, save_match_history, load_match_history, save_customization
 
 #urlpatterns = [
 #    path('', views.homepage, name="homepage"),
@@ -19,6 +19,7 @@ urlpatterns = [
     path('update_profile/', update_profile, name='update_profile'),
     path('api/save-match-history/', save_match_history, name='save_match_history'),
     path('api/load-match-history/', load_match_history, name='load_match_history'),
+    path('save-customization/', save_customization, name='save_customization'),
 ]
 
 # Serve media files during development
