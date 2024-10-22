@@ -180,6 +180,14 @@ export default function DashBoard() {
 							</p>
 						`).join('')}
 							</div>
+							<div class="card-header">Friend Requests:</div>
+							<div class="card-body">
+							${matchHistory.friend_requests.map(friend_request => `
+							<p>
+								${friend_request ? friend_request : 'You currently have no friend requests.'}
+							</p>
+						`).join('')}
+							</div>
 						</div>
 						<div class="card bg-dark text-white mb-3">
 							<div class="card-header">Settings</div>
