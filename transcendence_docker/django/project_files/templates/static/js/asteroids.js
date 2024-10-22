@@ -16,18 +16,36 @@ class Game {
 		if (this.gameMode !== '1' && this.gameMode !== '2' && this.gameMode !== '3' && this.gameMode !== '4') {
 			this.cleanup();
 		}
+		if (this.gameMode === '3' || this.gameMode === '4') {
+			this.gameMode = '2';
+		}
+		console.log(this.gameMode);
 		this.levels = [
-			new Level(0, 1, 0, 0, 0),
+			new Level(0, 1, 0, 0, 1),
 			new Level(1, 2, 0, 0, 0),
 			new Level(2, 3, 1, 0, 0),
 			new Level(3, 2, 1, 1, 0),
-			new Level(4, 2, 2, 0, 2),
+			new Level(4, 2, 2, 0, 1),
 			new Level(5, 3, 2, 0, 0),
 			new Level(6, 4, 2, 1, 0),
-			new Level(7, 4, 2, 2, 1)
+			new Level(7, 4, 2, 2, 1),
+			new Level(8, 5, 3, 0, 0),
+			new Level(9, 7, 4, 1, 2),
+			new Level(10, 0, 0, 5, 0)
 		];
 		this.nextLevelTimer = 0;
-		this.playerLives = 5;
+		this.player1Lives = 5;
+		if (this.gameMode === '1') {
+			this.player2;
+			this.player2Lives = 5;
+			this.shield2 = null;
+			this.shieldBar2 = null;
+			this.shieldBarBox2 = null;
+			this.player2VelocityX = 0;
+			this.player2VelocityY = 0;
+			this.player2IsActive = true;
+			this.lives2 = [];
+		}
 		this.level = 0;
 		this.GameIsRunning = false;
 		this.env = null;
@@ -54,19 +72,18 @@ class Game {
 		this.AIShips = [];
 		this.powerups = [];
 		this.projectiles = [];
-		this.lives = [];
-		this.shield;
-		this.shieldBar;
-		this.shieldBarBox;
+		this.lives1 = [];
+		this.shield1;
+		this.shieldBar1;
+		this.shieldBarBox1;
 		this.keysPressed = {};
 		this.maxSpeed = 0.5;
-		this.playerVelocityX = 0;
-		this.playerVelocityY = 0;
-		this.playerIsActive = true;
-		this.player;
+		this.player1VelocityX = 0;
+		this.player1VelocityY = 0;
+		this.player1IsActive = true;
+		this.player1;
 		this.shotType = 1;
 		this.shotType1Display;
-		this.shotType2Display;
 		this.levelDisplay;
 		this.lvlCompleteScreen = 0;
 		this.fbxloader = new THREE.FBXLoader();
@@ -84,15 +101,20 @@ class Game {
 		this.camera.lookAt(this.scene.position);
 		this.camera.add(this.listener);
 		this.createEnvironment()
-		this.createPlayer();
-		this.displayLives();
-		this.displayShieldBar();
+		if (this.gameMode == '1') {
+			this.createPlayer2();
+			this.displayLives2();
+			this.displayShieldBar2();
+		}
+		this.createPlayer1();
+		this.displayLives1();
+		this.displayShieldBar1();
 		this.createShotDisplay();
 		this.displayLevel();
 		this.spawnAsteroids(this.levels[this.level].asteroids, 'asteroid');
 		this.spawnAsteroids(this.levels[this.level].sAsteroids, 'sAsteroid');
 		this.spawnAIships(this.levels[this.level].AIShips);
-		//this.spawnpowerups(this.levels[this.level.powerups]);
+		this.spawnpowerups(this.levels[this.level].powerups);
 		this.scene.add(light);
 		this.setupEventListeners();
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -109,19 +131,37 @@ class Game {
 		delete this.level;
 		window.removeEventListener('keydown', this.handleKeyDown);
 		window.removeEventListener('keyup', this.handleKeyUp);
-		this.lives.forEach((life) => {
+		this.lives1.forEach((life) => {
 			this.scene.remove(life);
+			life.geometry.dispose();
+			life.material.dispose();
 		});
-	
-		if (this.shieldBar) {
-			this.scene.remove(this.shieldBar);
-			this.shieldBar.geometry.dispose();
-			this.shieldBar.material.dispose();
+		if (this.gameMode === '1') {
+			this.lives2.forEach((life) => {
+				this.scene.remove(life);
+				life.geometry.dispose();
+				life.material.dispose();
+				});
+			if (this.shieldBar2) {
+				this.scene.remove(this.shieldBar2);
+				this.shieldBar2.geometry.dispose();
+				this.shieldBar2.material.dispose();
+			}
+			if (this.shieldBarBox2) {
+				this.scene.remove(this.shieldBarBox2);
+				this.shieldBarBox2.geometry.dispose();
+				this.shieldBarBox2.material.dispose();
+			}
 		}
-		if (this.shieldBarBox) {
-			this.scene.remove(this.shieldBarBox);
-			this.shieldBarBox.geometry.dispose();
-			this.shieldBarBox.material.dispose();
+		if (this.shieldBar1) {
+			this.scene.remove(this.shieldBar1);
+			this.shieldBar1.geometry.dispose();
+			this.shieldBar1.material.dispose();
+		}
+		if (this.shieldBarBox1) {
+			this.scene.remove(this.shieldBarBox1);
+			this.shieldBarBox1.geometry.dispose();
+			this.shieldBarBox1.material.dispose();
 		}
 		if (this.shotType1Display) {
 			this.shotType1Display.geometry.dispose();
@@ -185,17 +225,6 @@ class Game {
 	gameOver() {
 		this.GameIsRunning = false;
 		for (let i = 0; i < 1000; i++) {}
-		// const timestamp = new Date();
-		// const formattedTimestamp = `
-		// <span style="color: blue;">Asteroids:</span>
-		// <span style="color: white;">${timestamp.toISOString().split('T')[0]}</span>
-		// at
-		// <span style="color: grey;">${timestamp.toTimeString().split(' ')[0]}</span> `;
-		// const match = {
-		// 	result: '<span style="color: red;">loss</span>',
-		// 	score: this.level,
-		// 	timestamp: formattedTimestamp
-		// };
 		const match = {
 			result: `loss`,
 			score: `Level ${this.level}`,
@@ -209,22 +238,11 @@ class Game {
 	gameWin() {
 		this.GameIsRunning = false;
 		for (let i = 0; i < 1000; i++) {}
-		// const timestamp = new Date();
-		// const formattedTimestamp = `
-		// <span style="color: blue;">Asteroids:</span>
-		// <span style="color: white;">${timestamp.toISOString().split('T')[0]}</span>
-		// at
-		// <span style="color: grey;">${timestamp.toTimeString().split(' ')[0]}</span> `;
 		const match = {
 			result: `win`,
 			score: `Level ${this.level}`,
 			game: `Asteroids`,
 		};
-		// const match = {
-		// 	result: '<span style="color: green;">win</span>',
-		// 	score: this.level,
-		// 	timestamp: formattedTimestamp
-		// };
 		saveMatchHistory(match);
 		this.cleanup();
 		document.getElementById('gameWin').style.display = 'flex';
@@ -257,34 +275,40 @@ class Game {
 		});
 	}
 
-	createShields() {
+	createShields(player) {
 		const geometry = new THREE.RingGeometry(3.1, 3.3, 20);
 		const material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
-		this.shield = new THREE.Mesh(geometry, material);
-		this.shield.position.x = this.player.position.x;
-		this.shield.position.y = this.player.position.y;
-		this.shield.position.z = this.player.position.z;
-		this.shield.lifetime = 100;
-		this.shield.spawnTime = 100;
-		this.player.add(this.shield);
-		this.shield.visible = false;
+		const shield = new THREE.Mesh(geometry, material);
+		shield.position.x = player.position.x;
+		shield.position.y = player.position.y;
+		shield.position.z = player.position.z;
+		shield.lifetime = 100;
+		shield.spawnTime = 100;
+		player.add(shield);
+		shield.visible = false;
 		let colorIndex = 0;
 		const colors = [0x0000ff, 0xff0000, 0x0000ff, 0xffffff, 0x0000ff];
 		const cycleColor = () => {
 			colorIndex = (colorIndex + 1) % colors.length;
-			this.shield.material.color.setHex(colors[colorIndex]);
+			shield.material.color.setHex(colors[colorIndex]);
 			setTimeout(cycleColor, 10);
 		};
 		cycleColor();
+		return (shield);
 	}
 
-	createPlayer() {
+	createPlayer1() {
 		const geometry = new THREE.BoxGeometry(3, 3, 3);
 		geometry.parameters.radius = Math.sqrt(3) * 3/2;
 		const material = new THREE.MeshBasicMaterial({ visible: false });
-		this.player = new THREE.Mesh(geometry, material);
-		this.player.position.set(0, 0, 5);
-		this.player.velocity = { x: 0, y: 0 };
+		this.player1 = new THREE.Mesh(geometry, material);
+		if (this.gameMode === '2' || this.gameMode === '3' || this.gameMode === '4' || this.gameMode === '5') {
+			this.player1.position.set(0, 0, 5);
+		}
+		else if (this.gameMode === '1') {
+			this.player1.position.set(-20, 0, 5);
+		}
+		this.player1.velocity = { x: 0, y: 0 };
 		
 		this.fbxloader.load('/static/media/assets/ships/ship4.fbx', (ship) => {
 			// Load the texture
@@ -294,14 +318,13 @@ class Game {
 					visible: true 
 				});
 				let scaleValue = 0.012;
-				ship.position.set(0, 0, 5);
 				ship.scale.set(scaleValue, scaleValue, scaleValue);
 				ship.rotation.x = -Math.PI / 2;
 				ship.rotation.z = Math.PI;
 				ship.visible = true;
 				ship.castShadow = true;
 				ship.receiveShadow = true;
-				this.player.add(ship);
+				this.player1.add(ship);
 				ship.traverse((child) => {
 					if (child.isMesh) {
 						child.material = trymesh;
@@ -312,8 +335,45 @@ class Game {
 				});
 			});
 		});
-		this.scene.add(this.player);
-		this.createShields();
+		this.scene.add(this.player1);
+		this.shield1 = this.createShields(this.player1);
+	}
+
+	createPlayer2() {
+		const geometry = new THREE.BoxGeometry(3, 3, 3);
+		geometry.parameters.radius = Math.sqrt(3) * 3/2;
+		const material = new THREE.MeshBasicMaterial({ visible: false });
+		this.player2 = new THREE.Mesh(geometry, material);
+		this.player2.position.set(20, 0, 5);
+		this.player2.velocity = { x: 0, y: 0 };
+		
+		this.fbxloader.load('/static/media/assets/ships/ship5.fbx', (ship) => {
+			// Load the texture
+			this.loader.load('/static/media/assets/ships/ship5.png', (texture) => {
+				let trymesh = new THREE.MeshLambertMaterial({ 
+					map: texture, // Apply the loaded texture
+					visible: true 
+				});
+				let scaleValue = 0.012;
+				ship.scale.set(scaleValue, scaleValue, scaleValue);
+				ship.rotation.x = -Math.PI / 2;
+				ship.rotation.z = Math.PI;
+				ship.visible = true;
+				ship.castShadow = true;
+				ship.receiveShadow = true;
+				this.player2.add(ship);
+				ship.traverse((child) => {
+					if (child.isMesh) {
+						child.material = trymesh;
+					}
+					if (child.isLight) {
+						child.visible = false;
+					}
+				});
+			});
+		});
+		this.scene.add(this.player2);
+		this.shield2 = this.createShields(this.player2);
 	}
 
 	spawnAsteroid(type, position, size = 3) {
@@ -330,7 +390,6 @@ class Game {
 		else {
 			heightSegments = 3;
 		}
-
 		if (type === 'asteroid') {
 			material = new THREE.MeshLambertMaterial({ map: this.loader.load('/static/media/assets/asteroid.jpg'), side: THREE.DoubleSide });
 			geometry = new THREE.SphereGeometry(size, 7, heightSegments, 0, 6.283185307179586, 0, 6.283185307179586);
@@ -375,13 +434,11 @@ class Game {
 		x: Math.cos(angle) * speed,
 		y: Math.sin(angle) * speed
 		};
-
 		asteroid.rotationSpeed = {
 			x: Math.random() * 0.1 - 0.05,
 			y: Math.random() * 0.1 - 0.05,
 			z: Math.random() * 0.1 - 0.05
 		};
-	
 		this.scene.add(asteroid);
 		return asteroid;
 	}
@@ -437,36 +494,93 @@ class Game {
 		}
 	}
 
+	spawnpowerups(count) {
+		for (let n = 0; n < count; n++) {
+			// Create the cylinder geometry
+			const cylinderGeometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 32);
+			const cylinderMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
+			const cylinder = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
+			const speed = 0.05 + Math.random() * 0.2;
+			const angle = Math.random() * Math.PI * 2;
+			cylinder.castShadow = true;
+            cylinder.receiveShadow = true;
+			cylinder.velocity = {
+				x: Math.cos(angle) * speed,
+				y: Math.sin(angle) * speed
+			};
+			cylinder.position.set(
+				(Math.random() - 0.5) * this.boundaryX * 2,
+				(Math.random() - 0.5) * this.boundaryY * 2,
+				5
+			);
+			cylinder.rotationSpeed = {
+				x: Math.random() * 0.1 - 0.05,
+				y: Math.random() * 0.1 - 0.05,
+				z: Math.random() * 0.1 - 0.05
+			};
+			this.scene.add(cylinder);
+			this.powerups.push(cylinder);
+		}
+	}
+
 	setupEventListeners() {
 		this.actionStates = {
-			shield: { pressed: false },
-			projectile: { pressed: false }
+			shield1: { pressed: false },
+			projectile1: { pressed: false },
+			shield2: {pressed: false},
+			projectile2: {pressed: false}
 		};
 		window.addEventListener('keydown', (event) => {
 			if (event.key === ' ') {
 				event.preventDefault();
-				if (!this.actionStates.projectile.pressed && this.playerIsActive) {
-					this.shoot(this.shotType, true);
+				if (!this.actionStates.projectile1.pressed && this.player1IsActive) {
+					this.shoot(this.shotType, true, this.player1);
 				}
-				this.actionStates.projectile.pressed = true;
+				this.actionStates.projectile1.pressed = true;
 			}
-			if (event.key === 'e' && this.playerIsActive && this.shield.lifetime > 0) {
+			if (event.key === 'e' && this.player1IsActive && this.shield1.lifetime > 0) {
 				event.preventDefault();
-				if (!this.actionStates.shield.pressed) {
+				if (!this.actionStates.shield1.pressed) {
 					this.playSound('/static/media/assets/sounds/shield.mp3', 0.4);
 				}
-				this.shield.visible = true;
-				this.actionStates.shield.pressed = true;
+				this.shield1.visible = true;
+				this.actionStates.shield1.pressed = true;
+			}
+			if (this.gameMode === '1') {
+				if (event.key === 'o' && this.player2IsActive && this.shield2.lifetime > 0) {
+					event.preventDefault();
+					if (!this.actionStates.shield2.pressed) {
+						this.playSound('/static/media/assets/sounds/shield.mp3', 0.4);
+					}
+					this.shield2.visible = true;
+					this.actionStates.shield2.pressed = true;
+				}
+				if (event.key === 'p') {
+					event.preventDefault();
+					if (!this.actionStates.projectile2.pressed && this.player2IsActive) {
+						this.shoot(this.shotType, true, this.player2);
+					}
+					this.actionStates.projectile2.pressed = true;
+				}
 			}
 			this.keysPressed[event.key] = true;
 		});
 		window.addEventListener('keyup', (event) => {
 			if (event.key === ' ') {
-				this.actionStates.projectile.pressed = false;
+				this.actionStates.projectile1.pressed = false;
 			}
 			if (event.key === 'e') {
-				this.actionStates.shield.pressed = false;
-				this.shield.visible = false;
+				this.actionStates.shield1.pressed = false;
+				this.shield1.visible = false;
+			}
+			if (this.gameMode === '1') {
+				if (event.key === 'p') {
+					this.actionStates.projectile2.pressed = false;
+				}
+				if (event.key === 'o') {
+					this.actionStates.shield2.pressed = false;
+					this.shield2.visible = false;
+				}
 			}
 			this.keysPressed[event.key] = false;
 		});
@@ -487,19 +601,16 @@ class Game {
 		}
 	};
 
-	shoot(method, isPlayer) {
+	shoot(method, isPlayer, player) {
 		if (method === 1) {
-			this.createProjectile(this.player, 0, isPlayer);
+			this.createProjectile(player, 0, isPlayer);
 			this.playSound('/static/media/assets/sounds/laser7.mp3', 0.9);
 		}
 		else if (method === 2) {
-			this.createProjectile(this.player, -15, isPlayer); // Left 
-			this.createProjectile(this.player, 0, isPlayer);
-			this.createProjectile(this.player, 15, isPlayer); // Right
+			this.createProjectile(player, -15, isPlayer); // Left 
+			this.createProjectile(player, 0, isPlayer);
+			this.createProjectile(player, 15, isPlayer); // Right
 			this.playSound('/static/media/assets/sounds/3shot.mp3', 1);
-		}
-		else if (method === 3) {
-
 		}
 	}
 
@@ -561,25 +672,50 @@ class Game {
 		}
 	}
 
-	playerDeath() {
+	player1Death() {
 		this.playSound('/static/media/assets/sounds/explosion2.mp3', 2);
-		this.scene.remove(this.player);
-		this.playerLives--;
+		this.scene.remove(this.player1);
+		this.player1Lives--;
 		if (this.checkLives()) {
-			this.playerIsActive = false;
+			this.player1IsActive = false;
 			setTimeout(() => {
-				this.scene.add(this.player);
-				this.playerIsActive = true;
-				this.shield.visible = true;
+				this.scene.add(this.player1);
+				this.player1IsActive = true;
+				this.shield1.visible = true;
 				this.playSound('/static/media/assets/sounds/shield.mp3', 0.4)
-				this.shield.spawnTime = 100;
-				if (this.shield.lifetime < 40) {
-					this.shield.lifetime = 80;
+				this.shield1.spawnTime = 100;
+				if (this.shield1.lifetime < 40) {
+					this.shield1.lifetime = 80;
 				}
 			}, 2000);
-			this.playerVelocityX = 0;
-			this.playerVelocityY = 0;
-			this.player.position.set(0, 0, 5);
+			this.player1VelocityX = 0;
+			this.player1VelocityY = 0;
+			this.player1.position.set(0, 0, 5);
+			if (this.gameMode === '1') {
+				this.player1.position.set(-20, 0, 5);
+			}
+		}
+	}
+
+	player2Death() {
+		this.playSound('/static/media/assets/sounds/explosion2.mp3', 2);
+		this.scene.remove(this.player2);
+		this.player2Lives--;
+		if (this.checkLives()) {
+			this.player2IsActive = false;
+			setTimeout(() => {
+				this.scene.add(this.player2);
+				this.player2IsActive = true;
+				this.shield2.visible = true;
+				this.playSound('/static/media/assets/sounds/shield.mp3', 0.4)
+				this.shield2.spawnTime = 100;
+				if (this.shield2.lifetime < 40) {
+					this.shield2.lifetime = 80;
+				}
+			}, 2000);
+			this.player2VelocityX = 0;
+			this.player2VelocityY = 0;
+			this.player2.position.set(20, 0, 5);
 		}
 	}
 
@@ -608,48 +744,104 @@ class Game {
 		});
 	}
 
-	displayLives() {
+	displayLives1() {
 		for (let i = 0; i < 4; i++) {
 			const imageGeometry = new THREE.PlaneGeometry(7,7,7);
 			this.loader.load('/static/media/assets/lives.png', (livesTex) => {
 				const imageMaterial = new THREE.MeshBasicMaterial({ map: livesTex, transparent: true, opacity: 1, depthTest: true, depthWrite: false });
 				const LivesImage = new THREE.Mesh(imageGeometry, imageMaterial);
-				LivesImage.position.set(i * 5 - 7.5, -44, 16);
+				if (this.gameMode === '2') {
+					LivesImage.position.set(i * 5 - 7.5, -44, 16);
+				}
+				else if (this.gameMode === '1') {
+					LivesImage.position.set(i * 5 - 7.5, -44, 16); // needs adjusting!
+				}
 				this.scene.add(LivesImage);
-				this.lives.push(LivesImage);
+				this.lives1.push(LivesImage);
 				LivesImage.material.needsUpdate = true;
 			});
 		}
 	}
 
-	checkLives() {
-		this.lives
-		if (this.playerLives <= 0) {
-			this.gameOver();
-			return 0;
+	displayLives2() {
+		for (let i = 0; i < 4; i++) {
+			const imageGeometry = new THREE.PlaneGeometry(7,7,7);
+			this.loader.load('/static/media/assets/lives.png', (livesTex) => {
+				const imageMaterial = new THREE.MeshBasicMaterial({ map: livesTex, transparent: true, opacity: 1, depthTest: true, depthWrite: false });
+				const LivesImage = new THREE.Mesh(imageGeometry, imageMaterial);
+				LivesImage.position.set(i * 5 - 7.5, -40, 16); // needs adjusting!!
+				this.scene.add(LivesImage);
+				this.lives2.push(LivesImage);
+				LivesImage.material.needsUpdate = true;
+			});
 		}
-		else if (this.lives.length >= this.playerLives) {
-			if (this.lives.length > 0) {
-				const life = this.lives.pop();
-				this.scene.remove(life);
-				life.geometry.dispose();
-				life.material.dispose();
-			}
-		}   
-		return 1;
 	}
 
-	displayShieldBar() {
+	checkLives() { // NEED TO UPDATE LIVES AS PLAYERS HAVE INFINITE LIVES
+		if (this.gameMode === '2') {
+			if (this.player1Lives <= 0) {
+				this.gameOver();
+				return 0;
+			}
+			else if (this.lives1.length >= this.player1Lives) {
+				if (this.lives1.length > 0) {
+					const life = this.lives1.pop();
+					this.scene.remove(life);
+					life.geometry.dispose();
+					life.material.dispose();
+				}
+			}  
+			return 1;
+		}
+		else if (this.gameMode === '1') {
+			if (this.player1Lives <= 0 && this.player2Lives <= 0) {
+				this.gameOver();
+				return 0;
+			}
+			else if (this.lives1.length >= this.player1Lives) {
+				if (this.lives1.length > 0) {
+					const life1 = this.lives1.pop();
+					this.scene.remove(life1);
+					life1.geometry.dispose();
+					life1.material.dispose();
+				}
+			}
+			else if (this.lives2.length >= this.player2Lives) {
+				if (this.lives2.length > 0) {
+					const life2 = this.lives2.pop();
+					this.scene.remove(life2);
+					life2.geometry.dispose();
+					life2.material.dispose();
+				}
+			}
+			return 1;
+		}
+	}
+
+	displayShieldBar1() {
 		const box1Geometry = new THREE.PlaneGeometry(13, 2);
 		const box1Material = new THREE.MeshBasicMaterial({ color: 0x808080})
-		this.shieldBarBox = new THREE.Mesh(box1Geometry, box1Material);
-		this.shieldBarBox.position.set(this.boundaryX - 13, this.boundaryY + 2.5, 16);
-		this.scene.add(this.shieldBarBox);
+		this.shieldBarBox1 = new THREE.Mesh(box1Geometry, box1Material);
+		this.shieldBarBox1.position.set(this.boundaryX - 13, this.boundaryY + 2.5, 16);
+		this.scene.add(this.shieldBarBox1);
 		const barGeometry = new THREE.PlaneGeometry(10, 1);
 		const barMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-		this.shieldBar = new THREE.Mesh(barGeometry, barMaterial);
-		this.shieldBar.position.set(this.boundaryX - 13, this.boundaryY + 2.5, 17);
-		this.scene.add(this.shieldBar);
+		this.shieldBar1 = new THREE.Mesh(barGeometry, barMaterial);
+		this.shieldBar1.position.set(this.boundaryX - 13, this.boundaryY + 2.5, 17);
+		this.scene.add(this.shieldBar1);
+	}
+
+	displayShieldBar2() {
+		const box1Geometry = new THREE.PlaneGeometry(13, 2);
+		const box1Material = new THREE.MeshBasicMaterial({ color: 0x808080})
+		this.shieldBarBox2 = new THREE.Mesh(box1Geometry, box1Material);
+		this.shieldBarBox2.position.set(this.boundaryX - 13, this.boundaryY - 2.5, 16);
+		this.scene.add(this.shieldBarBox2);
+		const barGeometry = new THREE.PlaneGeometry(10, 1);
+		const barMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+		this.shieldBar2 = new THREE.Mesh(barGeometry, barMaterial);
+		this.shieldBar2.position.set(this.boundaryX - 13, this.boundaryY + 2.5, 17);
+		this.scene.add(this.shieldBar2);
 	}
 	
 	displayLevel() {
@@ -671,17 +863,27 @@ class Game {
 		this.clearObjects(this.powerups);
 		this.clearObjects(this.projectiles);
 		this.level++;
-		this.shield.visible = false;
-		this.shield.spawnTime = 100;
+		this.shield1.visible = false;
+		this.shield1.spawnTime = 100;
 		this.nextLevelTimer = 0;
-		if (this.level <= this.levels.length) {
+		if (this.level < this.levels.length) {
 			this.spawnAsteroids(this.levels[this.level].asteroids, 'asteroid');
 			this.spawnAsteroids(this.levels[this.level].sAsteroids, 'sAsteroid');
 			this.spawnAIships(this.levels[this.level].AIShips);
-			//this.spawnpowerups(this.levels[this.level].powerups]);
-			this.playerVelocityX = 0;
-			this.playerVelocityY = 0;
-			this.player.position.set(0, 0, 5);
+			this.spawnpowerups(this.levels[this.level].powerups);
+			this.player1VelocityX = 0;
+			this.player1VelocityY = 0;
+			if (this.gameMode === '2') {
+				this.player1.position.set(0, 0, 5);
+			}
+			else if (this.gameMode === '1') {
+				this.player2VelocityX = 0;
+				this.player2VelocityY = 0;
+				this.shield2.visible = false;
+				this.shield2.spawnTime = 100;
+				this.player1.position.set(-20, 0, 5);
+				this.player2.position.set(20, 0, 5);
+			}
 			if (this.lvlCompleteScreen) {
 				this.lvlCompleteScreen.material.opacity = 0;
 			}
@@ -706,7 +908,10 @@ class Game {
 			if (this.lvlCompleteScreen) {
 				this.lvlCompleteScreen.material.opacity += 0.02;
 			}
-			this.shield.visible = true;
+			this.shield1.visible = true;
+			if (this.gameMode === '1') {
+				this.shield2.visible = true;
+			}
 			this.nextLevelTimer++;
 			if (this.nextLevelTimer === 200) {
 				this.levelUp();
@@ -795,7 +1000,91 @@ class Game {
 				this.env.position.y = this.boundaryY;
 			}
 		}
-		if (this.playerIsActive) {
+		if (this.gameMode === '1') {
+			if (this.player2IsActive) {
+				if (this.keysPressed['j']) {
+					this.player2.rotation.z += 0.05;
+				}
+				else if (this.keysPressed['l']) {
+					this.player2.rotation.z -= 0.05;
+				}
+				if (this.keysPressed['i']) {
+					const directionX = Math.sin(this.player2.rotation.z);
+					const directionY = -Math.cos(this.player2.rotation.z);
+					this.player2VelocityX += directionX * 0.02;
+					this.player2VelocityY += directionY * 0.02;
+					const speed = Math.sqrt(this.player2VelocityX * this.player2VelocityX + this.player2VelocityY * this.player2VelocityY);
+					if (speed > this.maxSpeed) {
+						const normalizationFactor = this.maxSpeed / speed;
+						this.player2VelocityX *= normalizationFactor;
+						this.player2VelocityY *= normalizationFactor;
+					}
+				}
+				if (this.keysPressed['o'] && this.shield2.lifetime > 0) {
+					this.shield2.lifetime--;
+				}
+				else if (this.shield2.lifetime === 0) {
+					this.shield2.visible = false;
+				}
+				if (!this.shield2.visible) {
+					for (let i = this.asteroids.length - 1; i >= 0; i--) {
+						const asteroid = this.asteroids[i];
+						if (this.checkCollision(this.player2, asteroid)) {
+							this.createExplosion(this.player2.position.x, this.player2.position.y, 2);
+							this.player2Death();
+							break;
+						}
+					}
+					for (let i = this.sAsteroids.length - 1; i >= 0; i--) {
+						const sAsteroid = this.sAsteroids[i];
+						if (this.checkCollision(this.player2, sAsteroid)) {
+							this.createExplosion(this.player2.position.x, this.player2.position.y, 3);
+							this.player2Death();
+							break;
+						}
+					}
+				}
+				else {
+					for (let i = this.asteroids.length - 1; i >= 0; i--) {
+						const asteroid = this.asteroids[i];
+						if (this.checkCollision(this.player2, asteroid)) {
+							this.createExplosion(this.player2.position.x, this.player2.position.y, 2);
+							break;
+						}
+					}
+					for (let i = this.sAsteroids.length - 1; i >= 0; i--) {
+						const sAsteroid = this.sAsteroids[i];
+						if (this.checkCollision(this.player2, sAsteroid)) {
+							this.createExplosion(this.player2.position.x, this.player2.position.y, 3);
+							this.player2VelocityX += sAsteroid.velocity.x * 0.5; // Adjust the factor as needed
+							this.player2VelocityY += sAsteroid.velocity.y * 0.5; // Adjust the factor as needed
+							if (this.player2VelocityX > 0.5) {
+								this.player2VelocityX = 0.5;
+							}
+							if (this.player2VelocityY > 0.5) {
+								this.player2VelocityY = 0.5;
+							}
+							break;
+						}
+					}
+				}
+			}
+			if (this.shield2.spawnTime > 0) {
+				this.shield2.spawnTime--;
+				if (this.shield2.spawnTime === 0) {
+					this.shield2.visible = false;
+				}
+			}
+			if (this.shieldBar2) {
+				this.shieldBar2.scale.x = this.shield2.lifetime / 80;
+			}
+			this.player2.position.x += this.player2VelocityX;
+			this.player2.position.y += this.player2VelocityY;
+			this.checkBoundaries(this.player2);
+
+
+		}
+		if (this.player1IsActive) {
 			if (this.keysPressed['f']) {
 				this.keysPressed['f'] = false;
 				if (this.shotType === 1) {
@@ -810,28 +1099,28 @@ class Game {
 				}
 			}
 			if (this.keysPressed['a']) {
-				this.player.rotation.z += 0.05;
+				this.player1.rotation.z += 0.05;
 			}
 			else if (this.keysPressed['d']) {
-				this.player.rotation.z -= 0.05;
+				this.player1.rotation.z -= 0.05;
 			}
 			if (this.keysPressed['w']) {
-				const directionX = Math.sin(this.player.rotation.z);
-				const directionY = -Math.cos(this.player.rotation.z);
-				this.playerVelocityX += directionX * 0.02;
-				this.playerVelocityY += directionY * 0.02;
-				const speed = Math.sqrt(this.playerVelocityX * this.playerVelocityX + this.playerVelocityY * this.playerVelocityY);
+				const directionX = Math.sin(this.player1.rotation.z);
+				const directionY = -Math.cos(this.player1.rotation.z);
+				this.player1VelocityX += directionX * 0.02;
+				this.player1VelocityY += directionY * 0.02;
+				const speed = Math.sqrt(this.player1VelocityX * this.player1VelocityX + this.player1VelocityY * this.player1VelocityY);
 				if (speed > this.maxSpeed) {
 					const normalizationFactor = this.maxSpeed / speed;
-					this.playerVelocityX *= normalizationFactor;
-					this.playerVelocityY *= normalizationFactor;
+					this.player1VelocityX *= normalizationFactor;
+					this.player1VelocityY *= normalizationFactor;
 				}
 			}
-			if (this.keysPressed['e'] && this.shield.lifetime > 0) {
-				this.shield.lifetime--;
+			if (this.keysPressed['e'] && this.shield1.lifetime > 0) {
+				this.shield1.lifetime--;
 			}
-			else if (this.shield.lifetime === 0) {
-				this.shield.visible = false;
+			else if (this.shield1.lifetime === 0) {
+				this.shield1.visible = false;
 			}
 			if (this.AIShips) {
 				this.AIShips.forEach(ship => {
@@ -860,27 +1149,82 @@ class Game {
 					}
 				});
 			}
-		}
-		this.checkLevelComplete();
-		if (this.shield.spawnTime > 0) {
-			this.shield.spawnTime--;
-			if (this.shield.spawnTime === 0) {
-				this.shield.visible = false;
+			if (!this.shield1.visible) {
+				for (let i = this.asteroids.length - 1; i >= 0; i--) {
+					const asteroid = this.asteroids[i];
+					if (this.checkCollision(this.player1, asteroid)) {
+						this.createExplosion(this.player1.position.x, this.player1.position.y, 2);
+						this.player1Death();
+						break;
+					}
+				}
+				for (let i = this.sAsteroids.length - 1; i >= 0; i--) {
+					const sAsteroid = this.sAsteroids[i];
+					if (this.checkCollision(this.player1, sAsteroid)) {
+						this.createExplosion(this.player1.position.x, this.player1.position.y, 3);
+						this.player1Death();
+						break;
+					}
+				}
+			}
+			else {
+				for (let i = this.asteroids.length - 1; i >= 0; i--) {
+					const asteroid = this.asteroids[i];
+					if (this.checkCollision(this.player1, asteroid)) {
+						this.createExplosion(this.player1.position.x, this.player1.position.y, 2);
+
+						break;
+					}
+				}
+				for (let i = this.sAsteroids.length - 1; i >= 0; i--) {
+					const sAsteroid = this.sAsteroids[i];
+					if (this.checkCollision(this.player1, sAsteroid)) {
+						this.createExplosion(this.player1.position.x, this.player1.position.y, 3);
+						this.player1VelocityX += sAsteroid.velocity.x * 0.5; // Adjust the factor as needed
+						this.player1VelocityY += sAsteroid.velocity.y * 0.5; // Adjust the factor as needed
+						if (this.player1VelocityX > 0.5) {
+							this.player1VelocityX = 0.5;
+						}
+						if (this.player1VelocityY > 0.5) {
+							this.player1VelocityY = 0.5;
+						}
+						break;
+					}
+				}
 			}
 		}
-		if (this.shieldBar) {
-			this.shieldBar.scale.x = this.shield.lifetime / 80;
+		if (this.powerups) {
+			for (let i = 0; i < this.powerups.length; i++) {
+				const powerup = this.powerups[i];
+				powerup.position.x += powerup.velocity.x;
+				powerup.position.y += powerup.velocity.y;
+				powerup.rotation.x += powerup.rotationSpeed.x;
+				powerup.rotation.y += powerup.rotationSpeed.y;
+				powerup.rotation.z += powerup.rotationSpeed.z;
+				this.checkBoundaries(powerup);
+			}
 		}
-		this.player.position.x += this.playerVelocityX;
-		this.player.position.y += this.playerVelocityY;
-		this.checkBoundaries(this.player);
+		this.checkLevelComplete();
+		if (this.shield1.spawnTime > 0) {
+			this.shield1.spawnTime--;
+			if (this.shield1.spawnTime === 0) {
+				this.shield1.visible = false;
+			}
+		}
+		if (this.shieldBar1) {
+			this.shieldBar1.scale.x = this.shield1.lifetime / 80;
+		}
+		this.player1.position.x += this.player1VelocityX;
+		this.player1.position.y += this.player1VelocityY;
+		this.checkBoundaries(this.player1);
+		// Im here!
 		this.AIShips.forEach(collisionBox => {
 			collisionBox.position.x += collisionBox.velocity.x;
 			collisionBox.position.y += collisionBox.velocity.y;
-			const playerPosition = new THREE.Vector3(this.player.position.x, this.player.position.y, this.player.position.z);
-			const direction = new THREE.Vector3().subVectors(playerPosition, collisionBox.position).normalize();
-			const angleToPlayer = Math.atan2(direction.y, direction.x);
-			collisionBox.rotation.z = angleToPlayer;
+			const player1Position = new THREE.Vector3(this.player1.position.x, this.player1.position.y, this.player1.position.z);
+			const direction = new THREE.Vector3().subVectors(player1Position, collisionBox.position).normalize();
+			const angleToPlayer1 = Math.atan2(direction.y, direction.x);
+			collisionBox.rotation.z = angleToPlayer1;
 			this.checkBoundaries(collisionBox);
 		});
 		this.asteroids.forEach(sphere => {
@@ -955,12 +1299,23 @@ class Game {
 				}
 			}
 			else {
-				if (this.checkCollision(projectile, this.player) && !this.shield.visible) {
-					this.playerDeath();
+				if (this.gameMode === '1') {
+					if (this.checkCollision(projectile, this.player2) && !this.shield2.visible) {
+						this.player2Death();
+						this.scene.remove(projectile);
+						this.projectiles.splice(i, 1);
+					}
+					else if (this.checkCollision(projectile, this.player2) && this.shield2.visible) {
+						this.scene.remove(projectile);
+						this.projectiles.splice(i, 1);
+					}
+				}
+				if (this.checkCollision(projectile, this.player1) && !this.shield1.visible) {
+					this.player1Death();
 					this.scene.remove(projectile);
 					this.projectiles.splice(i, 1);
 				}
-				else if (this.checkCollision(projectile, this.player) && this.shield.visible) {
+				else if (this.checkCollision(projectile, this.player1) && this.shield1.visible) {
 					this.scene.remove(projectile);
 					this.projectiles.splice(i, 1);
 				}
@@ -970,51 +1325,7 @@ class Game {
 				this.projectiles.splice(i, 1);
 			}
 		}
-		if (this.playerIsActive) {
-			if (!this.shield.visible) {
-				for (let i = this.asteroids.length - 1; i >= 0; i--) {
-					const asteroid = this.asteroids[i];
-					if (this.checkCollision(this.player, asteroid)) {
-						this.createExplosion(this.player.position.x, this.player.position.y, 2);
-						this.playerDeath();
-						break;
-					}
-				}
-				for (let i = this.sAsteroids.length - 1; i >= 0; i--) {
-					const sAsteroid = this.sAsteroids[i];
-					if (this.checkCollision(this.player, sAsteroid)) {
-						this.createExplosion(this.player.position.x, this.player.position.y, 3);
-						this.playerDeath();
-						break;
-					}
-				}
-			}
-			else {
-				for (let i = this.asteroids.length - 1; i >= 0; i--) {
-					const asteroid = this.asteroids[i];
-					if (this.checkCollision(this.player, asteroid)) {
-						this.createExplosion(this.player.position.x, this.player.position.y, 2);
 
-						break;
-					}
-				}
-				for (let i = this.sAsteroids.length - 1; i >= 0; i--) {
-					const sAsteroid = this.sAsteroids[i];
-					if (this.checkCollision(this.player, sAsteroid)) {
-						this.createExplosion(this.player.position.x, this.player.position.y, 3);
-						this.playerVelocityX += sAsteroid.velocity.x * 0.5; // Adjust the factor as needed
-						this.playerVelocityY += sAsteroid.velocity.y * 0.5; // Adjust the factor as needed
-						if (this.playerVelocityX > 0.5) {
-							this.playerVelocityX = 0.5;
-						}
-						if (this.playerVelocityY > 0.5) {
-							this.playerVelocityY = 0.5;
-						}
-						break;
-					}
-				}
-			}
-		}
 		this.renderer.render(this.scene, this.camera);
 	}
 }
