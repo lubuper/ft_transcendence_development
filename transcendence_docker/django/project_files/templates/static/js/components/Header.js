@@ -26,30 +26,6 @@ export default function Header() {
 
 	audioPlayer.volume = 0.2;
 
-	musicSelection.addEventListener('change', function() {
-		// Fade out the current track
-		let currentVolume = audioPlayer.volume;
-		const fadeOutInterval = setInterval(() => {
-			if (currentVolume > 0.05) {
-				currentVolume -= 0.05;
-				audioPlayer.volume = currentVolume;
-			} else {
-				clearInterval(fadeOutInterval);
-				audioPlayer.src = this.value;
-				audioPlayer.volume = 0; // Start with volume at 0
-				audioPlayer.play();
-
-				const fadeInInterval = setInterval(() => {
-					if (audioPlayer.volume < 0.2) {
-						audioPlayer.volume += 0.05;
-					} else {
-						clearInterval(fadeInInterval);
-					}
-				}, 100);
-			}
-		}, 100);
-	});
-
 	// Handle the ended event to loop the track or play the next one
 	audioPlayer.addEventListener('ended', function() {
 		const selectedIndex = musicSelection.selectedIndex;
@@ -89,45 +65,6 @@ export default function Header() {
 					}, 1000);
 				});
 			}
-
-			// Reattach event listeners after updating the innerHTML
-			const audioPlayer = $header.querySelector('#audioplayer');
-			const musicSelection = $header.querySelector('#musicSelection');
-
-			audioPlayer.volume = 0.2;
-
-			musicSelection.addEventListener('change', function() {
-				// Fade out the current track
-				let currentVolume = audioPlayer.volume;
-				const fadeOutInterval = setInterval(() => {
-					if (currentVolume > 0.05) {
-						currentVolume -= 0.05;
-						audioPlayer.volume = currentVolume;
-					} else {
-						clearInterval(fadeOutInterval);
-						audioPlayer.src = this.value;
-						audioPlayer.volume = 0; // Start with volume at 0
-						audioPlayer.play();
-
-						const fadeInInterval = setInterval(() => {
-							if (audioPlayer.volume < 0.2) {
-								audioPlayer.volume += 0.05;
-							} else {
-								clearInterval(fadeInInterval);
-							}
-						}, 100);
-					}
-				}, 100);
-			});
-
-			audioPlayer.addEventListener('ended', function() {
-				const selectedIndex = musicSelection.selectedIndex;
-				const nextIndex = (selectedIndex + 1) % musicSelection.options.length;
-				musicSelection.selectedIndex = nextIndex;
-				audioPlayer.src = musicSelection.value;
-				audioPlayer.play();
-			});
-
 		})
 		.catch((error) => {
 			console.log("error", error);
