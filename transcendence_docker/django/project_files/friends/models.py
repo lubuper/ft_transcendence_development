@@ -5,9 +5,9 @@ from firstApp.models import Profile
 # Create your models here.
 
 STATUS_CHOICES = (
-    ('sent', 'sent'),
-    ('accepted', 'accepted'),
-    ('rejected', 'rejected'),
+    ('sent', 'Sent'),
+    ('accepted', 'Accepted'),
+    ('rejected', 'Rejected'),
 )
 
 class Relationship(models.Model):

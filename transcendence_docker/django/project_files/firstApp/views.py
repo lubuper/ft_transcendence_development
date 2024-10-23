@@ -186,6 +186,7 @@ def load_match_history(request):
     try:
             match_history = MatchHistory.objects.filter(user=request.user).values('timestamp', 'score', 'result', 'game')
             friends = Profile.objects.filter(user=request.user).values_list('friends__username', flat=True)
+            friend_requests = Profile.objects.get(user=request.user).friend_requests.values_list('username', flat=True)
             profile = Profile.objects.get(user=request.user)
             friends_count = profile.friends.count()
             user = request.user
@@ -195,7 +196,8 @@ def load_match_history(request):
             'match_history': list(match_history),
             'friends': list(friends),
             'friends_count': friends_count,
-            'game_customization': list(game_customization)},
+            'game_customization': list(game_customization),
+            'friend_requests': list(friend_requests)},
             safe=False)
     except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)  # Return error as JSON

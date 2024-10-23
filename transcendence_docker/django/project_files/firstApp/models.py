@@ -14,6 +14,7 @@ class Profile(models.Model):
             null=True,
     )
     friends = models.ManyToManyField(User, related_name="friends", blank=True)
+    friend_requests = models.ManyToManyField(User, related_name="friend_requests", blank=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -22,6 +23,13 @@ class Profile(models.Model):
 
     def get_friends_no(self):
         return self.friends.all().count()
+
+    def get_pending_requests(self):
+        pending_requests = Relationship.objects.filter(receiver=self, status='sent')
+        if pending_requests.exists():
+            return pending_requests
+        else:
+            return "You have no friend requests."
 
     def __str__(self):
         return f"{self.user.username}"

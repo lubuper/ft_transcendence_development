@@ -509,7 +509,6 @@ class Game {
 		return shipTex;
 	}
 
-
 	adjustShipScale(shipNumber) {
 		let scaleValue;
 		switch(shipNumber) {
@@ -543,6 +542,7 @@ class Game {
 		}
 		return (scaleValue);
 	}
+
 	createModels(ship1Number, ship2Number) {
 		let ship1Mesh, ship2Mesh, ship1Tex, ship2Tex;
 		ship1Mesh = this.getShipMesh(ship1Number);
