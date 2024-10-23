@@ -45,9 +45,9 @@ class Game {
 			this.player2VelocityY = 0;
 			this.player2IsActive = true;
 			this.lives2 = [];
-			//this.ship2Number = 4;  // Player 2 ship - change here 
+			this.ship2Number = 8;  // Player 2 ship - change here 
 		}
-		//this.ship1Number = 1; // Player 1 ship - change here 
+		this.ship1Number = 7; // Player 1 ship - change here 
 		this.level = 0;
 		this.GameIsRunning = false;
 		this.env = null;
@@ -104,11 +104,11 @@ class Game {
 		this.camera.add(this.listener);
 		this.createEnvironment()
 		if (this.gameMode == '1') {
-			this.createPlayer2();
+			this.createPlayer2(this.ship2Number);
 			this.displayLives2();
 			this.displayShieldBar2();
 		}
-		this.createPlayer1();
+		this.createPlayer1(this.ship1Number);
 		this.displayLives1();
 		this.displayShieldBar1();
 		this.createShotDisplay();
@@ -297,7 +297,117 @@ class Game {
 		return (shield);
 	}
 
-	createPlayer1() {
+	getShipMesh(shipNumber) {
+		let shipMesh;
+		switch(shipNumber) {
+			case 1:
+				shipMesh = '/static/media/assets/ships/ship1.fbx';
+				break;
+			case 2:
+				shipMesh = '/static/media/assets/ships/ship2.fbx';
+				break;
+			case 3:
+				shipMesh = '/static/media/assets/ships/ship3.fbx';
+				break;
+			case 4:
+				shipMesh = '/static/media/assets/ships/ship4.fbx';
+				break;
+			case 5:
+				shipMesh = '/static/media/assets/ships/ship5.fbx';
+				break;
+			case 6:
+				shipMesh = '/static/media/assets/ships/ship6.fbx';
+				break;
+			case 7:
+				shipMesh = '/static/media/assets/ships/ship7.fbx';
+				break;
+			case 8:
+				shipMesh = '/static/media/assets/ships/ship8.fbx';
+				break;
+			case 9:
+				shipMesh = '/static/media/assets/ships/ship9.fbx';
+				break;
+			default:
+				shipMesh = '/static/media/assets/ships/tie-fighter.fbx';
+				break;
+		}
+		return shipMesh;
+	}
+
+	getShipTex(shipNumber) {
+		let shipTex;
+		switch(shipNumber) {
+			case 1:
+				shipTex = '/static/media/assets/ships/ship1.png';
+				break;
+			case 2:
+				shipTex = '/static/media/assets/ships/ship22.png';
+				break;
+			case 3:
+				shipTex = '/static/media/assets/ships/ship3.png';
+				break;
+			case 4:
+				shipTex = '/static/media/assets/ships/ship4.png';
+				break;
+			case 5:
+				shipTex = '/static/media/assets/ships/ship5.png';
+				break;
+			case 6:
+				shipTex = '/static/media/assets/ships/ship6.png';
+				break;
+			case 7:
+				shipTex = '/static/media/assets/ships/ship7.png';
+				break;
+			case 8:
+				shipTex = '/static/media/assets/ships/ship8.png';
+				break;
+			case 9:
+				shipTex = '/static/media/assets/ships/ship9.png';
+				break;
+			default:
+				shipTex = '/static/media/assets/metal.png';
+				break;
+		}
+		return shipTex;
+	}
+
+	adjustShipScale(shipNumber) {
+		let scaleValue;
+		switch(shipNumber) {
+			case 1:
+				scaleValue = 0.015;
+				break;
+			case 2:
+				scaleValue = 0.015;
+				break;
+			case 3:
+				scaleValue = 0.018;
+				break;
+			case 4:
+				scaleValue = 0.012;
+				break;
+			case 5:
+				scaleValue = 0.011;
+				break;
+			case 6:
+				scaleValue = 0.014;
+				break;
+			case 7:
+				scaleValue = 0.018;
+				break;
+			case 8:
+				scaleValue = 0.042;
+				break;
+			default:
+				scaleValue = 0.011;
+				break;
+		}
+		return (scaleValue);
+	}
+
+	createPlayer1(shipNumber) {
+		let ship1Mesh = this.getShipMesh(shipNumber);
+		let ship1Tex = this.getShipTex(shipNumber);
 		const geometry = new THREE.BoxGeometry(3, 3, 3);
 		geometry.parameters.radius = Math.sqrt(3) * 3/2;
 		const material = new THREE.MeshBasicMaterial({ visible: false });
@@ -310,14 +420,14 @@ class Game {
 		}
 		this.player1.velocity = { x: 0, y: 0 };
 		
-		this.fbxloader.load('/static/media/assets/ships/ship4.fbx', (ship) => {
+		this.fbxloader.load(ship1Mesh, (ship) => {
 			// Load the texture
-			this.loader.load('/static/media/assets/ships/ship4.png', (texture) => {
+			this.loader.load(ship1Tex, (texture) => {
 				let trymesh = new THREE.MeshLambertMaterial({ 
 					map: texture, // Apply the loaded texture
 					visible: true 
 				});
-				let scaleValue = 0.012;
+				let scaleValue = this.adjustShipScale(shipNumber);
 				ship.scale.set(scaleValue, scaleValue, scaleValue);
 				ship.rotation.x = -Math.PI / 2;
 				ship.rotation.z = Math.PI;
@@ -339,7 +449,9 @@ class Game {
 		this.shield1 = this.createShields(this.player1);
 	}
 
-	createPlayer2() {
+	createPlayer2(shipNumber) {
+		let ship2Mesh = this.getShipMesh(shipNumber);
+		let ship2Tex = this.getShipTex(shipNumber);
 		const geometry = new THREE.BoxGeometry(3, 3, 3);
 		geometry.parameters.radius = Math.sqrt(3) * 3/2;
 		const material = new THREE.MeshBasicMaterial({ visible: false });
@@ -347,14 +459,14 @@ class Game {
 		this.player2.position.set(20, 0, 5);
 		this.player2.velocity = { x: 0, y: 0 };
 		
-		this.fbxloader.load('/static/media/assets/ships/ship6.fbx', (ship) => {
+		this.fbxloader.load(ship2Mesh, (ship) => {
 			// Load the texture
-			this.loader.load('/static/media/assets/ships/ship6.png', (texture) => {
+			this.loader.load(ship2Tex, (texture) => {
 				let trymesh = new THREE.MeshLambertMaterial({ 
 					map: texture, // Apply the loaded texture
 					visible: true 
 				});
-				let scaleValue = 0.012;
+				let scaleValue = this.adjustShipScale(shipNumber);
 				ship.scale.set(scaleValue, scaleValue, scaleValue);
 				ship.rotation.x = -Math.PI / 2;
 				ship.rotation.z = Math.PI;
@@ -825,7 +937,7 @@ class Game {
 	}
 
 	displayShieldBar1() {
-		const box1Geometry = new THREE.PlaneGeometry(13, 2);
+		const box1Geometry = new THREE.PlaneGeometry(13, 1.5);
 		const box1Material = new THREE.MeshBasicMaterial({ color: 0x808080})
 		this.shieldBarBox1 = new THREE.Mesh(box1Geometry, box1Material);
 		this.shieldBarBox1.position.set(this.boundaryX - 13, this.boundaryY + 2.5, 16);
@@ -838,15 +950,15 @@ class Game {
 	}
 
 	displayShieldBar2() {
-		const box1Geometry = new THREE.PlaneGeometry(13, 2);
+		const box1Geometry = new THREE.PlaneGeometry(13, 1.5);
 		const box1Material = new THREE.MeshBasicMaterial({ color: 0x808080})
 		this.shieldBarBox2 = new THREE.Mesh(box1Geometry, box1Material);
-		this.shieldBarBox2.position.set(this.boundaryX - 13, this.boundaryY - 2.5, 16);
+		this.shieldBarBox2.position.set(this.boundaryX - 13, this.boundaryY - 0.5, 16);
 		this.scene.add(this.shieldBarBox2);
 		const barGeometry = new THREE.PlaneGeometry(10, 1);
-		const barMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+		const barMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 		this.shieldBar2 = new THREE.Mesh(barGeometry, barMaterial);
-		this.shieldBar2.position.set(this.boundaryX - 13, this.boundaryY + 2.5, 17);
+		this.shieldBar2.position.set(this.boundaryX - 13, this.boundaryY - 	0.5, 17);
 		this.scene.add(this.shieldBar2);
 	}
 	
