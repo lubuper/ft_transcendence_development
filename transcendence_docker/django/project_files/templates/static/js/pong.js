@@ -37,8 +37,8 @@ class Game {
 		this.player2;
 		this.ship1;
 		this.ship2;
-		this.ship1Number = 1; // Player 1 ship - change here 
-		this.ship2Number = 4;  // Player 2 ship - change here 
+		this.ship1Number = null; // Player 1 ship - change here
+		this.ship2Number = 4;  // Player 2 ship - change here
 		this.geometry_player1;
 		this.geometry_player2;
 		this.playingSurface = null;
@@ -60,7 +60,7 @@ class Game {
 		this.ballLastPosition;
 		this.ballStuckTimer = 0;
 		this.hexagons;
-		this.hexagoncolor = 0x00ff00; // color change here
+		this.hexagoncolor = null; // color change here
 		this.hexGroup = new THREE.Group();
 		this.planetEarth;
 		this.shake = 0;
@@ -72,6 +72,23 @@ class Game {
 		this.powerups = [];
 		this.powerupTimer = 0;
 		this.lastAITime = 0;
+	}
+
+	async fetchShipAndColor() {
+		try {
+			const response = await fetch('/api/get-ship-and-color/');
+			if (!response.ok) {
+				throw new Error('Failed to fetch ship and color');
+			}
+
+			const data = await response.json();
+			this.ship1Number = data.ship;
+			this.hexagoncolor = data.color;
+
+			console.log('Ship:', this.ship1Number, 'Color:', this.hexagoncolor);
+		} catch (error) {
+			console.error('Error fetching ship and color:', error);
+		}
 	}
 
 	init () {
@@ -1102,6 +1119,9 @@ class Game {
 
 export default function Pong(gameMode, gameType) {
 	const game = new Game(gameMode, gameType);
-	game.init();
+	game.fetchShipAndColor().then(() => {
+		game.init();
+		console.log('Game initialized with ship number:', game.ship1Number, 'and color:', game.hexagoncolor);
+	});
 	return game;
 }

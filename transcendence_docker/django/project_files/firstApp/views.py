@@ -102,7 +102,7 @@ def create_account(request):
             game_customization = GameCustomization.objects.create(
             	user=user,
                 ship = 1,
-                color = '0x00ff00'
+                color = '#00ff00'
             )
             game_customization.save()  # Save the customization entry
             return JsonResponse({'message': 'Account created successfully'}, status=200)
@@ -231,3 +231,20 @@ def save_customization(request):
 			return JsonResponse({'status': 'success', 'message': 'Customization saved.'})
 		except json.JSONDecodeError:
 			return JsonResponse({'error': 'Invalid JSON.'}, status=400)
+
+def get_ship_and_color(request):
+	if request.user.is_authenticated:
+		try:
+			game_customization = GameCustomization.objects.get(user=request.user)  # Use .get() for single result
+			ship_number = game_customization.ship
+			hexagon_color = game_customization.color
+		except GameCustomization.DoesNotExist:
+			ship_number = 1
+			hexagon_color = '#00ff00'
+	else:
+		ship_number = 1
+		hexagon_color = '#00ff00'
+	return JsonResponse({
+		'ship': ship_number,
+		'color': hexagon_color,
+	})
