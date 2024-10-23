@@ -119,7 +119,7 @@ export default function DashBoard() {
 							<div class="card-body">
 								<div class="d-flex flex-wrap">
 									 ${colorNames.map((names) =>
-										`<img src="/static/media/assets/color/${names}.png" data-color-id="#${names}" class="color-option rounded-circle m-1 ${names === localStorage.getItem('selectedColorId') ? 'selected-color' : ''}" alt="Color" style="width: 50px; height: 50px; cursor: pointer;">`
+										`<img src="/static/media/assets/color/${names}.png" data-color-id="#${names}" class="color-option rounded-circle m-1 ${`#${names}` === localStorage.getItem('selectedColorId') ? 'selected-color' : ''}" alt="Color" style="width: 50px; height: 50px; cursor: pointer;">`
 									 ).join('')}
 								</div>
 							</div>
