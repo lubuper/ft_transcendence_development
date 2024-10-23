@@ -174,7 +174,7 @@ export default function DashBoard() {
 								<button id="SearchButton" type="submit" class="btn btn-purple btn-custom mx-3 nav-link text-white shadow-lg">Search</button>
 								<div class="card-body" id="friend-message"></div>
 							</form>
-							<div class="card-header">Friend22s: ${matchHistory.friends_count}</div>
+							<div class="card-header">Friends: ${matchHistory.friends_count}</div>
 							<div class="card-body">
 							${matchHistory.friends.map(friend => `
 							<p>
@@ -192,12 +192,16 @@ export default function DashBoard() {
 							</div>
 							<div class="card-header">Friend Requests:</div>
 							<div class="card-body">
-							${matchHistory.friend_requests.map(friend_request => `
-							<p>
-								${friend_request ? friend_request : 'You currently have no friend requests.'}
-							</p>
-						`).join('')}
+							${matchHistory.friend_requests.length > 0 ? 
+								matchHistory.friend_requests.map(friend_request => `
+									${friend_request}
+									<button id="AcceptFriendRequest-${friend_request}" type="button" class="btn btn-success btn-sm ml-2">✔️</button>
+            						<button id="RejectFriendRequest-${friend_request}" type="button" class="btn btn-danger btn-sm ml-2">X</button>
+								`).join('') : 
+								'<p>You currently have no friend requests.</p>'
+							}
 							</div>
+							<div class="card-body" id="request-message"></div>
 						</div>
 						<div class="card bg-dark text-white mb-3">
 							<div class="card-header">Settings</div>
@@ -331,7 +335,62 @@ export default function DashBoard() {
 		}
 	});
 
+	matchHistory.friend_requests.forEach(friend_request => {
+		// Adding event listener for the accept button
+		document.getElementById(`AcceptFriendRequest-${friend_request}`).addEventListener('click', function() {
+			fetch('/accept-friend-request/', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': getCSRFToken() // Ensure CSRF token is sent
+				},
+				body: JSON.stringify({
+					'username': friend_request // Send the username in the request body
+				}),
+			})
+			.then(response => response.json())
+			.then(data => {
+				if (data.message) {
+					alert(data.message); // Display success message
+					location.reload(); // Reload the page or update the UI as needed
+				} else if (data.error) {
+					alert(data.error); // Display error message if there's an issue
+				}
+			})
+			.catch(error => {
+				console.error('Error:', error);
+				alert('There was an error accepting the friend request.');
+			});
+		});
+	
+		// Adding event listener for the reject button
+		document.getElementById(`RejectFriendRequest-${friend_request}`).addEventListener('click', function() {
+			fetch('/reject-friend-request/', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': getCSRFToken() // Ensure CSRF token is sent
+				},
+				body: JSON.stringify({
+					'username': friend_request // Send the username in the request body
+				}),
+			})
+			.then(response => response.json())
+			.then(data => {
+				if (data.message) {
+					alert(data.message); // Display success message
+					location.reload(); // Reload the page or update the UI as needed
+				} else if (data.error) {
+					alert(data.error); // Display error message if there's an issue
+				}
+			})
+			.catch(error => {
+				console.error('Error:', error);
+				alert('There was an error rejecting the friend request.');
+			});
+		});
+	});
+
 	});
 	return $dashboard;
 }
-

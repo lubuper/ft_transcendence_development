@@ -186,7 +186,7 @@ def load_match_history(request):
     try:
             match_history = MatchHistory.objects.filter(user=request.user).values('timestamp', 'score', 'result', 'game')
             friends = Profile.objects.filter(user=request.user).values_list('friends__username', flat=True)
-            friend_requests = Profile.objects.get(user=request.user).friend_requests.values_list('username', flat=True)
+            friend_requests = Relationship.objects.filter(receiver__user=request.user, status='sent').values_list('sender__user__username', flat=True)
             profile = Profile.objects.get(user=request.user)
             friends_count = profile.friends.count()
             user = request.user

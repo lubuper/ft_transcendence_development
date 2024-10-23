@@ -39,3 +39,55 @@ def send_friend_request(request):
             return JsonResponse({'message': 'User not found'}, status=404)
     
     return JsonResponse({'message': 'Invalid request'}, status=400)
+
+@csrf_exempt
+def accept_friend_request(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        username = data.get('username')
+
+        try:
+            receiver = request.user.profile  # Current user (receiver)
+            sender = Profile.objects.get(user__username=username)  # Sender of the request
+
+            # Update the Relationship model to set status to 'accepted'
+            relationship = Relationship.objects.get(sender=sender, receiver=receiver, status='sent')
+            relationship.status = 'accepted'
+            relationship.save()
+
+            # Add each other as friends
+            receiver.friends.add(sender.user)
+            sender.friends.add(receiver.user)
+
+            return JsonResponse({'message': 'Friend request accepted successfully!'}, status=200)
+        except Profile.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        except Relationship.DoesNotExist:
+            return JsonResponse({'error': 'Friend request not found'}, status=404)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@csrf_exempt
+def reject_friend_request(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        username = data.get('username')
+
+        try:
+            receiver = request.user.profile  # Current user (receiver)
+            sender = Profile.objects.get(user__username=username)  # Sender of the request
+
+            # Attempt to get the existing relationship
+            relationship = Relationship.objects.get(sender=sender, receiver=receiver, status='sent')
+
+            # Update the Relationship model to set status to 'rejected'
+            relationship.status = 'rejected'
+            relationship.save()
+
+            return JsonResponse({'message': 'Friend request rejected successfully!'}, status=200)
+        except Profile.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        except Relationship.DoesNotExist:
+            return JsonResponse({'error': 'Friend request not found'}, status=404)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
