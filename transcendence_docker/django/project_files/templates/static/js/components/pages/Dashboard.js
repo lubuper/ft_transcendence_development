@@ -12,16 +12,14 @@ const avatarPaths = [
 ];
 
 const colorNames = [
+	'0x00ff00',
 	'0x8000ff',
 	'0xff8000',
-	'0x00ff00',
 	'0x00ffff'
 ];
 
 export function saveMatchHistory(match) {
-	// const matchHistory = loadMatchHistory();
-	// matchHistory.push(match);
-	// localStorage.setItem('matchHistory', JSON.stringify(matchHistory));
+
 	console.log('a info que chega:', match);
 	return fetch('/api/save-match-history/', {
 		method: 'POST',
@@ -79,6 +77,8 @@ export default function DashBoard() {
 
 		const pongRank = calculateRankedStats(matchHistory.match_history, "Pong")
 		const astRank = calculateRankedStats(matchHistory.match_history, "Asteroids")
+		localStorage.setItem('selectedAvatarId', matchHistory.game_customization[0].ship);
+		localStorage.setItem('selectedColorId', matchHistory.game_customization[0].color);
 	$dashboard.innerHTML = `
 		<div class="vh-100 d-flex flex-column align-items-center justify-content-start position-relative" style="background-color: rgba(0, 0, 0, 0.6); color: white;">
 			<div class="container mt-3">
@@ -86,7 +86,7 @@ export default function DashBoard() {
 					<div class="col-md-3">
 						<div class="card bg-dark text-white mb-3">
 							<div class="card-body text-center">
-								<img id="avatar" src="${avatarPaths[0]}" class="rounded-circle mb-3" alt="Avatar" style="width: 100px; height: 100px;">
+								<img id="avatar" src="/static/media/assets/ships/splash/${localStorage.getItem('selectedAvatarId')}.png" class="rounded-circle mb-3" alt="Avatar" style="width: 100px; height: 100px;">
 								<h5 class="card-title">${matchHistory.username}</h5>
 								<p class="card-text">
 									<img src="/static/media/rank/${pongRank.rank}.png" 
@@ -109,7 +109,7 @@ export default function DashBoard() {
 							<div class="card-body">
 								<div class="d-flex flex-wrap">
 									${avatarPaths.map((path, index) =>
-										`<img src="${path}" data-ship-id="${index + 1}" class="avatar-option rounded-circle m-1" alt="Avatar" style="width: 50px; height: 50px; cursor: pointer;">`
+										`<img src="${path}" data-ship-id="${index + 1}" class="avatar-option rounded-circle m-1 ${(index + 1).toString() === localStorage.getItem('selectedAvatarId') ? 'selected-color' : ''}" alt="Avatar" style="width: 50px; height: 50px; cursor: pointer;">`
 									).join('')}
 									</div>
 							</div>
@@ -118,7 +118,9 @@ export default function DashBoard() {
 							<div class="card-header">Select Color</div>
 							<div class="card-body">
 								<div class="d-flex flex-wrap">
-									${colorNames.map(names => `<img src="/static/media/assets/color/${names}.png" data-color-id="${names}" class="color-option rounded-circle m-1 ${names === matchHistory.game_customization.color ? 'selected-color' : ''}" alt="Color" style="width: 50px; height: 50px; cursor: pointer;">`).join('')}
+									 ${colorNames.map((names) =>
+										`<img src="/static/media/assets/color/${names}.png" data-color-id="${names}" class="color-option rounded-circle m-1 ${names === localStorage.getItem('selectedColorId') ? 'selected-color' : ''}" alt="Color" style="width: 50px; height: 50px; cursor: pointer;">`
+									 ).join('')}
 								</div>
 							</div>
 						</div>
@@ -250,26 +252,14 @@ export default function DashBoard() {
 
 		const avatarElement = $dashboard.querySelector('#avatar');
 		const avatarOptions = $dashboard.querySelectorAll('.avatar-option');
-		const colorOptions = document.querySelectorAll('.color-option');
-		const csrfToken = getCSRFToken();
+		const colorOptions = $dashboard.querySelectorAll('.color-option');
 
-		let selectedAvatarUrl = null;
-		let selectedColorUrl = null;
-
-		// Event listener for avatar selection
-		// avatarOptions.forEach(option => {
-		// 	option.addEventListener('click', function() {
-		// 		selectedAvatarUrl = this.src;
-		// 		avatarElement.src = selectedAvatarUrl;
-		//
-		// 		localStorage.setItem('selectedAvatarUrl', selectedAvatarUrl);
-		// 		sendCustomizationToServer();
-		// 	});
-		// });
 		avatarOptions.forEach(option => {
 			option.addEventListener('click', function() {
+				avatarOptions.forEach(opt => opt.classList.remove('selected-color'));
 				const selectedAvatarId = this.getAttribute('data-ship-id');  // Get the ship ID
 				avatarElement.src = this.src;
+				this.classList.add('selected-color');
 
 				localStorage.setItem('selectedAvatarId', selectedAvatarId);  // Store the ID
 				sendCustomizationToServer();  // Send to server with the correct ID
@@ -280,11 +270,10 @@ export default function DashBoard() {
 		colorOptions.forEach(option => {
 			option.addEventListener('click', function() {
 				colorOptions.forEach(opt => opt.classList.remove('selected-color'));
+				const selectedColorId = this.getAttribute('data-color-id');
 				this.classList.add('selected-color');
-				const selectedColorId = this.getAttribute('data-color-id');  // Get the color ID
-				selectedColorUrl = this.src;
 
-				localStorage.setItem('selectedColorUrl', selectedColorId);
+				localStorage.setItem('selectedColorId', selectedColorId);
 				sendCustomizationToServer();
 			});
 		});
@@ -292,10 +281,8 @@ export default function DashBoard() {
 		// Function to send the selected ship (avatar) and color to the Django backend
 		function sendCustomizationToServer() {
 			const selectedAvatarId = localStorage.getItem('selectedAvatarId');
-			const selectedColor = localStorage.getItem('selectedColorUrl');
+			const selectedColor = localStorage.getItem('selectedColorId');
 
-			console.log('ship: ', selectedAvatarId)
-			console.log('color: ', selectedColor)
 			if (selectedAvatarId || selectedColor) {
 				fetch('/save-customization/', {
 					method: 'POST',
@@ -319,24 +306,6 @@ export default function DashBoard() {
 				console.error('Missing ship or color selection.');
 			}
 		}
-
-		// Load stored values from localStorage on page load
-		document.addEventListener('DOMContentLoaded', function() {
-			const storedAvatarUrl = localStorage.getItem('selectedAvatarUrl');
-			const storedColorUrl = localStorage.getItem('selectedColorUrl');
-
-			if (storedAvatarUrl) {
-				avatarElement.src = storedAvatarUrl;
-			}
-
-			if (storedColorUrl) {
-				colorOptions.forEach(option => {
-					if (option.src === storedColorUrl) {
-						option.classList.add('selected-color');
-					}
-				});
-			}
-		});
 
 	document.getElementById('SearchButton').addEventListener('click', async function() {
 		event.preventDefault();

@@ -215,7 +215,7 @@ def save_customization(request):
 
 			# Check if the ship value is valid
 			if not ship:
-				return JsonResponse({'error': 'Ship ID is missing.'}, status=400)
+				ship = 1
 
 			# Validate and convert the ship to an integer
 			try:
