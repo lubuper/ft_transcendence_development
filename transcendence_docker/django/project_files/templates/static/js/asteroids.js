@@ -45,7 +45,9 @@ class Game {
 			this.player2VelocityY = 0;
 			this.player2IsActive = true;
 			this.lives2 = [];
+			//this.ship2Number = 4;  // Player 2 ship - change here 
 		}
+		//this.ship1Number = 1; // Player 1 ship - change here 
 		this.level = 0;
 		this.GameIsRunning = false;
 		this.env = null;
@@ -279,9 +281,7 @@ class Game {
 		const geometry = new THREE.RingGeometry(3.1, 3.3, 20);
 		const material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
 		const shield = new THREE.Mesh(geometry, material);
-		shield.position.x = player.position.x;
-		shield.position.y = player.position.y;
-		shield.position.z = player.position.z;
+		shield.position.set(0, 0, 0);
 		shield.lifetime = 100;
 		shield.spawnTime = 100;
 		player.add(shield);
@@ -347,9 +347,9 @@ class Game {
 		this.player2.position.set(20, 0, 5);
 		this.player2.velocity = { x: 0, y: 0 };
 		
-		this.fbxloader.load('/static/media/assets/ships/ship5.fbx', (ship) => {
+		this.fbxloader.load('/static/media/assets/ships/ship6.fbx', (ship) => {
 			// Load the texture
-			this.loader.load('/static/media/assets/ships/ship5.png', (texture) => {
+			this.loader.load('/static/media/assets/ships/ship6.png', (texture) => {
 				let trymesh = new THREE.MeshLambertMaterial({ 
 					map: texture, // Apply the loaded texture
 					visible: true 
@@ -678,6 +678,9 @@ class Game {
 		this.player1Lives--;
 		if (this.checkLives()) {
 			this.player1IsActive = false;
+			if (this.player1Lives <= 0) {
+				return;
+			}
 			setTimeout(() => {
 				this.scene.add(this.player1);
 				this.player1IsActive = true;
@@ -703,6 +706,9 @@ class Game {
 		this.player2Lives--;
 		if (this.checkLives()) {
 			this.player2IsActive = false;
+			if (this.player2Lives <= 0) {
+				return;
+			}
 			setTimeout(() => {
 				this.scene.add(this.player2);
 				this.player2IsActive = true;
