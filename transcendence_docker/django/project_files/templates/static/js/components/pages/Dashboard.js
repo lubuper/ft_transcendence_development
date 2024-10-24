@@ -203,12 +203,6 @@ export default function DashBoard() {
 							</div>
 							<div class="card-body" id="request-message"></div>
 						</div>
-						<div class="card bg-dark text-white mb-3">
-							<div class="card-header">Settings</div>
-							<div class="card-body">
-								<button id="clearStorage" class="btn btn-danger">Clear Storage</button>
-							</div>
-						</div>
 					</div>
 				</div>
 			</div>
