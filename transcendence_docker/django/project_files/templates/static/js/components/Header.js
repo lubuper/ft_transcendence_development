@@ -1,4 +1,4 @@
-import navigate from "../helpers/App.js";
+import { navigate } from "../helpers/App.js";
 
 export default function Header() {
 	const $header = document.createElement('header');

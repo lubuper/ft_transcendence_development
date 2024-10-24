@@ -1,4 +1,4 @@
-import navigate from '../../helpers/App.js';
+import { navigate } from '../../helpers/App.js';
 
 export default function CreateAccount() {
 	const $CreateAccountForm = document.createElement('CreateAccountForm');
