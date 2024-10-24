@@ -47,7 +47,7 @@ class Game {
 			this.lives2 = [];
 			this.ship2Number = 8;  // Player 2 ship - change here 
 		}
-		this.ship1Number = 7; // Player 1 ship - change here 
+		this.ship1Number = 7; // Player 1 ship - change here
 		this.level = 0;
 		this.GameIsRunning = false;
 		this.env = null;
@@ -92,6 +92,23 @@ class Game {
 		this.explosionGroup = [];
 		this.animationFrameID;
 		this.animate = this.animate.bind(this);
+	}
+	async fetchShipAndColor() {
+		try {
+			const response = await fetch('/api/get-ship-and-color/');
+			if (!response.ok) {
+				throw new Error('Failed to fetch ship and color');
+			}
+
+			const data = await response.json();
+			this.ship1Number = data.ship;
+			if (this.ship1Number === 8)
+				this.ship2Number = 9;
+
+			console.log('Ship:', this.ship1Number);
+		} catch (error) {
+			console.error('Error fetching ship and color:', error);
+		}
 	}
 
 	init() {
@@ -1450,6 +1467,9 @@ class Game {
 
 export default function Asteroids(gameMode) {
 	const game = new Game(gameMode);
-	game.init();
+	game.fetchShipAndColor().then(() => {
+		game.init();
+		console.log('Game initialized with ship number:', game.ship1Number);
+	});
 	return game;
 }

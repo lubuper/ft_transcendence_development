@@ -1,3 +1,5 @@
+import {navigate} from "../helpers/App";
+
 export default function Header() {
 	const $header = document.createElement('header');
 
@@ -61,7 +63,7 @@ export default function Header() {
 				logoutButton.addEventListener('click', async () => {
 					await fetch('/logout/', { method: 'POST', credentials: 'same-origin' });
 					setTimeout(() => {
-						window.location.href = '/';  // Redirect to home page after 1 second
+						navigate('/');// Redirect to home page after 1 second
 					}, 1000);
 				});
 			}

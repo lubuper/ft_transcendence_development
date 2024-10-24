@@ -31,13 +31,13 @@ class Game {
 		//this.controls = new THREE.OrbitControls(this.camerap2, this.renderer.domElement);
 		this.keysPressed = {};
 		this.animationFrameID;
-		this.cameratoggle = 0;
+		this.cameratoggle = 2;
 		this.initialpos = new THREE.Vector3(0, 0, 0);
 		this.player1;
 		this.player2;
 		this.ship1;
 		this.ship2;
-		this.ship1Number = null; // Player 1 ship - change here
+		this.ship1Number = 1; // Player 1 ship - change here
 		this.ship2Number = 4;  // Player 2 ship - change here
 		this.geometry_player1;
 		this.geometry_player2;
@@ -60,7 +60,7 @@ class Game {
 		this.ballLastPosition;
 		this.ballStuckTimer = 0;
 		this.hexagons;
-		this.hexagoncolor = null; // color change here
+		this.hexagoncolor = 0x00ff00; // color change here
 		this.hexGroup = new THREE.Group();
 		this.planetEarth;
 		this.shake = 0;
