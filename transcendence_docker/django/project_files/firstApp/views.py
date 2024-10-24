@@ -235,7 +235,7 @@ def save_customization(request):
 def get_ship_and_color(request):
 	if request.user.is_authenticated:
 		try:
-			game_customization = GameCustomization.objects.get(user=request.user)  # Use .get() for single result
+			game_customization = GameCustomization.objects.get(user=request.user)
 			ship_number = game_customization.ship
 			hexagon_color = game_customization.color
 		except GameCustomization.DoesNotExist:

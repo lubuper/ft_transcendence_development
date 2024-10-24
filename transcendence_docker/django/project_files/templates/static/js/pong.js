@@ -84,6 +84,8 @@ class Game {
 			const data = await response.json();
 			this.ship1Number = data.ship;
 			this.hexagoncolor = data.color;
+			if (this.ship1Number === 4)
+				this.ship2Number = 1;
 
 			console.log('Ship:', this.ship1Number, 'Color:', this.hexagoncolor);
 		} catch (error) {
