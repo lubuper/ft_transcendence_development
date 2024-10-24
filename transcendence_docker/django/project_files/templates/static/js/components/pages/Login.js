@@ -1,4 +1,4 @@
-import App, { navigate } from '../../helpers/App.js';
+import navigate from '../../helpers/App.js';
 
 export default function Login() {
 	const $loginForm = document.createElement('loginForm');
@@ -45,7 +45,7 @@ export default function Login() {
 		if (response.ok) {
 			loginMessage.innerHTML = '<p class="text-success">Login successful!</p>';
 			setTimeout(() => {
-			navigate('/');
+				navigate('/');
 			}, 1000);
 		} else {
 			loginMessage.innerHTML = `<p class="text-danger">Login failed: ${result.message}</p>`;

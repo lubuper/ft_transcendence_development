@@ -4,65 +4,61 @@ let selectedGameType = null;
 export default function LocalPlay(navigate) {
 	const $games = document.createElement('div');
 	$games.innerHTML = `
-		<div class="container vh-100 d-flex align-items-center justify-content-center">
+		<div class="container vh-100 d-flex flex-column align-items-center justify-content-center">
+			<!-- Select Game Mode Card -->
+			<div class="card bg-dark text-white w-100 mb-3" style="border: 1px solid #343a40; opacity: 0.8;">
+				<div class="card-body">
+					<h5 class="card-title text-center">Select Game Mode</h5>
+					<div class="form-check">
+						<input class="form-check-input" type="radio" name="gameMode" id="pvp" value="1" checked>
+						<label class="form-check-label" for="pvp">Player vs Player</label>
+					</div>
+					<div class="form-check">
+						<input class="form-check-input" type="radio" name="gameMode" id="ai" value="2">
+						<label class="form-check-label" for="ai">Play vs AI</label>
+					</div>
+					<div id="difficultyOptions" class="mt-3" style="display: none;">
+						<h6 class="text-center">Select Difficulty</h6>
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="gameMode" id="ai-easy" value="2">
+							<label class="form-check-label" for="ai-easy">Easy</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="gameMode" id="ai-medium" value="3">
+							<label class="form-check-label" for="ai-medium">Medium</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="gameMode" id="ai-hard" value="4">
+							<label class="form-check-label" for="ai-hard">Hard</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="gameMode" id="ai-impossible" value="5">
+							<label class="form-check-label" for="ai-impossible">Impossible</label>
+						</div>
+					</div>
+					<h5 class="card-title text-center mt-3">Select Game Type</h5>
+					<div class="form-check">
+						<input class="form-check-input" type="radio" name="gameType" id="default" value="default" checked>
+						<label class="form-check-label" for="default">Default</label>
+					</div>
+					<div class="form-check">
+						<input class="form-check-input" type="radio" name="gameType" id="powered-up" value="powered">
+						<label class="form-check-label" for="powered-up">Powered Up</label>
+					</div>
+				</div>
+			</div>
+			<!-- Game Sections -->
 			<div class="row w-100">
 				<!-- Pong Section -->
 				<div class="col-md-6 text-center d-flex flex-column align-items-center">
 					<img src="/static/media/assets/pongsplash.png" alt="Pong Game" class="img-fluid mt-2" style="width: 100%; height: auto;">
-					<div class="row w-100 mt-3">
-						<div class="col-md-6">
-							<div class="card bg-dark text-white w-100" style="border: 1px solid #343a40; opacity: 0.8;">
-								<div class="card-body">
-									<h5 class="card-title text-center">How To Play</h5>
-									<p class="card-text">
-										Player 1: A and D<br>
-										Player 2: J and L
-									</p>
-								</div>
-							</div>
-						</div>
-						<div class="col-md-6">
-							<div class="card bg-dark text-white w-100" style="border: 1px solid #343a40; opacity: 0.8;">
-								<div class="card-body">
-									<h5 class="card-title text-center">Select Game Mode</h5>
-									<div class="form-check">
-										<input class="form-check-input" type="radio" name="gameMode" id="pvp" value="1" checked>
-										<label class="form-check-label" for="pvp">Player vs Player</label>
-									</div>
-									<div class="form-check">
-										<input class="form-check-input" type="radio" name="gameMode" id="ai" value="2">
-										<label class="form-check-label" for="ai">Play vs AI</label>
-									</div>
-									<div id="difficultyOptions" class="mt-3" style="display: none;">
-										<h6 class="text-center">Select Difficulty</h6>
-										<div class="form-check">
-											<input class="form-check-input" type="radio" name="gameMode" id="ai-easy" value="2">
-											<label class="form-check-label" for="ai-easy">Easy</label>
-										</div>
-										<div class="form-check">
-											<input class="form-check-input" type="radio" name="gameMode" id="ai-medium" value="3">
-											<label class="form-check-label" for="ai-medium">Medium</label>
-										</div>
-										<div class="form-check">
-											<input class="form-check-input" type="radio" name="gameMode" id="ai-hard" value="4">
-											<label class="form-check-label" for="ai-hard">Hard</label>
-										</div>
-										<div class="form-check">
-											<input class="form-check-input" type="radio" name="gameMode" id="ai-impossible" value="5">
-											<label class="form-check-label" for="ai-impossible">Impossible</label>
-										</div>
-									</div>
-									<h5 class="card-title text-center mt-3">Select Game Type</h5>
-									<div class="form-check">
-										<input class="form-check-input" type="radio" name="gameType" id="default" value="default" checked>
-										<label class="form-check-label" for="default">Default</label>
-									</div>
-									<div class="form-check">
-										<input class="form-check-input" type="radio" name="gameType" id="powered-up" value="powered">
-										<label class="form-check-label" for="powered-up">Powered Up</label>
-									</div>
-								</div>
-							</div>
+					<div class="card bg-dark text-white mt-3 w-100" style="border: 1px solid #343a40; opacity: 0.8;">
+						<div class="card-body">
+							<h5 class="card-title text-center">How To Play</h5>
+							<p class="card-text">
+								Player 1: A and D<br>
+								Player 2: J and L
+							</p>
 						</div>
 					</div>
 					<div class="d-flex justify-content-center mt-4">
