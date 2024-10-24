@@ -1,4 +1,5 @@
 import Header from '../components/Header.js';
+import background from '../components/background.js'
 import Footer from '../components/Footer.js';
 import Home from '../components/pages/Home.js';
 import CreateAccount from '../components/pages/CreateAccount.js';
@@ -114,6 +115,9 @@ function initSPA() {
 			navigate(path);
 		}
 	});
+
+	const videoMusicPlayer = background();
+	document.body.appendChild(videoMusicPlayer);
 
 	// Directly render the initial path if it's a game path
 	if (initialPath === '/asteroids' || initialPath === '/pong') {

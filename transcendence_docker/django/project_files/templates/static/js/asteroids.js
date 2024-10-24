@@ -889,7 +889,7 @@ class Game {
 					LivesImage.position.set(i * 5 - 7.5, -44, 16);
 				}
 				else if (this.gameMode === '1') {
-					LivesImage.position.set(i * 5 - 7.5, -44, 16); // needs adjusting!
+					LivesImage.position.set(i * -4 - 5, -44, 16); // needs adjusting!
 				}
 				this.scene.add(LivesImage);
 				this.lives1.push(LivesImage);
@@ -904,7 +904,7 @@ class Game {
 			this.loader.load('/static/media/assets/lives.png', (livesTex) => {
 				const imageMaterial = new THREE.MeshBasicMaterial({ map: livesTex, transparent: true, opacity: 1, depthTest: true, depthWrite: false });
 				const LivesImage = new THREE.Mesh(imageGeometry, imageMaterial);
-				LivesImage.position.set(i * 5 - 7.5, -40, 16); // needs adjusting!!
+				LivesImage.position.set(i * 4 + 5, -44, 16); // needs adjusting!!
 				this.scene.add(LivesImage);
 				this.lives2.push(LivesImage);
 				LivesImage.material.needsUpdate = true;
@@ -970,7 +970,7 @@ class Game {
 		const box1Geometry = new THREE.PlaneGeometry(13, 1.5);
 		const box1Material = new THREE.MeshBasicMaterial({ color: 0x808080})
 		this.shieldBarBox2 = new THREE.Mesh(box1Geometry, box1Material);
-		this.shieldBarBox2.position.set(this.boundaryX - 13, this.boundaryY - 0.5, 16);
+		this.shieldBarBox2.position.set(this.boundaryX - 13, this.boundaryY, 16);
 		this.scene.add(this.shieldBarBox2);
 		const barGeometry = new THREE.PlaneGeometry(10, 1);
 		const barMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
