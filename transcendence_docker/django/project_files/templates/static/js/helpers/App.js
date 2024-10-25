@@ -10,6 +10,7 @@ import AboutUs from '../components/pages/AboutUs.js';
 import Asteroids from '../asteroids.js';
 import Pong from '../pong.js';
 import Profile from "../components/pages/Profile.js";
+import ProfileFriend from "../components/pages/ProfileFriend.js";
 import LocalPlay, { getSelectedGameMode, getSelectedGameType } from '../components/pages/LocalPlay.js';
 
 export default function App() {
@@ -32,7 +33,8 @@ const routes = {
 	'/asteroids': Asteroids,
 	'/pong': Pong,
 	'/aboutus': AboutUs,
-	'/profile': Profile
+	'/profile': Profile,
+	'/profileFriend': ProfileFriend
 };
 
 let currentGameI = null;

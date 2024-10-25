@@ -1,4 +1,5 @@
-// Assuming you have the paths to the images
+import { navigate } from '../../helpers/App.js';
+
 const avatarPaths = [
 	'/static/media/assets/ships/splash/1.png',
 	'/static/media/assets/ships/splash/7.png',
@@ -10,6 +11,8 @@ const avatarPaths = [
 	'/static/media/assets/ships/splash/9.png',
 	'/static/media/assets/ships/splash/8.png'
 ];
+
+export let currentFriend = '';
 
 const colorNames = [
 	'00ff00',
@@ -175,17 +178,23 @@ export default function DashBoard() {
 								<div class="card-body" id="friend-message"></div>
 							</form>
 							<div class="card-header">Friends: ${matchHistory.friends_count}</div>
-							<div class="card-body">
+							<div class="card-body" id="friends-list">
 							${matchHistory.friends.map(friend => `
 							<p>
       							${friend ? friend : 'You currently have no friends.'}
       							${friend ? `
-      							  <img src="/static/media/icons/chat-icon.png" 
+      								<img src="/static/media/icons/chat-icon.png" 
       							       class="chat-icon ml-2" 
       							       alt="Chat" 
       							       style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);" 
       							       data-friend="${friend}"
       							       title="Chat with ${friend}">
+									<img src="/static/media/icons/profile.png" 
+      							       class="profile-icon ml-2" 
+      							       alt="Profile-friend" 
+      							       style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);" 
+      							       data-friend="${friend}"
+      							       id="Profile-id-${friend}"
       							` : ''}
     						</p>
 						`).join('')}
@@ -251,6 +260,15 @@ export default function DashBoard() {
 		const avatarElement = $dashboard.querySelector('#avatar');
 		const avatarOptions = $dashboard.querySelectorAll('.avatar-option');
 		const colorOptions = $dashboard.querySelectorAll('.color-option');
+		const profileIcons = document.querySelectorAll('.profile-icon');
+
+		profileIcons.forEach(profile => {
+			profile.addEventListener('click', function() {
+				const friend = profile.getAttribute('data-friend');
+				profileFriend(friend);
+
+			})
+		})
 
 		avatarOptions.forEach(option => {
 			option.addEventListener('click', function() {
@@ -324,10 +342,23 @@ export default function DashBoard() {
 
 		if (response.ok) {
 			friendMessage.innerHTML = '<p class="text-success">Friend request sent successfully!</p>';
+			setTimeout(() => {
+				friendMessage.innerHTML = '<p </p>';
+			}, 2000);
 		} else {
 			friendMessage.innerHTML = `<p class="text-danger">Failed to send friend request! ${result.message} </p>`;
+			setTimeout(() => {
+				friendMessage.innerHTML = '<p </p>';
+			}, 2000);
 		}
 	});
+
+		function profileFriend(friendName) {
+			console.log('friend que chega', friendName);
+			currentFriend = friendName;
+			console.log('friend que salva', currentFriend);
+			navigate('/profileFriend');
+		}
 
 	matchHistory.friend_requests.forEach(friend_request => {
 		// Adding event listener for the accept button

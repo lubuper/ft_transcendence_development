@@ -248,3 +248,26 @@ def get_ship_and_color(request):
 		'ship': ship_number,
 		'color': hexagon_color,
 	})
+
+def get_profile_friend(request):
+    if request.method == 'POST':
+            data = json.loads(request.body)
+            username = data.get('username')  # Retrieve the friend's username
+
+            try:
+                # Retrieve the friend's user object based on username
+                friend_user = User.objects.get(username=username)
+
+                # Fetch the friend's match history using the user's ID
+                match_history = MatchHistory.objects.filter(user=friend_user).values('timestamp', 'score', 'result', 'game')
+                profile = Profile.objects.get(user=friend_user)
+
+                return JsonResponse({
+                    'match_history': list(match_history),
+                    'profile_picture': profile.profile_picture.url if profile.profile_picture else None},
+                safe=False)
+
+            except User.DoesNotExist:
+                # Handle case where the username does not exist
+                return JsonResponse({'message': 'User not found'}, status=404)
+    return JsonResponse({'message': 'Invalid request'}, status=400)
