@@ -72,6 +72,8 @@ class Game {
 		this.powerups = [];
 		this.powerupTimer = 0;
 		this.lastAITime = 0;
+		this.aiMoveFlag = 0;
+		this.aiTimeFlag = 0;
 	}
 
 	async fetchShipAndColor() {
@@ -365,7 +367,7 @@ class Game {
 		this.ball = new THREE.Mesh(geometry_ball, ball_tex);
 		this.scene.add(this.ball);
 		this.ball.position.set(0, 0, -0.01);
-		this.ball.velocity = new THREE.Vector3(0.02, 0.02, 0);
+		this.ball.velocity = new THREE.Vector3(-0.02, 0.02, 0);
 		this.ballLastPosition = { x: this.ball.position.x, y: this.ball.position.y };
 	}
 
@@ -726,12 +728,25 @@ class Game {
 	}
 
 	beginnerAI() {
-		if (this.ball.position.y > this.player2.position.y + 0.1 && this.player2.position.y <= this.maxY) {
+		const currentTime = performance.now();
+		if (currentTime - this.lastAITime > 999) {
+			if (this.ball.position.y > this.player2.position.y + 0.1) {
+				this.aiMoveFlag = 1;
+			}
+			else if (this.ball.position.y < this.player2.position.y - 0.1) {
+				this.aiMoveFlag = 2;
+			}
+			else {
+				this.aiMoveFlag = 0;
+			}
+			this.lastAITime = currentTime;
+		}
+		if (this.aiMoveFlag === 1 && this.player2.position.y <= this.maxY) {
 			this.player2.position.y += 0.03;
 			this.ship2.position.y += 0.03;
 			this.tiltShip(1);
 		}
-		else if (this.ball.position.y < this.player2.position.y - 0.1 && this.player2.position.y >= this.minY) {
+		else if (this.aiMoveFlag === 2 && this.player2.position.y >= this.minY) {
 			this.player2.position.y -= 0.03;
 			this.ship2.position.y -= 0.03;
 			this.tiltShip(-1);
@@ -742,19 +757,19 @@ class Game {
 	}
 
 	advancedAI() {
-		const currentTime = Date.now();
-		if (currentTime - this.lastAITime < 1000) {
-			return;
-		}
 		if (this.ball.velocity.x > 0) {
-			let timeToReachGoal = Math.abs((this.player2.position.x - this.ball.position.x) / this.ball.velocity.x); // time = (Pposx - Bposx) / Bvel
-			let predictedY = this.ball.position.y + (this.ball.velocity.y * timeToReachGoal); // y = Bposy + (Bvel * time)
-			if (predictedY > this.player2.position.y + 0.1 && this.player2.position.y <= this.maxY) {
+			const currentTime = performance.now();
+			if (currentTime - this.lastAITime > 999) {
+				let timeToReachGoal = Math.abs((this.player2.position.x - this.ball.position.x) / this.ball.velocity.x); // time = (Paddle_posX - Ball_posX) / Ball_velocityX
+				this.aiMoveFlag = this.ball.position.y + (this.ball.velocity.y * timeToReachGoal); // y = Ball posY + (Ball_velocityY * time)
+				this.lastAITime = currentTime;
+			}
+			if (this.aiMoveFlag > this.player2.position.y + 0.1 && this.player2.position.y <= this.maxY) {
 				this.player2.position.y += 0.03;
 				this.ship2.position.y += 0.03;
 				this.tiltShip(1); // Tilt right
 			}
-			else if (predictedY < this.player2.position.y - 0.1 && this.player2.position.y >= this.minY) {
+			else if (this.aiMoveFlag < this.player2.position.y - 0.1 && this.player2.position.y >= this.minY) {
 				this.player2.position.y -= 0.03;
 				this.ship2.position.y -= 0.03;
 				this.tiltShip(-1); // Tilt left
@@ -766,34 +781,33 @@ class Game {
 	}
 
 	normalAI() {
-		const currentTime = Date.now();
-		if (currentTime - this.lastAITime < 1000) {
-			return;
-		}
-		this.tiltShip(0);
-		if (this.ball.velocity.x > 0 && this.ball.position.x >= 0) {
-			let timeToReachGoal = Math.abs((this.player2.position.x - this.ball.position.x) / this.ball.velocity.x);
-			let totalYDistance = this.ball.velocity.y * timeToReachGoal;
-			let fieldHeight = this.maxY - this.minY;
-			let bounces = Math.floor(Math.abs(totalYDistance) / fieldHeight);
-			let predictedY;
-			if (bounces % 2 == 0) {
-				predictedY = this.ball.position.y + (totalYDistance % fieldHeight);
-				if (predictedY > this.maxY) {
-					predictedY = this.maxY - (predictedY - this.maxY);
+		if (this.ball.velocity.x > 0) {
+			const currentTime = performance.now();
+			if (currentTime - this.lastAITime > 999) {
+				let timeToReachGoal = Math.abs((this.player2.position.x - this.ball.position.x) / this.ball.velocity.x);
+				let totalYDistance = this.ball.velocity.y * timeToReachGoal;
+				let fieldHeight = this.maxY - this.minY;
+				let bounces = Math.floor(Math.abs(totalYDistance) / fieldHeight);
+				if (bounces % 2 == 0) {
+					this.aiMoveFlag = this.ball.position.y + (totalYDistance % fieldHeight);
+					if (this.aiMoveFlag > this.maxY) {
+						this.aiMoveFlag = this.maxY - (this.aiMoveFlag - this.maxY);
+					}
+				} else {
+					this.aiMoveFlag = this.ball.position.y + fieldHeight - (totalYDistance % fieldHeight);
+					if (this.aiMoveFlag < this.minY) {
+						this.aiMoveFlag = this.minY + (this.minY - this.aiMoveFlag);
+					}
 				}
-			} else {
-				predictedY = this.ball.position.y + fieldHeight - (totalYDistance % fieldHeight);
-				if (predictedY < this.minY) {
-					predictedY = this.minY + (this.minY - predictedY);
-				}
+				this.lastAITime = currentTime;
 			}
-			if (predictedY < this.player2.position.y - 0.1 && this.player2.position.y >= this.minY) {
+			this.tiltShip(0);
+			if (this.aiMoveFlag < this.player2.position.y - 0.1 && this.player2.position.y >= this.minY) {
 				this.player2.position.y -= 0.03;
 				this.ship2.position.y -= 0.03;
 				this.tiltShip(-1); // Tilt left
 			}
-			if (predictedY > this.player2.position.y + 0.1 && this.player2.position.y <= this.maxY) {
+			if (this.aiMoveFlag > this.player2.position.y + 0.1 && this.player2.position.y <= this.maxY) {
 				this.player2.position.y += 0.03;
 				this.ship2.position.y += 0.03;
 				this.tiltShip(1); // Tilt right
@@ -802,15 +816,36 @@ class Game {
 	}
 
 	impossibleAI() {
-	//calculus
-	const currentTime = Date.now();
-		if (currentTime - this.lastAITime < 1000) {
-			return;
+		if (this.ball.velocity.x > 0 && this.ball.position.x === -2.3) {
+			const timeToReachGoal = Math.abs((this.player2.position.x - this.ball.position.x) / this.ball.velocity.x);
+			const totalYDistance = this.ball.velocity.y * timeToReachGoal;
+			const fieldHeight = this.boundaryY * 2;
+			const bounces = Math.floor(Math.abs(totalYDistance) / fieldHeight);
+			const remainingDistance = Math.abs(totalYDistance) % fieldHeight;
+			if (bounces % 2 === 0) {
+				this.aiMoveFlag = this.ball.position.y + (this.ball.velocity.y > 0 ? remainingDistance : -remainingDistance);
+			} else {
+				this.aiMoveFlag = this.ball.position.y + (this.ball.velocity.y > 0 ? -remainingDistance : remainingDistance);
+			}
+
+			if (this.aiMoveFlag > this.boundaryY) {
+				this.aiMoveFlag = this.boundaryY - (this.aiMoveFlag - this.boundaryY);
+			} else if (this.aiMoveFlag < -this.boundaryY) {
+				this.aiMoveFlag = -this.boundaryY + (-this.boundaryY - this.aiMoveFlag);
+			}
 		}
-
-	//movement
+		if (this.aiMoveFlag < this.player2.position.y - 0.1 && this.player2.position.y >= this.minY) {
+			this.player2.position.y -= 0.03;
+			this.ship2.position.y -= 0.03;
+			this.tiltShip(-1); // Tilt left
+		}
+		if (this.aiMoveFlag > this.player2.position.y + 0.1 && this.player2.position.y <= this.maxY) {
+			this.player2.position.y += 0.03;
+			this.ship2.position.y += 0.03;
+			this.tiltShip(1); // Tilt right
+		}
 	}
-
+	
 	gameControls() {
 		switch (this.gameMode) {
 			case '1':
@@ -854,6 +889,7 @@ class Game {
 				break;
 			case '5':
 				this.impossibleAI();
+				break;
 			default:
 				console.warn(`Unknown game mode: ${this.gameMode}`);
 				break;

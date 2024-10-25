@@ -43,7 +43,8 @@ let currentPath = null;
 
 export function navigate(path) {
 	console.log(`DEBUG: Navigating to: ${path}`);
-	if (path === currentPath) {
+	if (path === currentPath && !document.getElementById('user-logged-in')) {
+		refreshHeader();
 		return;
 	}
 	currentPath = path;
@@ -138,4 +139,12 @@ function initSPA() {
 	} else {
 		navigate(initialPath);
 	}
+}
+
+function refreshHeader() {
+	const $header = document.querySelector('header');
+	if ($header) {
+		$header.remove();
+	}
+	$root.prepend(Header());
 }
