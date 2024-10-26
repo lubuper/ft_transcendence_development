@@ -1,4 +1,6 @@
 import { navigate } from '../../helpers/App.js';
+import { setupChat } from './Client.js';
+
 
 const avatarPaths = [
 	'/static/media/assets/ships/splash/1.png',
@@ -217,7 +219,47 @@ export default function DashBoard() {
 			</div>
 		</div>
 	`;
+	const chatIcons = document.querySelectorAll('.chat-icon');
+	chatIcons.forEach(icon => {
+	    icon.addEventListener('click', (event) => {
+	        const friendName = event.currentTarget.getAttribute('data-friend');
+	        openChatBox(friendName);
+	    });
+	});
 
+	function openChatBox(friendName) {
+		currentFriend = friendName;
+		const shortName = friendName.length > 6 ? friendName.slice(0, 6) : friendName; // Limit to first 6 characters
+		const chatBox = document.createElement('div');
+		chatBox.classList.add('chat-popup');
+	
+		chatBox.innerHTML = `
+			<div class="chat-box">
+				<div class="chat-header">
+					<span>${shortName} Live-Chat</span>
+					<button class="close-btn">&times;</button>
+				</div>
+				<div class="messages" id="messages-${friendName}">
+					<!-- Messages will load here -->
+				</div>
+				<div class="input-container">
+					<input type="text" class="message-input" placeholder="Type your message...">
+					<button class="sender">SEND</button>
+				</div>
+			</div>
+		`;
+	
+		document.body.appendChild(chatBox);
+	
+		// Close the chat box when the X button is clicked
+		chatBox.querySelector('.close-btn').addEventListener('click', () => {
+			chatBox.remove();
+		});
+	
+		// Initialize chat functionality for the friend
+		setupChat(friendName);
+	}
+	
 	function calculateRankedStats(matchHistory, gameName) {
 		const stats = { wins: 0, total: 0 };
 		matchHistory.forEach(match => {

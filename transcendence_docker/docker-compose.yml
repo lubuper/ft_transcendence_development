@@ -19,3 +19,11 @@ services:
       - transcendence_db
     command: ["sh", "-c", "./wait_for_db.sh && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"]
 
+  socket_server:
+    build:
+      context: ./socket-server
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - web

@@ -27,37 +27,26 @@ body {
     justify-content: space-between;
 }
 
+/* Chat popup styling */
+.chat-popup {
+    position: fixed;
+    bottom: 100px; /* Place above input field */
+    right: 20px;
+    width: 300px;
+    background-color: #111;
+    border: 2px solid #0f0;
+    box-shadow: 0px 0px 20px #0f0;
+    padding: 10px;
+    z-index: 1000;
+    max-height: 250px; /* Limit height */
+    overflow-y: auto; /* Scroll if messages exceed height */
+}
+
 /* Chat box styling */
 .chat-box {
-    width: 70%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* Top bar styling */
-.top-bar {
     width: 100%;
     display: flex;
-    justify-content: space-around;
-    margin-bottom: 10px;
-}
-
-.top-bar button {
-    font-family: inherit;
-    background-color: black;
-    color: #0f0;
-    border: 2px solid #0f0;
-    padding: 10px;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    width: 134px;
-}
-
-.top-bar button:hover {
-    background-color: #0f0;
-    color: black;
+    flex-direction: column;
 }
 
 /* Messages styling */
@@ -65,7 +54,7 @@ body {
     border: 2px solid #0f0;
     background-color: black;
     color: white;
-    height: 300px;
+    height: 200px; /* Adjust height as needed */
     overflow-y: scroll;
     padding: 10px;
     display: flex;
@@ -113,7 +102,7 @@ body {
     background-color: black;
     color: white;
     border: 2px solid #0f0;
-    width: 100%; /* Takes up remaining space */
+    width: calc(100% - 60px); /* Takes up remaining space with button */
     font-family: inherit;
 }
 
@@ -126,7 +115,7 @@ body {
     font-family: inherit;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-left: 10px; /* Spacing between input and button */
+    width: 50px; /* Fixed width for button */
 }
 
 /* Friends list styling */
@@ -181,4 +170,29 @@ body {
     display: flex;
     justify-content: flex-end; /* Aligns the button to the right */
     margin-top: auto; /* Pushes the button to the bottom */
+}
+
+/* Additional styling for top bar and buttons */
+.top-bar {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 10px;
+}
+
+.top-bar button {
+    font-family: inherit;
+    background-color: black;
+    color: #0f0;
+    border: 2px solid #0f0;
+    padding: 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    width: 134px;
+}
+
+.top-bar button:hover {
+    background-color: #0f0;
+    color: black;
 }
