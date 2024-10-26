@@ -228,10 +228,16 @@ export default function DashBoard() {
 	});
 
 	function openChatBox(friendName) {
+		const existingChatBox = document.getElementById(`chat-box-${friendName}`);
+		if (existingChatBox) {
+			return; // Exit if the chat box is already open
+		}
+	
 		currentFriend = friendName;
 		const shortName = friendName.length > 6 ? friendName.slice(0, 6) : friendName; // Limit to first 6 characters
 		const chatBox = document.createElement('div');
 		chatBox.classList.add('chat-popup');
+		chatBox.id = `chat-box-${friendName}`; // Set a unique ID for each friend's chat box
 	
 		chatBox.innerHTML = `
 			<div class="chat-box">
@@ -251,15 +257,17 @@ export default function DashBoard() {
 	
 		document.body.appendChild(chatBox);
 	
-		// Close the chat box when the X button is clicked
+		// Close the chat box with animation when the X button is clicked
 		chatBox.querySelector('.close-btn').addEventListener('click', () => {
-			chatBox.remove();
+			chatBox.classList.add('fade-out'); // Add fade-out class for close animation
+			setTimeout(() => {
+				chatBox.remove(); // Remove the chat box after the animation finishes
+			}, 300); // Delay matches the duration of the fadeOut animation (0.3s)
 		});
 	
-		// Initialize chat functionality for the friend
-		setupChat(friendName);
-	}
-	
+		setupChat(friendName); // Initialize chat functionality for the friend
+	}	
+
 	function calculateRankedStats(matchHistory, gameName) {
 		const stats = { wins: 0, total: 0 };
 		matchHistory.forEach(match => {
