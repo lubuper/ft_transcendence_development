@@ -1,15 +1,16 @@
 /* Chat popup styling */
 .chat-popup {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 350px;
+    position: absolute;
+    bottom: 160px;
+    right: 300px;
+    width: 308px;
     background-color: #111;
     border: 2px solid #0f0;
     box-shadow: 0px 0px 10px #0f0;
     display: flex;
     flex-direction: column;
     z-index: 1000;
+    border-radius: 6px;
     animation: fadeIn 0.3s ease-in-out forwards; /* Animation on open */
 }
 
@@ -70,10 +71,12 @@
     color: white;
     border: 2px solid #0f0;
     font-family: 'Press Start 2P', cursive;
+     border-radius: 5px;
+    margin-right: 5px; /* Add margin to keep distance from Send button */
+    width: calc(100% - 80px); /* Adjust width to fit Send button properly */
 }
 
 .sender {
-    margin-left: 5px;
     padding: 10px;
     background-color: #0f0;
     color: black;
@@ -82,6 +85,11 @@
     cursor: pointer;
     width: 70px;
     text-transform: uppercase;
+    border-radius: 5px; /* Rounded corners for the Send button */
+    text-align: left; /* Align text to the left */
+    padding-left: 12px; /* Adjust the padding to move text to the left */
+    box-sizing: border-box; /* Ensure padding fits within button width */
+    white-space: nowrap; /* Prevent text wrap */
 }
 
 /* Animation for chat popup */
