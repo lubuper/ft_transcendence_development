@@ -12,13 +12,19 @@
     z-index: 1000;
     border-radius: 6px;
     animation: fadeIn 0.3s ease-in-out forwards; /* Animation on open */
+    overflow: hidden;
 }
 
 .chat-popup.fade-out {
     animation: fadeOut 0.3s ease-in-out forwards; /* Animation on close */
 }
 
-/* Chat header with close button */
+/* Hide content when minimized */
+.hidden {
+    display: none;
+}
+
+/* Chat header with close and minimize buttons */
 .chat-header {
     display: flex;
     justify-content: space-between;
@@ -29,12 +35,14 @@
     color: white;
 }
 
-.close-btn {
+.close-btn,
+.minimize-btn {
     background: none;
     border: none;
     color: #0f0;
     font-size: 18px;
     cursor: pointer;
+    margin-left: 5px;
 }
 
 /* Chat box styling */
@@ -42,6 +50,13 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+}
+
+/* Chat content (wrapping messages and input) */
+.chat-content {
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease; /* Smooth transition */
 }
 
 /* Messages styling */
@@ -71,7 +86,7 @@
     color: white;
     border: 2px solid #0f0;
     font-family: 'Press Start 2P', cursive;
-     border-radius: 5px;
+    border-radius: 5px;
     margin-right: 5px; /* Add margin to keep distance from Send button */
     width: calc(100% - 80px); /* Adjust width to fit Send button properly */
 }

@@ -243,14 +243,17 @@ export default function DashBoard() {
 			<div class="chat-box">
 				<div class="chat-header">
 					<span>${shortName} Live-Chat</span>
+					<button class="minimize-btn">-</button> <!-- Minimize Button -->
 					<button class="close-btn">&times;</button>
 				</div>
-				<div class="messages" id="messages-${friendName}">
-					<!-- Messages will load here -->
-				</div>
-				<div class="input-container">
-					<input type="text" class="message-input" placeholder="Type your message...">
-					<button class="sender">SEND</button>
+				<div class="chat-content"> <!-- Wrapping content to toggle visibility -->
+					<div class="messages" id="messages-${friendName}">
+						<!-- Messages will load here -->
+					</div>
+					<div class="input-container">
+						<input type="text" class="message-input" placeholder="Type your message...">
+						<button class="sender">SEND</button>
+					</div>
 				</div>
 			</div>
 		`;
@@ -265,8 +268,17 @@ export default function DashBoard() {
 			}, 300); // Delay matches the duration of the fadeOut animation (0.3s)
 		});
 	
+		// Minimize/maximize functionality for the chat box
+		const minimizeButton = chatBox.querySelector('.minimize-btn');
+		const chatContent = chatBox.querySelector('.chat-content');
+		minimizeButton.addEventListener('click', () => {
+			chatContent.classList.toggle('hidden'); // Toggle visibility
+			chatBox.style.height = chatContent.classList.contains('hidden') ? 'auto' : '400px'; // Adjust height based on state
+			minimizeButton.textContent = chatContent.classList.contains('hidden') ? '+' : '-'; // Change button text
+		});
+	
 		setupChat(friendName); // Initialize chat functionality for the friend
-	}	
+	}
 
 	function calculateRankedStats(matchHistory, gameName) {
 		const stats = { wins: 0, total: 0 };
