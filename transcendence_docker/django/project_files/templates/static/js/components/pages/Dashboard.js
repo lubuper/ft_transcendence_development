@@ -172,7 +172,7 @@ export default function DashBoard() {
 							</div>
 						</div>
 					</div>
-					<div class="col-md-3">
+					<div class="col-md-3 friends-column">
 						<div class="card bg-dark text-white mb-3">
 							<form id="send-friend-request">
 								<input type="text" class="form-control mb-3" id="searchInput" name="username" placeholder="Search friends to add...">
@@ -243,8 +243,10 @@ export default function DashBoard() {
 			<div class="chat-box">
 				<div class="chat-header">
 					<span>${shortName} Live-Chat</span>
+					<div>
 					<button class="minimize-btn">-</button> <!-- Minimize Button -->
 					<button class="close-btn">&times;</button>
+					</div>
 				</div>
 				<div class="chat-content"> <!-- Wrapping content to toggle visibility -->
 					<div class="messages" id="messages-${friendName}">
@@ -258,7 +260,7 @@ export default function DashBoard() {
 			</div>
 		`;
 	
-		document.body.appendChild(chatBox);
+		document.getElementsByClassName('friends-column')[0].appendChild(chatBox);
 	
 		// Close the chat box with animation when the X button is clicked
 		chatBox.querySelector('.close-btn').addEventListener('click', () => {
@@ -273,7 +275,7 @@ export default function DashBoard() {
 		const chatContent = chatBox.querySelector('.chat-content');
 		minimizeButton.addEventListener('click', () => {
 			chatContent.classList.toggle('hidden'); // Toggle visibility
-			chatBox.style.height = chatContent.classList.contains('hidden') ? 'auto' : '400px'; // Adjust height based on state
+			//chatBox.style.height = chatContent.classList.contains('hidden') ? 'auto' : '400px'; // Adjust height based on state
 			minimizeButton.textContent = chatContent.classList.contains('hidden') ? '+' : '-'; // Change button text
 		});
 	

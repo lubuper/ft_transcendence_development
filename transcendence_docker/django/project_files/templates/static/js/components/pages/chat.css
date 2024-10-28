@@ -1,8 +1,5 @@
 /* Chat popup styling */
 .chat-popup {
-    position: absolute;
-    bottom: 160px;
-    right: 300px;
     width: 308px;
     background-color: #111;
     border: 2px solid #0f0;
@@ -13,6 +10,7 @@
     border-radius: 6px;
     animation: fadeIn 0.3s ease-in-out forwards; /* Animation on open */
     overflow: hidden;
+    margin-top: 16px;
 }
 
 .chat-popup.fade-out {
@@ -21,7 +19,7 @@
 
 /* Hide content when minimized */
 .hidden {
-    display: none;
+    height: 0;
 }
 
 /* Chat header with close and minimize buttons */
