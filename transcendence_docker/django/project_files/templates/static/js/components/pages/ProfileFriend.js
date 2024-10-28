@@ -27,7 +27,7 @@ export default function ProfileFriend() {
             const astRank = calculateRankedStats2(userFriend.match_history, "Asteroids")
             $ProfileFriendForm.innerHTML = `
 			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative" style="background-color: rgba(0, 0, 0, 0.6); color: white;">
-                <div class="card bg-dark text-white mb-3" style="width: 300px;">
+                <div class="card bg-dark text-white mb-3" style="width: 400px;">
                 <div class="card-body text-center">
                 <img id="avatar" src="static/${userFriend.profile_picture}"
                      class="rounded-circle mb-3" 
@@ -48,6 +48,7 @@ export default function ProfileFriend() {
                 </p>
                 </div>
                 </div>
+                <button class="btn btn-purple btn-lg text-white shadow-lg mt-3" onclick="window.history.back()">Go Back To Dashboard</button>
             </div>
 	        `;
 

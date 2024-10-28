@@ -14,8 +14,8 @@ export default function Login() {
 						<label for="password" class="text-white">Password</label>
 						<input type="password" class="form-control" id="password" required>
 					</div>
-					<div id="login-message"></div>
 					<button type="submit" class="btn btn-purple btn-custom mt-3 text-white">Login</button>
+					<div id="login-message"></div>
 				</form>
 			</div>
 		</div>

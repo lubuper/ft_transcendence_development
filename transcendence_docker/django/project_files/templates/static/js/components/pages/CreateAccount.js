@@ -22,12 +22,8 @@ export default function CreateAccount() {
                         <label for="confirmPassword" class="text-white">Confirm Password</label>
                         <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
                     </div>
-<!--                    <div class="form-group">-->
-<!--                        <label for="captcha" class="text-white">Captcha</label>-->
-<!--                        <input type="text" class="form-control" id="captcha" name="captcha" required>-->
-<!--                    </div>-->
                     <button type="submit" class="btn btn-purple btn-custom mt-3 text-white">Create Account</button>
-                	<div id="message" class="text-white mt-3"></div>
+                    <div id="creat-account-message"></div>
                 </form>
             </div>
         </div>
@@ -52,21 +48,17 @@ export default function CreateAccount() {
 				body: JSON.stringify(data)
 			});
 
-			const messageDiv = document.getElementById('message');
-			messageDiv.innerText = '';  // Clear any previous messages
-			messageDiv.classList.remove('text-success', 'text-error');
+			const CAMessage = document.getElementById('creat-account-message');
 
 			const result = await response.json();
 
 			if (response.ok) {
-				messageDiv.innerText = 'Account created successfully!';
-				messageDiv.classList.add('text-success');  // not working
+				CAMessage.innerHTML = '<p class="text-success">Account created successfully!</p>';
 				setTimeout(() => {
 					navigate('/login');
-				}, 1000);
+				}, 2000);
 			} else {
-				messageDiv.innerText = 'Failed to create account: ' + (result.message || 'Unknown error');
-				messageDiv.classList.add('text-error');  // not working
+				CAMessage.innerHTML = `<p class="text-danger">Failed to create account: ${result.message || 'Unknown error'}</p>`;
 			}
 		} catch (error) {
 			console.error('Error:', error);
