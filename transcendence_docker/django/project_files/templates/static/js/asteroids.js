@@ -970,12 +970,12 @@ class Game {
 		const box1Geometry = new THREE.PlaneGeometry(13, 1.5);
 		const box1Material = new THREE.MeshBasicMaterial({ color: 0x808080})
 		this.shieldBarBox2 = new THREE.Mesh(box1Geometry, box1Material);
-		this.shieldBarBox2.position.set(this.boundaryX - 13, this.boundaryY, 16);
+		this.shieldBarBox2.position.set(this.boundaryX - 13, this.boundaryY - 0.5, 16);
 		this.scene.add(this.shieldBarBox2);
 		const barGeometry = new THREE.PlaneGeometry(10, 1);
 		const barMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 		this.shieldBar2 = new THREE.Mesh(barGeometry, barMaterial);
-		this.shieldBar2.position.set(this.boundaryX - 13, this.boundaryY - 	0.5, 17);
+		this.shieldBar2.position.set(this.boundaryX - 13, this.boundaryY - 0.5, 17);
 		this.scene.add(this.shieldBar2);
 	}
 	
