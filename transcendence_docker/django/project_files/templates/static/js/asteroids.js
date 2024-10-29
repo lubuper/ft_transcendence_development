@@ -933,7 +933,7 @@ class Game {
 				this.gameOver();
 				return 0;
 			}
-			else if (this.lives1.length >= this.player1Lives) {
+			if (this.lives1.length >= this.player1Lives) {
 				if (this.lives1.length > 0) {
 					const life1 = this.lives1.pop();
 					this.scene.remove(life1);
@@ -941,7 +941,7 @@ class Game {
 					life1.material.dispose();
 				}
 			}
-			else if (this.lives2.length >= this.player2Lives) {
+			if (this.lives2.length >= this.player2Lives) {
 				if (this.lives2.length > 0) {
 					const life2 = this.lives2.pop();
 					this.scene.remove(life2);
@@ -1087,7 +1087,7 @@ class Game {
 			particles: [],
 			lifetime: 60 // Adjust the lifetime as needed
 		};
-		const numParticles = Math.floor(Math.random() * 5) + 4;
+		const numParticles = Math.floor(Math.random() * 5) + 4 + size;
 		const colors = [0xffffff, 0xffff00, 0xff0000];
 		for (let i = 0; i < numParticles; i++) {
 			const particleSize = Math.random() * 0.2 + 0.1;
@@ -1425,6 +1425,7 @@ class Game {
 					const AIShip = this.AIShips[j];
 					if (this.checkCollision(projectile, AIShip)) {
 						this.playSound('/static/media/assets/sounds/explosion.mp3', 2);
+						this.createExplosion(AIShip.position.x, AIShip.position.y, 3);
 						this.scene.remove(AIShip);
 						this.AIShips.splice(j, 1);
 						this.scene.remove(projectile);

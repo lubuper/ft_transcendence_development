@@ -73,7 +73,7 @@ class Game {
 		this.powerupTimer = 0;
 		this.lastAITime = 0;
 		this.aiMoveFlag = 0;
-		this.aiTimeFlag = 0;
+		this.aiFirstTime = true;
 	}
 
 	async fetchShipAndColor() {
@@ -442,14 +442,16 @@ class Game {
 				break;
 			case 'extralife':
 				if (player == this.player1) {
-					this.scorePlayer2--;
+					if (this.scorePlayer2 > 0) {
+						this.scorePlayer2--;
+					}
 				}
 				else {
-					this.player1.score--;
+					if (this.scorePlayer1 > 0) {
+						this.scorePlayer1--;
+					}
 				}
-				this.updateScore(this.player1, this.player2);
-				console.log(this.scorePlayer1);
-				console.log(this.scorePlayer2);
+				this.updateScore(this.scorePlayer1, this.scorePlayer2);
 				break;
 		}
 	}
@@ -725,110 +727,31 @@ class Game {
 		}, 1000);
 	}
 
-	beginnerAI() {
-		if (this.ball.position.y > this.player2.position.y + 0.1) {
-			this.aiMoveFlag = 1;
-		}
-		else if (this.ball.position.y < this.player2.position.y - 0.1) {
-			this.aiMoveFlag = 2;
-		}
-		else {
-			this.aiMoveFlag = 0;
-		}
-		if (this.aiMoveFlag === 1 && this.player2.position.y <= this.maxY) {
-			this.player2.position.y += 0.03;
-			this.ship2.position.y += 0.03;
-			this.tiltShip(1);
-		}
-		else if (this.aiMoveFlag === 2 && this.player2.position.y >= this.minY) {
-			this.player2.position.y -= 0.03;
-			this.ship2.position.y -= 0.03;
-			this.tiltShip(-1);
-		}
-		else {
-			this.tiltShip(0);
-		}
-	}
-
-	advancedAI() {
-		if (this.ball.velocity.x > 0) {
-			const currentTime = performance.now();
-			if (currentTime - this.lastAITime > 999) {
-				let timeToReachGoal = Math.abs((this.player2.position.x - this.ball.position.x) / this.ball.velocity.x); // time = (Paddle_posX - Ball_posX) / Ball_velocityX
-				this.aiMoveFlag = this.ball.position.y + (this.ball.velocity.y * timeToReachGoal); // y = Ball posY + (Ball_velocityY * time)
-				this.lastAITime = currentTime;
-			}
-			if (this.aiMoveFlag > this.player2.position.y + 0.1 && this.player2.position.y <= this.maxY) {
-				this.player2.position.y += 0.03;
-				this.ship2.position.y += 0.03;
-				this.tiltShip(1); // Tilt right
-			}
-			else if (this.aiMoveFlag < this.player2.position.y - 0.1 && this.player2.position.y >= this.minY) {
-				this.player2.position.y -= 0.03;
-				this.ship2.position.y -= 0.03;
-				this.tiltShip(-1); // Tilt left
-			}
-			else {
-				this.tiltShip(0); // Tilt back to original position
-			}
-		}
-	}
-
-	normalAI() {
-		if (this.ball.velocity.x > 0) {
-			const currentTime = performance.now();
-			if (currentTime - this.lastAITime > 999) {
-				let timeToReachGoal = Math.abs((this.player2.position.x - this.ball.position.x) / this.ball.velocity.x);
-				let totalYDistance = this.ball.velocity.y * timeToReachGoal;
-				let fieldHeight = this.maxY - this.minY;
-				let bounces = Math.floor(Math.abs(totalYDistance) / fieldHeight);
-				if (bounces % 2 == 0) {
-					this.aiMoveFlag = this.ball.position.y + (totalYDistance % fieldHeight);
-					if (this.aiMoveFlag > this.maxY) {
-						this.aiMoveFlag = this.maxY - (this.aiMoveFlag - this.maxY);
-					}
-				} else {
-					this.aiMoveFlag = this.ball.position.y + fieldHeight - (totalYDistance % fieldHeight);
-					if (this.aiMoveFlag < this.minY) {
-						this.aiMoveFlag = this.minY + (this.minY - this.aiMoveFlag);
-					}
-				}
-				this.lastAITime = currentTime;
-			}
-			this.tiltShip(0);
-			if (this.aiMoveFlag < this.player2.position.y - 0.1 && this.player2.position.y >= this.minY) {
-				this.player2.position.y -= 0.03;
-				this.ship2.position.y -= 0.03;
-				this.tiltShip(-1); // Tilt left
-			}
-			if (this.aiMoveFlag > this.player2.position.y + 0.1 && this.player2.position.y <= this.maxY) {
-				this.player2.position.y += 0.03;
-				this.ship2.position.y += 0.03;
-				this.tiltShip(1); // Tilt right
-			}
-		}
-	}
-
-	impossibleAI() {
-		console.log("ball V = ", this.ball.velocity.x)
-		if (this.ball.velocity.x > 0 && this.ball.position.x < -2.2) {
-			console.log("YES!")
+	ultimateAI(difficulty) {
+		if (this.ball.velocity.x > 0 && this.ball.position.x < this.player1.position.x + 0.5) {
+			let difficulty_i = parseInt(difficulty, 10);
 			let ballX = this.ball.position.x;
 			let ballY = this.ball.position.y;
 			let ballVx = this.ball.velocity.x;
 			let ballVy = this.ball.velocity.y;
 
-			// Simulate the ball's movement until it reaches the AI paddle's x position
 			while (ballX < this.player2.position.x) {
 				ballX += ballVx;
 				ballY += ballVy;
-				// Check for wall bounces
-				if (ballY <= -this.boundaryY + this.ball.radius || ballY >= this.boundaryY - this.ball.radius) {
-					ballVy = -ballVy; // Reverse the y velocity
+				if (ballY + this.ball.geometry.parameters.radius > this.geoy / 2) {
+					ballY = this.geoy / 2 - this.ball.geometry.parameters.radius;
+					ballVy *= -1;
+				}
+				if (ballY - this.ball.geometry.parameters.radius < -this.geoy / 2) {
+					ballY = -this.geoy / 2 + this.ball.geometry.parameters.radius;
+					ballVy *= -1;
 				}
 			}
-			//this.aiMoveFlag = Math.max(-this.boundaryY + paddleHeight / 2, Math.min(ballY, this.boundaryY - paddleHeight / 2));
-			this.aiMoveFlag = ballY;
+			this.aiMoveFlag = Math.max(this.minY, Math.min(ballY, this.maxY));
+			if (difficulty_i >= 2 && difficulty_i <= 4) {
+				const randomOffset = (Math.random() - 0.5) * (5 - difficulty_i);
+				this.aiMoveFlag += randomOffset;
+			}
 		}
 		if (this.aiMoveFlag < this.player2.position.y - 0.1 && this.player2.position.y >= this.minY) {
 			this.player2.position.y -= 0.03;
@@ -839,59 +762,44 @@ class Game {
 			this.player2.position.y += 0.03;
 			this.ship2.position.y += 0.03;
 			this.tiltShip(1); // Tilt right
-		}
-		else {
+		} else {
 			this.tiltShip(0);
 		}
 	}
 	
 	gameControls() {
-		switch (this.gameMode) {
-			case '1':
-				if (this.keysPressed['l'] && this.ship2) {
-					this.env.rotation.x += 0.007;
-					if (this.player2.position.y >= this.minY) {
-						this.player2.position.y -= 0.03;
-						this.ship2.position.y -= 0.03;
-						const tweenLeft = new TWEEN.Tween(this.ship2.rotation)
-							.to({ z: THREE.Math.degToRad(-30) }, 400) // Rotate 20 degrees to the left
-							.easing(TWEEN.Easing.Quadratic.Out)
-							.start();
-					}
-				}
-				if (this.keysPressed['j'] && this.ship2) {
-					this.env.rotation.x -= 0.007;
-					if (this.player2.position.y <= this.maxY) {
-						this.player2.position.y += 0.03;
-						this.ship2.position.y += 0.03;
-						const tweenRight = new TWEEN.Tween(this.ship2.rotation)
-							.to({ z: THREE.Math.degToRad(30) }, 400) // Rotate 20 degrees to the right
-							.easing(TWEEN.Easing.Quadratic.Out)
-							.start();
-					}
-				}
-				if (!this.keysPressed['j'] && !this.keysPressed['l'] && this.ship2) {
-					const tweenBack = new TWEEN.Tween(this.ship2.rotation)
-						.to({ z: THREE.Math.degToRad(-0) }, 400)
+		if (this.gameMode === '1') {
+			if (this.keysPressed['l'] && this.ship2) {
+				this.env.rotation.x += 0.007;
+				if (this.player2.position.y >= this.minY) {
+					this.player2.position.y -= 0.03;
+					this.ship2.position.y -= 0.03;
+					const tweenLeft = new TWEEN.Tween(this.ship2.rotation)
+						.to({ z: THREE.Math.degToRad(-30) }, 400) // Rotate 20 degrees to the left
 						.easing(TWEEN.Easing.Quadratic.Out)
 						.start();
 				}
-				break;
-			case '2':
-				this.beginnerAI();
-				break;
-			case '3':
-				this.advancedAI();
-				break;
-			case '4':
-				this.normalAI();
-				break;
-			case '5':
-				this.impossibleAI();
-				break;
-			default:
-				console.warn(`Unknown game mode: ${this.gameMode}`);
-				break;
+			}
+			if (this.keysPressed['j'] && this.ship2) {
+				this.env.rotation.x -= 0.007;
+				if (this.player2.position.y <= this.maxY) {
+					this.player2.position.y += 0.03;
+					this.ship2.position.y += 0.03;
+					const tweenRight = new TWEEN.Tween(this.ship2.rotation)
+						.to({ z: THREE.Math.degToRad(30) }, 400) // Rotate 20 degrees to the right
+						.easing(TWEEN.Easing.Quadratic.Out)
+						.start();
+				}
+			}
+			if (!this.keysPressed['j'] && !this.keysPressed['l'] && this.ship2) {
+				const tweenBack = new TWEEN.Tween(this.ship2.rotation)
+					.to({ z: THREE.Math.degToRad(-0) }, 400)
+					.easing(TWEEN.Easing.Quadratic.Out)
+					.start();
+			}
+		}
+		else if (this.gameMode === '2' || this.gameMode === '3' || this.gameMode === '4' || this.gameMode === '5') {
+			this.ultimateAI(this.gameMode);
 		}
 	}
 
@@ -1095,11 +1003,11 @@ class Game {
 		}
 		if (this.keysPressed['w'] && this.player1.position.x <= 0) {
 			this.player1.position.x += 0.03;
-		}
+		} */
 		if (this.keysPressed['c']) {
 			this.cameratoggle = (this.cameratoggle + 1) % 3;
 			this.keysPressed['c'] = false;
-		} */
+		}
 		this.gameControls();
 		this.ball.position.add(this.ball.velocity);
 		// Check for scoring
