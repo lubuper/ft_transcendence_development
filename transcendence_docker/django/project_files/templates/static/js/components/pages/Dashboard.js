@@ -205,9 +205,10 @@ export default function DashBoard() {
 							<div class="card-body">
 							${matchHistory.friend_requests.length > 0 ? 
 								matchHistory.friend_requests.map(friend_request => `
-									${friend_request}
+									<p>${friend_request}
 									<button id="AcceptFriendRequest-${friend_request}" type="button" class="btn btn-success btn-sm ml-2">✔️</button>
             						<button id="RejectFriendRequest-${friend_request}" type="button" class="btn btn-danger btn-sm ml-2">X</button>
+            						</p>
 								`).join('') : 
 								'<p>You currently have no friend requests.</p>'
 							}

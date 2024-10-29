@@ -17,7 +17,7 @@ export default function Profile() {
             // console.log(user)
 
             const profilePicHTML = user.profile_picture
-                ? `<img src="static/${user.profile_picture}" alt="${user.username}'s profile picture" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 20px;">`
+                ? `<img src="${user.profile_picture}" alt="${user.username}'s profile picture" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 20px;">`
                 : '<div>No profile picture available</div>';
 
             $ProfileForm.innerHTML = `
