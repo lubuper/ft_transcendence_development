@@ -430,8 +430,10 @@ class Game {
 					.start();
 				break;
 			case 'ballSpeedUp':
-				this.ball.velocity.x *= 1.2;
-				this.ball.velocity.y *= 1.2;
+				if (Math.abs(this.ball.velocity.x) < 0.1) {
+					this.ball.velocity.x *= 1.2;
+					this.ball.velocity.y *= 1.2;
+				}
 				break;
 			case 'invertSpeed':
 				this.ball.velocity.x *= -1;
@@ -896,7 +898,9 @@ class Game {
 			this.ball.position.y + this.ball.geometry.parameters.radius > player1Bounds.bottom &&
 			this.ball.position.y - this.ball.geometry.parameters.radius < player1Bounds.top) {
 			// Reflect the ball's X velocity
-			this.ball.velocity.x *= -1.04;
+			if (Math.abs(this.ball.velocity.x) < 0.1) {
+				this.ball.velocity.x *= -1.04;
+			}
 			// Adjust the ball's position to avoid sticking
 			this.ball.position.x = player1Bounds.right + this.ball.geometry.parameters.radius + 0.05;
 			this.player1pup = true;
@@ -920,7 +924,9 @@ class Game {
 			this.ball.position.y + this.ball.geometry.parameters.radius > player2Bounds.bottom &&
 			this.ball.position.y - this.ball.geometry.parameters.radius < player2Bounds.top) {
 			// Reflect the ball's X velocity
-			this.ball.velocity.x *= -1.04;
+			if (Math.abs(this.ball.velocity.x) < 0.1) {
+				this.ball.velocity.x *= -1.04;
+			}
 			// Adjust the ball's position to avoid sticking
 			this.ball.position.x = player2Bounds.left - this.ball.geometry.parameters.radius - 0.05;
 			this.player1pup = false;
@@ -1010,6 +1016,7 @@ class Game {
 		}
 		this.gameControls();
 		this.ball.position.add(this.ball.velocity);
+		console.log(this.ball.velocity);
 		// Check for scoring
 		if (this.scorePlayer2 >= 5)
 			this.gameOver();
