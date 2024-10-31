@@ -23,6 +23,9 @@ from .models import *
 def homepage(request):
     return render(request, 'index.html')
 
+def lobby(request):
+	return render(request, 'chat/lobby.html')
+
 @login_required
 def profile(request):
     user = request.user

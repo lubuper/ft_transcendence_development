@@ -22,6 +22,7 @@ urlpatterns = [
     path('save-customization/', save_customization, name='save_customization'),
     path('api/get-ship-and-color/', get_ship_and_color, name='get-ship-and-color'),
     path('get-profile-friend/', get_profile_friend, name='get_profile_friend'),
+	path('lobby/', views.lobby, name='lobby'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

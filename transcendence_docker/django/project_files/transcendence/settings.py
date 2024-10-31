@@ -31,6 +31,7 @@ ALLOWED_HOSTS = [ '0.0.0.0', 'localhost', '10.11.5.2' ]
 # Application definition
 
 INSTALLED_APPS = [
+	'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,6 +42,8 @@ INSTALLED_APPS = [
     'friends',
     'chat',
 ]
+
+ASGI_APPLICATION = 'transcendence.agsi.application'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

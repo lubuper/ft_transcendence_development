@@ -3,7 +3,7 @@ FROM debian:bullseye
 RUN apt-get update && \
     apt upgrade -y && \
     apt install -y python3-pip netcat && \
-    pip3 install django psycopg2-binary
+    pip3 install django psycopg2-binary channels
 
 
 RUN django-admin startproject transcendence
