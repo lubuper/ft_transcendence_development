@@ -63,7 +63,9 @@ export default function Profile() {
 
                 console.log('aqui============')
 
-                const formPData = new FormData(formP);
+                const form = document.getElementById('profile-form');
+
+                const formPData = new FormData(form);
 
                 const data = Object.fromEntries(formPData.entries());
 
@@ -76,7 +78,7 @@ export default function Profile() {
                             // 'Content-Type': 'application/json',
                             'X-CSRFToken': getCookie('csrftoken') // For CSRF protection
                         },
-                        body: JSON.stringify(data)
+                        body: formPData,
                     });
 
                     const messageDivP = document.getElementById('message');

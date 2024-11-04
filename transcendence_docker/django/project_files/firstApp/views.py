@@ -16,6 +16,8 @@ import sys
 from django.db import IntegrityError
 from django.views.decorators.http import require_POST
 from friends.models import Relationship
+from django.shortcuts import get_object_or_404
+from django.core.exceptions import ValidationError
 
 # Create your views here.
 from .models import *
@@ -118,15 +120,14 @@ def update_profile(request):
     if request.method == 'POST':
 
         user = request.user
-
-        data = json.loads(request.body)
+        profile = get_object_or_404(Profile, user=user)
 
         profile_picture = request.FILES.get('profile-picture')
 
-        new_email = data.get('email')
-        old_password = data.get('password')
-        new_password = data.get('new-password')
-        new_confirm_password = data.get('new-confirmPassword')
+        new_email = request.POST.get('email')
+        old_password = request.POST.get('password')
+        new_password = request.POST.get('new-password')
+        new_confirm_password = request.POST.get('new-confirmPassword')
 
         if not check_password(old_password, user.password):
             return JsonResponse({'message': 'Wrong password!'}, status=400)
@@ -144,12 +145,11 @@ def update_profile(request):
             user.password = make_password(new_password)  # Hash the new password
 
         if profile_picture:
-                    profile, created = Profile.objects.get_or_create(user=user)
-                    if profile.profile_picture and profile.profile_picture.name != 'profile_pics/default_profile.png':
-                        if os.path.isfile(profile.profile_picture.path):
-                            os.remove(profile.profile_picture.path)
-                    profile.profile_picture = profile_picture
-                    profile.save()
+                    try:
+                        profile.profile_picture = profile_picture
+                        profile.save()
+                    except ValidationError as e:
+                        return JsonResponse({"error": str(e)}, status=400)
 
         user.save()
 
