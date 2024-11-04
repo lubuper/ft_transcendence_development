@@ -27,7 +27,13 @@ export default function Profile() {
                 <form id="profile-form" enctype="multipart/form-data">
                     <div class="form-group">
                          <label for="profile-picture" class="text-white">Profile Picture</label>
-                         <input type="file" class="form-control" id="profile-picture" name="profile-picture" accept="image/*">
+                         <input type="file" class="form-control" id="profile-picture" name="profile-picture" accept="image/*" >
+                    </div>
+                    <div id="previewContainer" style="display:none;">
+                        <div style="width: 300px; height: 300px; border-radius: 50%; overflow: hidden;">
+                            <img id="imagePreview" style="max-width: 100%;" />
+                        </div>
+                        <button type="button" id="cropButton">Crop & Upload</button>
                     </div>
                     <div class="form-group">
                         <label for="username" class="text-white">Username</label>
@@ -73,6 +79,70 @@ export default function Profile() {
                 });
             }
 
+            let cropper;
+            let croppedImageBlob = null;
+            const fileInput = document.getElementById('profile-picture');
+            const cropButton = document.getElementById('cropButton');
+
+            console.log('fileInput:', fileInput);
+            console.log('cropButton:', cropButton);
+
+            fileInput.addEventListener('change', async function() {
+                event.preventDefault();
+                console.log('aqui111111111')
+                const file = event.target.files[0];
+                if (!file) return;
+
+                if (!file.type.startsWith('image/')) {
+                    alert("Please select a valid image file.");
+                    return;
+                }
+
+                const imagePreview = document.getElementById('imagePreview');
+                imagePreview.src = URL.createObjectURL(file);
+
+                // Show the preview container
+                document.getElementById('previewContainer').style.display = 'block';
+
+                if (cropper) {
+                    cropper.destroy();
+                }
+
+                cropper = new Cropper(imagePreview, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    cropBoxResizable: false,
+                    cropBoxMovable: false,
+                    background: false,
+                    ready() {
+                        const cropBoxData = cropper.getCropBoxData();
+                        const canvasData = cropper.getCanvasData();
+                        cropper.setCropBoxData({
+                            left: cropBoxData.left,
+                            top: cropBoxData.top,
+                            width: canvasData.width,
+                            height: canvasData.width,
+                        });
+                    },
+                });
+            });
+
+            cropButton.addEventListener('click', async function() {
+                event.preventDefault();
+                console.log('aqui222222')
+                if (!cropper) return;
+
+                // Get the cropped image as a Blob
+                const canvas = cropper.getCroppedCanvas({
+                    width: 300,
+                    height: 300,
+                });
+                canvas.toBlob((blob) => {
+                    croppedImageBlob = blob;  // Store the cropped image blob
+                    alert("Image cropped successfully! You can now submit the form.");
+                }, 'image/jpeg');
+            });
+
             const formP = $ProfileForm.querySelector('#profile-form');
 
             formP.addEventListener('submit', async (event) => {
@@ -96,6 +166,10 @@ export default function Profile() {
                         await validateImage(profilePicture);
                     } catch (error) {
                         alert("Please upload a valid image file.");
+                        return;
+                    }
+                    if (!croppedImageBlob) {
+                        alert("Please select and crop an image first.");
                         return;
                     }
                 }
