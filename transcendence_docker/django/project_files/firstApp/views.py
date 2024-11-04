@@ -125,9 +125,9 @@ def update_profile(request):
         profile_picture = request.FILES.get('profile-picture')
 
         new_email = request.POST.get('email')
-        old_password = request.POST.get('password')
         new_password = request.POST.get('new-password')
         new_confirm_password = request.POST.get('new-confirmPassword')
+        old_password = request.POST.get('old-password')
 
         if not check_password(old_password, user.password):
             return JsonResponse({'message': 'Wrong password!'}, status=400)
@@ -145,6 +145,8 @@ def update_profile(request):
             user.password = make_password(new_password)  # Hash the new password
 
         if profile_picture:
+                    if not profile_picture.content_type.startswith('image/'):
+                                    return JsonResponse({"error": "Invalid file type. Please upload an image file."}, status=400)
                     try:
                         profile.profile_picture = profile_picture
                         profile.save()

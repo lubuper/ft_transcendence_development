@@ -38,10 +38,6 @@ export default function Profile() {
                         <input type="email" class="form-control" id="email" name="email" value="${user.email}" required>
                     </div>
                     <div class="form-group">
-                        <label for="password" class="text-white">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
-                    <div class="form-group">
                         <label for="new-password" class="text-white">New Password</label>
                         <input type="password" class="form-control" id="new-password" name="new-password">
                     </div>
@@ -49,12 +45,33 @@ export default function Profile() {
                         <label for="new-confirmPassword" class="text-white">Confirm New Password</label>
                         <input type="password" class="form-control" id="new-confirmPassword" name="new-confirmPassword">
                     </div>
+                    <div class="form-group">
+                        <label for="password" class="text-white">Insert your Password to confirm changes</label>
+                        <input type="password" class="form-control" id="old-password" name="old-password" required>
+                    </div>
                     <button type="submit" class="btn btn-purple btn-custom mt-3 text-white">Save</button>
                 	<div id="message" class="text-white mt-3"></div>
                 </form>
             </div>
             </div>
 	        `;
+
+            function validateImage(file) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.src = URL.createObjectURL(file);
+
+                    img.onload = () => {
+                        URL.revokeObjectURL(img.src);
+                        resolve(true);  // It's an image
+                    };
+
+                    img.onerror = () => {
+                        URL.revokeObjectURL(img.src);
+                        reject(false);  // Not an image
+                    };
+                });
+            }
 
             const formP = $ProfileForm.querySelector('#profile-form');
 
@@ -70,6 +87,19 @@ export default function Profile() {
                 const data = Object.fromEntries(formPData.entries());
 
                 console.log('data: ', data)
+
+                const profilePicture = formPData.get('profile-picture');
+
+                if (profilePicture) {
+                    // Perform basic image validation
+                    try {
+                        await validateImage(profilePicture);
+                    } catch (error) {
+                        alert("Please upload a valid image file.");
+                        return;
+                    }
+                }
+
 
                 try {
                     const response = await fetch('/update_profile/', {
