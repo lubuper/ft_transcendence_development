@@ -49,6 +49,7 @@ export default function ProfileFriend() {
                 </div>
                 </div>
                 <button class="btn btn-danger btn-lg text-white shadow-lg mt-3 custom-button">Block</button>
+                <button class="btn btn-danger btn-lg text-white shadow-lg mt-3 custom-button">Remove Friend</button>
                 <button class="btn btn-purple btn-lg text-white shadow-lg mt-3 custom-button" onclick="window.history.back()">Go Back To Dashboard</button>
             </div>
 	        `;
