@@ -71,11 +71,9 @@ class Game {
 		this.lastDirection = 0;
 		this.powerups = [];
 		this.powerupTimer = 0;
+		this.lastAITime = 0;
 		this.aiMoveFlag = 0;
-		this.aiTopMov = 0;
-		this.aiBotMov = 0;
-		this.aiCalculusFlag = false;
-		this.aiMovingDirection = true;
+		this.aiFirstTime = true;
 	}
 
 	async fetchShipAndColor() {
@@ -732,8 +730,7 @@ class Game {
 	}
 
 	ultimateAI(difficulty) {
-		//calculus
-		if (this.ball.velocity.x > 0 && this.ball.position.x > 0.5 && this.aiCalculusFlag === false) {
+		if (this.ball.velocity.x > 0 && this.ball.position.x < this.player1.position.x + 0.5) {
 			let difficulty_i = parseInt(difficulty, 10);
 			let ballX = this.ball.position.x;
 			let ballY = this.ball.position.y;
@@ -753,35 +750,21 @@ class Game {
 				}
 			}
 			this.aiMoveFlag = Math.max(this.minY, Math.min(ballY, this.maxY));
-			//difficulty adjustment
 			if (difficulty_i >= 2 && difficulty_i <= 4) {
-				const randomOffset = (Math.random() - 0.5) * (5.1 - difficulty_i);
-				if (randomOffset < 0) {
-					this.aiMoveFlag += randomOffset;
-				}
-				else {
-					this.aiMoveFlag -= randomOffset;
-				}
+				const randomOffset = (Math.random() - 0.5) * (5 - difficulty_i);
+				this.aiMoveFlag += randomOffset;
 			}
-			this.aiCalculusFlag = true;
 		}
-		//humanlike behaviour
-		if (this.ball.velocity.x < 0 && this.ball.position.x <= this.player2.position.x - 1)
-		{
-			this.aiMoveFlag = 0;
-		}
-		//moving
 		if (this.aiMoveFlag < this.player2.position.y - 0.1 && this.player2.position.y >= this.minY) {
 			this.player2.position.y -= 0.03;
 			this.ship2.position.y -= 0.03;
 			this.tiltShip(-1); // Tilt left
 		}
-		else if (this.aiMoveFlag > this.player2.position.y + 0.1 && this.player2.position.y <= this.maxY) {
+		if (this.aiMoveFlag > this.player2.position.y + 0.1 && this.player2.position.y <= this.maxY) {
 			this.player2.position.y += 0.03;
 			this.ship2.position.y += 0.03;
 			this.tiltShip(1); // Tilt right
-		} 
-		else {
+		} else {
 			this.tiltShip(0);
 		}
 	}
@@ -947,7 +930,6 @@ class Game {
 			// Adjust the ball's position to avoid sticking
 			this.ball.position.x = player2Bounds.left - this.ball.geometry.parameters.radius - 0.05;
 			this.player1pup = false;
-			this.aiCalculusFlag = false;
 			if (this.keysPressed['l']) {
 				this.ball.velocity.y -= 0.02;
 			}
@@ -1034,6 +1016,7 @@ class Game {
 		}
 		this.gameControls();
 		this.ball.position.add(this.ball.velocity);
+		console.log(this.ball.velocity);
 		// Check for scoring
 		if (this.scorePlayer2 >= 5)
 			this.gameOver();
@@ -1044,7 +1027,6 @@ class Game {
 			this.shake = 0.05;
 			this.updateScore(this.scorePlayer1, this.scorePlayer2);
 			this.resetBall();
-			this.aiCalculusFlag = false;
 			this.aiMoveFlag = 0;
 		}
 		else if (this.ball.position.x - this.ball.geometry.parameters.radius < (-this.geox / 2 )) {

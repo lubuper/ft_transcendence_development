@@ -1,4 +1,4 @@
 from django.shortcuts import render
 
 def lobby(request):
-    return render(request, 'remote/lobby.html')
+    return render(request, 'chat/lobby.html')
