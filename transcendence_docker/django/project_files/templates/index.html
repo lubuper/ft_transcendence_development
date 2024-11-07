@@ -28,7 +28,7 @@
 		<style>
 		    body {
         	    font-family: 'Orbitron', sans-serif;
-        }
+        	}
 			.btn-purple {
 				background-color: #582a6b;
 				border-color: #582a6b;
@@ -53,14 +53,6 @@
 				top: 0;
 				transition: top 0.5s ease-in-out;
 			}
-			#profile-form img {
-				width: 100px;
-				height: 100px;
-				border-radius: 50%;
-				object-fit: cover;
-				margin-bottom: 20px;
-			}
-			/* Tooltip text */
 			.card-text .tooltiptext {
 				visibility: hidden;
 				width: 350px;
@@ -70,20 +62,182 @@
 				padding: 8px 8px;
 				border-radius: 6px;
 
-				/* Position the tooltip text - see examples below! */
 				position: absolute;
 				z-index: 1;
 			}
-			/* Show the tooltip text when you mouse over the tooltip container */
 			.card-text:hover .tooltiptext {
 				visibility: visible;
 			}
 			.selected-color {
-				border: 2px solid rgba(255, 255, 255, 0.6); /* Red border around the selected color */
+				border: 2px solid rgba(255, 255, 255, 0.6);
 			}
 			.custom-button {
-				width: 200px; /* Adjust to your preferred width */
-				padding: 10px 20px; /* Ensure both buttons have the same padding */
+				width: 200px;
+				padding: 10px 20px;
+			}
+			.bar{
+				display: block;
+				background-color: #582a6b;
+			}
+
+			.bar h1{
+				margin: 0px;
+				font-size: 22px;
+				padding: 10px;
+				color: white;
+				-webkit-font-smoothing: antialiased;
+				-moz-osx-font-smoothing: grayscale;
+				font-weight: normal;
+			}
+
+			.profile-photo-div{
+				position: relative;
+				margin: 50px auto 10px auto;
+				width: 200px;
+				height: auto;
+				overflow: hidden;
+				border-radius: 10px;
+				-webkit-transition: ease .3s;
+				-o-transition: ease .3s;
+				transition: ease .3s;
+			}
+
+			.profile-img-div{
+				display: block;
+				position: relative;
+				overflow: hidden;
+			}
+
+			#loader{
+				position: absolute;
+				top:0;
+				left: 0;
+				width: 0%;
+				height: 100%;
+				background-color: #582a6b;
+				z-index:10;
+				-webkit-transition: .3s;
+				-o-transition: .3s;
+				transition: .3s;
+			}
+
+			#profile-img{
+				position: absolute;
+				display: block;
+				width: 100%;
+				height: 100%;
+				top: 0;
+				left: 0;
+			}
+
+			#change-photo{
+				display: none;
+			}
+
+			.profile-buttons-div{
+				position: relative;
+				display: block;
+			}
+
+			.button{
+				position: relative;
+				display: block;
+				font-size: 15px;
+				padding:20px;
+				text-align: center;
+				color: white;
+				background-color: #582a6b;
+				cursor: pointer;
+				-webkit-transition: .5s;
+				-o-transition: .5s;
+				transition: .5s;
+				overflow: hidden;
+				-webkit-font-smoothing: antialiased;
+				-moz-osx-font-smoothing: grayscale;
+			}
+
+			.button:hover{
+				letter-spacing: 1px;
+			}
+
+			.button:after{
+				content: '';
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				-webkit-transform: translate(-50%,-50%);
+				-ms-transform: translate(-50%,-50%);
+				transform: translate(-50%,-50%);
+				width: 10px;
+				height: 10px;
+				background-color: rgba(255,255,255,0.4);
+				border-radius: 50%;
+				opacity: 0;
+				-webkit-transition: .9s;
+				-o-transition: .9s;
+				transition: .9s;
+			}
+
+			.button:hover:after{
+				-webkit-transform: scale(50);
+				-ms-transform: scale(50);
+				transform: scale(50);
+				opacity: 1;
+			}
+
+			.button.half{
+				width: 50%;
+			}
+
+			.green{
+				background-color: #15ae6b;
+			}
+
+			.red{
+				background-color: #ae0000;
+			}
+
+			#x-position{
+				position: absolute;
+				bottom: 5px;
+				left: 50%;
+				-webkit-transform: translateX(-50%);
+				-ms-transform: translateX(-50%);
+				transform: translateX(-50%);
+				display: none;
+			}
+
+			#y-position{
+				position: absolute;
+				right: -50px;
+				top: 50%;
+				-webkit-transform: translateY(-50%) rotate(90deg);
+				-ms-transform: translateY(-50%) rotate(90deg);
+				transform: translateY(-50%) rotate(90deg);
+				display: none;
+			}
+
+			canvas{
+				position: fixed;
+				top: -2000px;
+				left: -2000px;
+				z-index: -1;
+			}
+
+			.profile-img-confirm{
+				display: -webkit-box;
+				display: -webkit-flex;
+				display: -ms-flexbox;
+				display: flex;
+				width: 100%;
+			}
+
+			.error{
+				font-family: Helvetica, sans-serif;
+				font-size: 13px;
+				color: red;
+				text-align:center;
+				display: none;
 			}
 		</style>
 	</head>

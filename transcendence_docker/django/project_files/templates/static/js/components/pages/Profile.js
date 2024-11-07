@@ -17,24 +17,37 @@ export default function Profile() {
             // console.log(user)
 
             const profilePicHTML = user.profile_picture
-                ? `<img src="${user.profile_picture}" alt="${user.username}'s profile picture" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 20px;">`
+                ? `<img src="${user.profile_picture}" alt="${user.username}'s profile picture" 
+                     class="rounded-circle mb-3" 
+                     alt="Avatar" 
+                     style="width: 200px; height: 200px;">`
                 : '<div>No profile picture available</div>';
 
             $ProfileForm.innerHTML = `
-			<div class="vh-100 d-flex align-items-center justify-content-center position-relative">
+			<div class="d-flex align-items-center justify-content-center position-relative">
             <div class="container row justify-content-center col-md-2">
-                ${profilePicHTML}
                 <form id="profile-form" enctype="multipart/form-data">
                     <div class="form-group">
-                         <label for="profile-picture" class="text-white">Profile Picture</label>
-                         <input type="file" class="form-control" id="profile-picture" name="profile-picture" accept="image/*" >
+                        <label class="text-white">Profile Picture</label>
+                        ${profilePicHTML}
                     </div>
-                    <div id="previewContainer" style="display:none;">
-                        <div style="width: 300px; height: 300px; border-radius: 50%; overflow: hidden;">
-                            <img id="imagePreview" style="max-width: 100%;" />
+                    <div class="form-group">
+                        <label class="text-white">Upload New Profile Picture</label>
+                        <div class="profile-photo-div" id="profile-photo-div">
+                        <div class="profile-img-div" id="profile-img-div">
+                        <div id="loader"></div><img id="profile-img" src="https://s3.amazonaws.com/FringeBucket/default-user.png" /><input id="x-position" type="range" name="x-position" value="0" min="0" /><input id="y-position" type="range" name="y-position" value="0" min="0" /></div>
+                        <div
+                            class="profile-buttons-div">
+                        <div class="profile-img-input" id="profile-img-input"><label class="button" id="change-photo-label" for="change-photo">UPLOAD PHOTO</label><input id="change-photo" name="change-photo" type="file" style="display: none" accept="image/*" /></div>
+                        <div class="profile-img-confirm" id="profile-img-confirm"
+                            style="display: none">
+                        <div class="button half green" id="save-img"><i class="fa fa-check" aria-hidden="true"></i></div>
+                        <div class="button half red" id="cancel-img"><i class="fa fa-remove" aria-hidden="true"></i></div>
                         </div>
-                        <button type="button" id="cropButton">Crop & Upload</button>
+                        </div>
+                        </div>
                     </div>
+                    <div class="error" id="error">min sizes 400*400px</div><canvas id="croppedPhoto" width="400" height="400"></canvas>
                     <div class="form-group">
                         <label for="username" class="text-white">Username</label>
                         <input type="text" class="form-control" id="username" name="username" value="${user.username}" readonly required>
@@ -79,69 +92,190 @@ export default function Profile() {
                 });
             }
 
-            let cropper;
-            let croppedImageBlob = null;
-            const fileInput = document.getElementById('profile-picture');
-            const cropButton = document.getElementById('cropButton');
+        let $profileImgDiv = document.getElementById("profile-img-div"),
+                $profileImg = document.getElementById("profile-img"),
+                $changePhoto = document.getElementById("change-photo"),
+                $xPosition = document.getElementById("x-position"),
+                $yPosition = document.getElementById("y-position"),
+                $saveImg = document.getElementById("save-img"),
+                $loader = document.getElementById("loader"),
+                $cancelImg = document.getElementById("cancel-img"),
+                $profileImgInput = document
+                    .getElementById("profile-img-input"),
+                $profileImgConfirm = document
+                    .getElementById("profile-img-confirm"),
+                $error = document.getElementById("error");
 
-            console.log('fileInput:', fileInput);
-            console.log('cropButton:', cropButton);
+            let currentProfileImg = ""
+            let profileImgDivW = getSizes($profileImgDiv).elW
+            let NewImgNatWidth = 0
+            let NewImgNatHeight = 0
+            let NewImgNatRatio = 0
+            let NewImgWidth = 0
+            let NewImgHeight = 0
+            let NewImgRatio = 0
+            let xCut = 0
+            let yCut = 0
 
-            fileInput.addEventListener('change', async function() {
-                event.preventDefault();
-                console.log('aqui111111111')
-                const file = event.target.files[0];
-                if (!file) return;
+            makeSquared($profileImgDiv);
 
-                if (!file.type.startsWith('image/')) {
-                    alert("Please select a valid image file.");
+            $changePhoto.addEventListener("change", function() {
+                currentProfileImg = $profileImg.src;
+                showPreview(this, $profileImg);
+                $loader.style.width = "100%";
+                $profileImgInput.style.display = "none";
+                $profileImgConfirm.style.display = "flex";
+                $error.style.display = "none";
+            });
+
+            $xPosition.addEventListener("input", function() {
+                $profileImg.style.left = -this.value + "px";
+                xCut = this.value;
+                yCut = 0;
+            });
+
+            $yPosition.addEventListener("input", function() {
+                $profileImg.style.top = -this.value + "px";
+                yCut = this.value;
+                xCut = 0;
+            });
+
+            $saveImg.addEventListener("click", function() {
+                cropImg($profileImg);
+                resetAll(true);
+            });
+
+            $cancelImg.addEventListener("click", function() {
+                resetAll(false);
+            });
+
+            window.addEventListener("resize", function() {
+                makeSquared($profileImgDiv);
+                profileImgDivW = getSizes($profileImgDiv).elW;
+            });
+
+            function makeSquared(el) {
+                let elW = el.clientWidth;
+                el.style.height = elW + "px";
+            }
+
+            function showPreview(input, el) {
+                var reader = new FileReader();
+                reader.readAsDataURL(input.files[0]);
+                if (input.files && input.files[0]) {
+                    reader.onload = function(e) {
+                        setTimeout(function() {
+                            el.src = e.target.result;
+                        }, 300);
+
+                        let poll = setInterval(function() {
+                            if (el.naturalWidth && el.src != currentProfileImg) {
+                                clearInterval(poll);
+                                setNewImgSizes(el);
+                                setTimeout(function() {
+                                    $loader.style.width = "0%";
+                                    $profileImg.style.opacity = "1";
+                                }, 1000);
+                            }
+                        }, 100);
+                    };
+                } else {
                     return;
                 }
+            }
 
-                const imagePreview = document.getElementById('imagePreview');
-                imagePreview.src = URL.createObjectURL(file);
-
-                // Show the preview container
-                document.getElementById('previewContainer').style.display = 'block';
-
-                if (cropper) {
-                    cropper.destroy();
+            function setNewImgSizes(el) {
+                if (getNatSizes(el).elR > 1) {
+                    el.style.width = "auto";
+                    el.style.height = "100%";
+                    NewImgNatWidth = getSizes(el).elW;
+                    $xPosition.style.display = "block";
+                    $yPosition.style.display = "none";
+                    $xPosition.max = NewImgNatWidth - profileImgDivW;
+                } else if (getNatSizes(el).elR < 1) {
+                    el.style.width = "100%";
+                    el.style.height = "auto";
+                    NewImgNatHeight = getSizes(el).elH;
+                    $xPosition.style.display = "none";
+                    $yPosition.style.display = "block";
+                    $yPosition.max = NewImgNatHeight - profileImgDivW;
+                } else if (getNatSizes(el).elR == 1) {
+                    el.style.width = "100%";
+                    el.style.height = "100%";
+                    $xPosition.style.display = "none";
+                    $yPosition.style.display = "none";
                 }
+            }
 
-                cropper = new Cropper(imagePreview, {
-                    aspectRatio: 1,
-                    viewMode: 1,
-                    cropBoxResizable: false,
-                    cropBoxMovable: false,
-                    background: false,
-                    ready() {
-                        const cropBoxData = cropper.getCropBoxData();
-                        const canvasData = cropper.getCanvasData();
-                        cropper.setCropBoxData({
-                            left: cropBoxData.left,
-                            top: cropBoxData.top,
-                            width: canvasData.width,
-                            height: canvasData.width,
-                        });
-                    },
-                });
-            });
+            function getNatSizes(el) {
+                let elW = el.naturalWidth,
+                    elH = el.naturalHeight,
+                    elR = elW / elH;
+                return {
+                    elW: elW,
+                    elH: elH,
+                    elR: elR
+                };
+            }
 
-            cropButton.addEventListener('click', async function() {
-                event.preventDefault();
-                console.log('aqui222222')
-                if (!cropper) return;
+            function getSizes(el) {
+                let elW = el.clientWidth,
+                    elH = el.clientHeight,
+                    elR = elW / elH;
+                return {
+                    elW: elW,
+                    elH: elH,
+                    elR: elR
+                };
+            }
 
-                // Get the cropped image as a Blob
-                const canvas = cropper.getCroppedCanvas({
-                    width: 300,
-                    height: 300,
-                });
-                canvas.toBlob((blob) => {
-                    croppedImageBlob = blob;  // Store the cropped image blob
-                    alert("Image cropped successfully! You can now submit the form.");
-                }, 'image/jpeg');
-            });
+            function cropImg(el) {
+                let natClientImgRatio = getNatSizes(el).elW / getSizes(el).elW;
+                (myCanvas = document.getElementById("croppedPhoto")),
+                    (ctx = myCanvas.getContext("2d"));
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(0, 0, 400, 400);
+                ctx.drawImage(
+                    el,
+                    xCut * natClientImgRatio,
+                    yCut * natClientImgRatio,
+                    profileImgDivW * natClientImgRatio,
+                    profileImgDivW * natClientImgRatio,
+                    0,
+                    0,
+                    400,
+                    400
+                );
+                let newProfileImgUrl = myCanvas.toDataURL("image/jpeg");
+                $profileImg.src = newProfileImgUrl;
+            }
+
+            function resetAll(confirm) {
+                if (!confirm) {
+                    $profileImg.src = currentProfileImg;
+                }
+                $changePhoto.value = "";
+                $profileImgInput.style.display = "block";
+                $profileImgConfirm.style.display = "none";
+                $profileImg.style.left = "0";
+                $profileImg.style.top = "0";
+                $profileImg.style.width = "100%";
+                $profileImg.style.height = "100%";
+                $xPosition.style.display = "none";
+                $yPosition.style.display = "none";
+                $xPosition.value = "0";
+                $yPosition.value = "0";
+                xCut = "0";
+                yCut = "0";
+            }
+
+            function checkMinSizes(el) {
+                if (getNatSizes(el).elW > 400 && getNatSizes(el).elH > 400) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
 
             const formP = $ProfileForm.querySelector('#profile-form');
 
