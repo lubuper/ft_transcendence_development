@@ -94,15 +94,15 @@ export default function DashBoard() {
 								<img id="avatar" src="/static/media/assets/ships/splash/${localStorage.getItem('selectedAvatarId')}.png" class="rounded-circle mb-3" alt="Avatar" style="width: 100px; height: 100px;">
 								<h5 class="card-title">${matchHistory.username}</h5>
 								<p class="card-text">
-									<img src="/static/media/rank/${pongRank.rank}.png" 
-										alt="${pongRank.rank}" 
+									<img src="/static/media/rank/${pongRank.rank}.png"
+										alt="${pongRank.rank}"
 										style="width: 64px; height: 64px; margin-right: 2px;">
 									${pongRank.result}
 									<span class="tooltiptext">The game ranking starts after 5 matches, and there are 5 of them. Good luck!</span>
 								</p>
 								<p class="card-text">
-									<img src="/static/media/rank/${astRank.rank}.png" 
-										alt="${astRank.rank}" 
+									<img src="/static/media/rank/${astRank.rank}.png"
+										alt="${astRank.rank}"
 										style="width: 64px; height: 64px; margin-right: 2px;">
 									${astRank.result}
 									<span class="tooltiptext">The game ranking starts after 5 matches, and there are 5 of them. Good luck!</span>
@@ -154,10 +154,10 @@ export default function DashBoard() {
 								<div class="card-body">
 									${matchHistory.match_history.map(match => `
         								<p>
-           									${match.game}: ${match.score} -> 
+           									${match.game}: ${match.score} ->
             								<span style="color: ${match.result === 'win' ? 'green' : 'red'};">
                 								${match.result}
-           									</span> 
+           									</span>
             								at ${new Date(match.timestamp).toLocaleString('en-GB', {
 												day: '2-digit',
 												month: '2-digit',
@@ -185,17 +185,19 @@ export default function DashBoard() {
 							<p>
       							${friend ? friend : 'You currently have no friends.'}
       							${friend ? `
-      								<img src="/static/media/icons/chat-icon.png" 
-      							       class="chat-icon ml-2" 
-      							       alt="Chat" 
-      							       style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);" 
+      								<img src="/static/media/icons/chat-icon.png"
+      							       class="chat-icon ml-2"
+      							       alt="Chat"
+      							       style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);"
       							       data-friend="${friend}"
+									   user="${matchHistory.username}"
       							       title="Chat with ${friend}">
-									<img src="/static/media/icons/profile.png" 
-      							       class="profile-icon ml-2" 
-      							       alt="Profile-friend" 
-      							       style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);" 
+									<img src="/static/media/icons/profile.png"
+      							       class="profile-icon ml-2"
+      							       alt="Profile-friend"
+      							       style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);"
       							       data-friend="${friend}"
+									   user="${matchHistory.username}"
       							       id="Profile-id-${friend}"
       							` : ''}
     						</p>
@@ -204,13 +206,13 @@ export default function DashBoard() {
 							<form id="friend-requests">
 								<div class="card-header">Friend Requests:</div>
 								<div class="card-body">
-								${matchHistory.friend_requests.length > 0 ? 
+								${matchHistory.friend_requests.length > 0 ?
 									matchHistory.friend_requests.map(friend_request => `
 										<p>${friend_request}
 										<button id="AcceptFriendRequest-${friend_request}" type="button" class="btn btn-success btn-sm ml-2">✔️</button>
             							<button id="RejectFriendRequest-${friend_request}" type="button" class="btn btn-danger btn-sm ml-2">X</button>
             							</p>
-									`).join('') : 
+									`).join('') :
 									'<p>You currently have no friend requests.</p>'
 								}
 								</div>
@@ -227,25 +229,26 @@ export default function DashBoard() {
 	chatIcons.forEach(icon => {
 	    icon.addEventListener('click', (event) => {
 	        const friendName = event.currentTarget.getAttribute('data-friend');
-	        openChatBox(friendName);
+			const userName = event.currentTarget.getAttribute('user');
+	        openChatBox(friendName, userName);
 	    });
 	});
 
 	let currentChatBox = null; // Track the currently open chat box
-	
-	function openChatBox(friendName) {
+
+	function openChatBox(friendName, userName) {
 	    // Close and remove the currently open chat box if it exists
 	    if (currentChatBox) {
 	        currentChatBox.remove(); // Directly remove the previous chat box
 	        currentChatBox = null; // Reset the tracker
 	    }
-	
+
 	    currentFriend = friendName;
 	    const shortName = friendName.length > 6 ? friendName.slice(0, 6) : friendName; // Limit to first 6 characters
 	    const chatBox = document.createElement('div');
 	    chatBox.classList.add('chat-popup');
-	    chatBox.id = `chat-box-${friendName}`; // Set a unique ID for each friend's chat box
-	
+	    chatBox.id = `chat-box-${userName}-${friendName}`; // Set a unique ID for each friend's chat box
+
 	    chatBox.innerHTML = `
 	        <div class="chat-box">
 	            <div class="chat-header">
@@ -256,7 +259,7 @@ export default function DashBoard() {
 	                </div>
 	            </div>
 	            <div class="chat-content"> <!-- Wrapping content to toggle visibility -->
-	                <div class="messages" id="messages-${friendName}">
+	                <div class="messages" id="messages-${userName}-${friendName}">
 	                    <!-- Messages will load here -->
 	                </div>
 	                <div class="input-container">
@@ -266,18 +269,18 @@ export default function DashBoard() {
 	            </div>
 	        </div>
 	    `;
-	
+
 	    document.getElementsByClassName('friends-column')[0].appendChild(chatBox);
-	
+
 	    // Update the current chat box tracker
 	    currentChatBox = chatBox;
-	
+
 	    // Close the chat box with animation when the X button is clicked
 	    chatBox.querySelector('.close-btn').addEventListener('click', () => {
 	        chatBox.remove(); // Remove the chat box immediately
 	        currentChatBox = null; // Reset the tracker when closed manually
 	    });
-	
+
 	    // Minimize/maximize functionality for the chat box
 	    const minimizeButton = chatBox.querySelector('.minimize-btn');
 	    const chatContent = chatBox.querySelector('.chat-content');
@@ -285,8 +288,8 @@ export default function DashBoard() {
 	        chatContent.classList.toggle('hidden'); // Toggle visibility
 	        minimizeButton.textContent = chatContent.classList.contains('hidden') ? '+' : '-'; // Change button text
 	    });
-	
-	    setupChat(friendName); // Initialize chat functionality for the friend
+
+	    setupChat(friendName, userName); // Initialize chat functionality for the friend
 	}
 
 	function calculateRankedStats(matchHistory, gameName) {
@@ -337,7 +340,6 @@ export default function DashBoard() {
 			profile.addEventListener('click', function() {
 				const friend = profile.getAttribute('data-friend');
 				profileFriend(friend);
-
 			})
 		})
 
@@ -408,7 +410,7 @@ export default function DashBoard() {
 				'username': username
 			})
 		})
-		const result = await response.json();	
+		const result = await response.json();
 		const friendMessage = document.getElementById('friend-message');
 
 		if (response.ok) {
@@ -445,7 +447,7 @@ export default function DashBoard() {
 				}),
 			})
 
-			const result = await response.json();	
+			const result = await response.json();
 			const friendAcceptMessage = document.getElementById('friend-request-message');
 
 			if (response.ok) {
@@ -462,7 +464,7 @@ export default function DashBoard() {
 				}, 2000);
 			}
 		});
-	
+
 		// Adding event listener for the reject button
 		document.getElementById(`RejectFriendRequest-${friend_request}`).addEventListener('click', async function() {
 			const response = await fetch('/reject-friend-request/', {
@@ -475,7 +477,7 @@ export default function DashBoard() {
 					'username': friend_request // Send the username in the request body
 				}),
 			})
-			const result = await response.json();	
+			const result = await response.json();
 			const friendRejectMessage = document.getElementById('friend-request-message');
 
 			if (response.ok) {
