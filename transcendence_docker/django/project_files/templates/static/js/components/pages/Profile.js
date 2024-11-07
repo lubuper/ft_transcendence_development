@@ -28,22 +28,18 @@ export default function Profile() {
             <div class="container row justify-content-center col-md-2">
                 <form id="profile-form" enctype="multipart/form-data">
                     <div class="form-group">
-                        <label class="text-white">Profile Picture</label>
-                        ${profilePicHTML}
-                    </div>
-                    <div class="form-group">
                         <label class="text-white">Upload New Profile Picture</label>
                         <div class="profile-photo-div" id="profile-photo-div">
                             <div class="profile-img-div" id="profile-img-div">
                                 <div id="loader">
                                     </div>
-                                    <img id="profile-img" src="https://s3.amazonaws.com/FringeBucket/default-user.png" />
+                                    <img id="profile-img" src="${user.profile_picture}" />
                                     <input id="x-position" type="range" name="x-position" value="0" min="0" />
                                     <input id="y-position" type="range" name="y-position" value="0" min="0" />
                                     </div>
                                 <div class="profile-buttons-div">
                                     <div class="profile-img-input" id="profile-img-input">
-                                    <label class="button" id="change-photo-label" for="change-photo">UPLOAD PHOTO</label>
+                                    <label class="button" id="change-photo-label" for="change-photo">Upload Photo</label>
                                     <input id="change-photo" name="change-photo" type="file" style="display: none" accept="image/*" />
                                 </div>
                                 <div class="profile-img-confirm" id="profile-img-confirm" style="display: none">
