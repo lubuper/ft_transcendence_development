@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'firstApp',
     'friends',
-    'chat',
+    'remote',
 ]
 
 ASGI_APPLICATION = 'transcendence.agsi.application'

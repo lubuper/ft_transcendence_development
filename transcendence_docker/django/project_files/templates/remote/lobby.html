@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>ft_transcendence - Lobby</title>
+	{% load static %}
+	<script type="module" src="{% static 'js/pong.js' %}" defer></script>
+	<script type="module">
+		import { Pong } from '{% static "js/pong.js" %}';
+		document.addEventListener('DOMContentLoaded', (event) => {
+			const gameMode = '1'; 
+			const gameType = 'default'; 
+			Pong(gameMode, gameType); 
+		});
+	</script>
+</head>
+<body>
+	<h1>Game Lobby</h1>
+	<div id="game-container">
+		<!-- The game will be rendered here -->
+	</div>
+</body>
+</html>
