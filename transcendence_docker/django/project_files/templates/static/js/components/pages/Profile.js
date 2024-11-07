@@ -34,17 +34,28 @@ export default function Profile() {
                     <div class="form-group">
                         <label class="text-white">Upload New Profile Picture</label>
                         <div class="profile-photo-div" id="profile-photo-div">
-                        <div class="profile-img-div" id="profile-img-div">
-                        <div id="loader"></div><img id="profile-img" src="https://s3.amazonaws.com/FringeBucket/default-user.png" /><input id="x-position" type="range" name="x-position" value="0" min="0" /><input id="y-position" type="range" name="y-position" value="0" min="0" /></div>
-                        <div
-                            class="profile-buttons-div">
-                        <div class="profile-img-input" id="profile-img-input"><label class="button" id="change-photo-label" for="change-photo">UPLOAD PHOTO</label><input id="change-photo" name="change-photo" type="file" style="display: none" accept="image/*" /></div>
-                        <div class="profile-img-confirm" id="profile-img-confirm"
-                            style="display: none">
-                        <div class="button half green" id="save-img"><i class="fa fa-check" aria-hidden="true"></i></div>
-                        <div class="button half red" id="cancel-img"><i class="fa fa-remove" aria-hidden="true"></i></div>
-                        </div>
-                        </div>
+                            <div class="profile-img-div" id="profile-img-div">
+                                <div id="loader">
+                                    </div>
+                                    <img id="profile-img" src="https://s3.amazonaws.com/FringeBucket/default-user.png" />
+                                    <input id="x-position" type="range" name="x-position" value="0" min="0" />
+                                    <input id="y-position" type="range" name="y-position" value="0" min="0" />
+                                    </div>
+                                <div class="profile-buttons-div">
+                                    <div class="profile-img-input" id="profile-img-input">
+                                    <label class="button" id="change-photo-label" for="change-photo">UPLOAD PHOTO</label>
+                                    <input id="change-photo" name="change-photo" type="file" style="display: none" accept="image/*" />
+                                </div>
+                                <div class="profile-img-confirm" id="profile-img-confirm" style="display: none">
+                                    <div class="button half green" id="save-img">
+                                    <i class="fa fa-check" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="button half red" id="cancel-img">
+                                    <i class="fa fa-remove" aria-hidden="true">
+                                    </i>
+                                </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="error" id="error">min sizes 400*400px</div><canvas id="croppedPhoto" width="400" height="400"></canvas>
@@ -92,19 +103,17 @@ export default function Profile() {
                 });
             }
 
-        let $profileImgDiv = document.getElementById("profile-img-div"),
-                $profileImg = document.getElementById("profile-img"),
-                $changePhoto = document.getElementById("change-photo"),
-                $xPosition = document.getElementById("x-position"),
-                $yPosition = document.getElementById("y-position"),
-                $saveImg = document.getElementById("save-img"),
-                $loader = document.getElementById("loader"),
-                $cancelImg = document.getElementById("cancel-img"),
-                $profileImgInput = document
-                    .getElementById("profile-img-input"),
-                $profileImgConfirm = document
-                    .getElementById("profile-img-confirm"),
-                $error = document.getElementById("error");
+            const $profileImgDiv = document.getElementById("profile-img-div"),
+                  $profileImg = document.getElementById("profile-img"),
+                  $changePhoto = document.getElementById("change-photo"),
+                  $xPosition = document.getElementById("x-position"),
+                  $yPosition = document.getElementById("y-position"),
+                  $saveImg = document.getElementById("save-img"),
+                  $loader = document.getElementById("loader"),
+                  $cancelImg = document.getElementById("cancel-img"),
+                  $profileImgInput = document.getElementById("profile-img-input"),
+                  $profileImgConfirm = document.getElementById("profile-img-confirm"),
+                  $error = document.getElementById("error");
 
             let currentProfileImg = ""
             let profileImgDivW = getSizes($profileImgDiv).elW
