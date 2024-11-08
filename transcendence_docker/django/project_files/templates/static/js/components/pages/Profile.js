@@ -1,3 +1,5 @@
+import { navigate } from '../../helpers/App.js';
+
 export default function Profile() {
     const $ProfileForm = document.createElement('profile');
 
@@ -223,28 +225,11 @@ export default function Profile() {
                         <input type="password" class="form-control" id="old-password" name="old-password" required>
                     </div>
                     <button type="submit" class="btn btn-purple btn-custom mt-3 text-white">Save</button>
-                	<div id="message" class="text-white mt-3"></div>
+                	<div id="update-account-message"></div>
                 </form>
             </div>
             </div>
 	        `;
-
-            function validateImage(file) {
-                return new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.src = URL.createObjectURL(file);
-
-                    img.onload = () => {
-                        URL.revokeObjectURL(img.src);
-                        resolve(true);  // It's an image
-                    };
-
-                    img.onerror = () => {
-                        URL.revokeObjectURL(img.src);
-                        reject(false);  // Not an image
-                    };
-                });
-            }
 
             const $profileImgDiv = document.getElementById("profile-img-div"),
                   $profileImg = document.getElementById("profile-img"),
@@ -295,7 +280,7 @@ export default function Profile() {
 
             $saveImg.addEventListener("click", function() {
                 cropImg($profileImg);
-                resetAll(true);
+                // resetAll(true);
             });
 
             $cancelImg.addEventListener("click", function() {
@@ -388,22 +373,29 @@ export default function Profile() {
                 const ctx = myCanvas.getContext("2d");
                 ctx.fillStyle = "#ffffff";
                 ctx.fillRect(0, 0, 400, 400);
-                ctx.drawImage(
-                    el,
-                    xCut * natClientImgRatio,
-                    yCut * natClientImgRatio,
-                    profileImgDivW * natClientImgRatio,
-                    profileImgDivW * natClientImgRatio,
-                    0,
-                    0,
-                    400,
-                    400
-                );
+                try {
+                    ctx.drawImage(
+                        el,
+                        xCut * natClientImgRatio,
+                        yCut * natClientImgRatio,
+                        profileImgDivW * natClientImgRatio,
+                        profileImgDivW * natClientImgRatio,
+                        0,
+                        0,
+                        400,
+                        400
+                    );
+                } catch (error) {
+                    alert("Please upload a valid image file.");
+                    resetAll(false);
+                    return;
+                }
                 let newProfileImgUrl = myCanvas.toDataURL("image/jpeg");
                 $profileImg.src = newProfileImgUrl;
                 myCanvas.toBlob((blob) => {
                     profilePictureFinal = blob;  // Store the cropped image blob
                 }, 'image/jpeg');
+                resetAll(true);
             }
 
             function resetAll(confirm) {
@@ -448,15 +440,17 @@ export default function Profile() {
 
                 console.log('data: ', data)
 
-                formPData.set('profile-picture', profilePictureFinal, 'user.jpeg');
+                // formPData.set('profile-picture', profilePictureFinal, 'user.jpeg');
 
                 if (profilePictureFinal) {
-                    try {
-                        await validateImage(profilePictureFinal);
-                    } catch (error) {
-                        alert("Please upload a valid image file.");
-                        return;
-                    }
+                    // try {
+                    //     await validateImage(profilePictureFinal);
+                    // } catch (error) {
+                    //     alert("Please upload a valid image file.");
+                    //     return;
+                    // }
+                    console.log('profilePictureFinal: ', profilePictureFinal)
+                    formPData.set('profile-picture', profilePictureFinal, 'user.jpeg');
                 }
 
 
@@ -470,21 +464,17 @@ export default function Profile() {
                         body: formPData,
                     });
 
-                    const messageDivP = document.getElementById('message');
-                    messageDivP.innerText = '';  // Clear any previous messages
-                    messageDivP.classList.remove('text-success', 'text-error');
+                    const UPMessage = document.getElementById('update-account-message');
 
                     const result = await response.json();
 
                     if (response.ok) {
-                        messageDivP.innerText = 'Account updated successfully!';
-                        //messageDiv.classList.add('text-success');  // not working
+                        UPMessage.innerHTML = '<p class="text-success">Account updated successfully!</p>';
                         setTimeout(() => {
-                            window.location.href = '/';  // era suposto ir para login page mas nao vai, so a home page funciona
+                            navigate('/');
                         }, 2000);
                     } else {
-                        messageDivP.innerText = 'Failed to update account: ' + (result.message || 'Unknown error');
-                        //messageDiv.classList.add('text-error');  // not working
+                        UPMessage.innerHTML = `<p class="text-danger">Failed to update account: ${result.message || 'Unknown error'}</p>`;
                     }
                 } catch (error) {
                     console.error('Error:', error);
