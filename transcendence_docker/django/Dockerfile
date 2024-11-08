@@ -3,7 +3,7 @@ FROM debian:bullseye
 RUN apt-get update && \
     apt upgrade -y && \
     apt install -y python3-pip netcat && \
-    pip3 install django psycopg2-binary channels
+    pip3 install django psycopg2-binary channels_redis
 
 
 RUN django-admin startproject transcendence
@@ -13,6 +13,7 @@ WORKDIR /transcendence
 COPY project_files/. .
 
 RUN pip3 install Pillow
+RUN pip3 install -v channels==3.0.5
 
 #RUN python3 manage.py migrate
 

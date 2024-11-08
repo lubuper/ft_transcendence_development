@@ -25,4 +25,6 @@ else:
     print('Superuser already exists')
 END
 
+#daphne -u /tmp/daphne.sock transcendence.asgi:application &
+
 exec "$@"
