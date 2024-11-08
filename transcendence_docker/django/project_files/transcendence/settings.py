@@ -31,6 +31,7 @@ ALLOWED_HOSTS = [ '0.0.0.0', 'localhost', '10.11.12.4' ]
 # Application definition
 
 INSTALLED_APPS = [
+	'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,21 +40,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'firstApp',
     'friends',
-    'chat',
-    'channels',
+    'remote',
 ]
 
 ASGI_APPLICATION = 'transcendence.asgi.application'
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("redis", 6379)],  # Adjust this if you change Redis setup in Docker
-        },
-    },
-}
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
