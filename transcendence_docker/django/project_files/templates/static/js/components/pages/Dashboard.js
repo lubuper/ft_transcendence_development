@@ -461,7 +461,6 @@ export default function DashBoard() {
 				friendAcceptMessage.innerHTML = '<p class="text-success">Friend request accepted successfully!</p>';
 				setTimeout(() => {
 					friendAcceptMessage.innerHTML = '<p </p>';
-					console.log('going to homepage?');
 					navigate('/dashboard');
 				}, 2000);
 			} else {
@@ -491,7 +490,6 @@ export default function DashBoard() {
 				friendRejectMessage.innerHTML = '<p class="text-success">Friend request rejected successfully!</p>';
 				setTimeout(() => {
 					friendRejectMessage.innerHTML = '<p </p>';
-					console.log('going to homepage?');
 					navigate('/dashboard');
 				}, 1000);
 			} else {
