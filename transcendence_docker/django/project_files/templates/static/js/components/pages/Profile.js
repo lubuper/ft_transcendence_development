@@ -440,15 +440,7 @@ export default function Profile() {
 
                 console.log('data: ', data)
 
-                // formPData.set('profile-picture', profilePictureFinal, 'user.jpeg');
-
                 if (profilePictureFinal) {
-                    // try {
-                    //     await validateImage(profilePictureFinal);
-                    // } catch (error) {
-                    //     alert("Please upload a valid image file.");
-                    //     return;
-                    // }
                     console.log('profilePictureFinal: ', profilePictureFinal)
                     formPData.set('profile-picture', profilePictureFinal, 'user.jpeg');
                 }
@@ -458,8 +450,7 @@ export default function Profile() {
                     const response = await fetch('/update_profile/', {
                         method: 'POST',
                         headers: {
-                            // 'Content-Type': 'application/json',
-                            'X-CSRFToken': getCookie('csrftoken') // For CSRF protection
+                            'X-CSRFToken': getCookie('csrftoken')
                         },
                         body: formPData,
                     });

@@ -400,6 +400,16 @@ export default function DashBoard() {
 		event.preventDefault();
 		const username = document.getElementById('searchInput').value;
 
+		const friendMessage = document.getElementById('friend-message');
+		if (username === matchHistory.username)
+		{
+			friendMessage.innerHTML = `<p class="text-danger">You can not be friends with yourself!</p>`;
+			setTimeout(() => {
+				friendMessage.innerHTML = '<p </p>';
+			}, 2000);
+			return;
+		}
+
 		const response = await fetch('/send-friend-request/', {
 			method: 'POST',
 			headers: {
@@ -411,7 +421,6 @@ export default function DashBoard() {
 			})
 		})
 		const result = await response.json();
-		const friendMessage = document.getElementById('friend-message');
 
 		if (response.ok) {
 			friendMessage.innerHTML = '<p class="text-success">Friend request sent successfully!</p>';
@@ -427,9 +436,7 @@ export default function DashBoard() {
 	});
 
 		function profileFriend(friendName) {
-			console.log('friend que chega', friendName);
 			currentFriend = friendName;
-			console.log('friend que salva', currentFriend);
 			navigate('/profileFriend');
 		}
 
@@ -455,7 +462,7 @@ export default function DashBoard() {
 				setTimeout(() => {
 					friendAcceptMessage.innerHTML = '<p </p>';
 					console.log('going to homepage?');
-					navigate('/');
+					navigate('/dashboard');
 				}, 2000);
 			} else {
 				friendAcceptMessage.innerHTML = `<p class="text-danger">Failed to accept friend request! ${result.message} </p>`;
@@ -485,13 +492,13 @@ export default function DashBoard() {
 				setTimeout(() => {
 					friendRejectMessage.innerHTML = '<p </p>';
 					console.log('going to homepage?');
-					navigate('/');
-				}, 2000);
+					navigate('/dashboard');
+				}, 1000);
 			} else {
 				friendRejectMessage.innerHTML = `<p class="text-danger">Failed to reject friend request! ${result.message} </p>`;
 				setTimeout(() => {
 					friendRejectMessage.innerHTML = '<p </p>';
-				}, 2000);
+				}, 1000);
 			}
 		});
 	});

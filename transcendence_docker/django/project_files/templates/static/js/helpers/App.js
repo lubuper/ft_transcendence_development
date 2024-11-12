@@ -43,7 +43,7 @@ let currentPath = null;
 
 export function navigate(path) {
 	console.log(`DEBUG: Navigating to: ${path}`);
-	if (path === currentPath && !document.getElementById('user-logged-in')) {
+	if (path === currentPath && path !== '/dashboard' && !document.getElementById('user-logged-in')) {
 		refreshHeader();
 		return;
 	}
