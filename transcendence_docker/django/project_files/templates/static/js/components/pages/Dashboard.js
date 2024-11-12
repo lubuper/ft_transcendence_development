@@ -185,6 +185,11 @@ export default function DashBoard() {
 							<p>
       							${friend ? friend : 'You currently have no friends.'}
       							${friend ? `
+      								<img src="/static/media/icons/offline.png"
+      							       class="profile-icon ml-2"
+      							       alt="Profile-friend-status"
+      							       style="width: 20px; height: 20px; cursor: pointer;"
+      							       id="Profile-status-${friend}">
       								<img src="/static/media/icons/chat-icon.png"
       							       class="chat-icon ml-2"
       							       alt="Chat"
@@ -198,7 +203,7 @@ export default function DashBoard() {
       							       style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);"
       							       data-friend="${friend}"
 									   user="${matchHistory.username}"
-      							       id="Profile-id-${friend}"
+      							       id="Profile-id-${friend}">
       							` : ''}
     						</p>
 						`).join('')}
