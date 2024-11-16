@@ -2,8 +2,8 @@
 .chat-popup {
     width: 308px;
     background-color: #111;
-    border: 2px solid #0f0;
-    box-shadow: 0px 0px 10px #0f0;
+    border: 2px solid #7e378c;
+    box-shadow: 0px 0px 10px #7e378c;
     display: flex;
     flex-direction: column;
     z-index: 1000;
@@ -28,16 +28,16 @@
     justify-content: space-between;
     align-items: center;
     padding: 5px 10px;
-    background-color: black;
-    border-bottom: 2px solid #0f0;
-    color: white;
+    background-color: #212529;
+    border-bottom: 2px solid #7e378c;
+    color: #fff;
 }
 
 .close-btn,
 .minimize-btn {
     background: none;
     border: none;
-    color: #0f0;
+    color: #7e378c;
     font-size: 18px;
     cursor: pointer;
     margin-left: 5px;
@@ -59,9 +59,9 @@
 
 /* Messages styling */
 .messages {
-    background-color: black;
+    background-color: #212529;
     color: white;
-    border: 2px solid #0f0;
+    border: 2px solid #7e378c;
     display: flex;
     flex-direction: column;
     padding: 10px;
@@ -75,17 +75,16 @@
     display: flex;
     width: 100%;
     padding: 5px;
-    background-color: black;
-    border-top: 2px solid #0f0;
+    background-color: #212529;
+    border-top: 2px solid #7e378c;
 }
 
 .message-input {
     flex-grow: 1;
     padding: 10px;
-    background-color: black;
+    background-color: #212529;
     color: white;
-    border: 2px solid #0f0;
-    font-family: 'Press Start 2P', cursive;
+    border: 2px solid #7e378c;
     border-radius: 5px;
     margin-right: 5px; /* Add margin to keep distance from Send button */
     width: calc(100% - 80px); /* Adjust width to fit Send button properly */
@@ -93,10 +92,9 @@
 
 .sender {
     padding: 10px;
-    background-color: #0f0;
-    color: black;
+    background-color: #7e378c;
+    color: #e9ecef;
     border: none;
-    font-family: 'Press Start 2P', cursive;
     cursor: pointer;
     width: 70px;
     text-transform: uppercase;
@@ -110,14 +108,18 @@
 
 .friend-message {
     align-self: flex-start;
-    background-color: #333;
-    color: white;
+    background-color: #c6c7c8;
+    color: #7e378c;
+    border-radius: 5px;
+    padding: 2px;
 }
 
 .my-message {
     align-self: flex-end;
-    background-color: #0f0;
-    color: black;
+    background-color: #7e378c;
+    color: #fff;
+    border-radius: 5px;
+    padding: 2px;
 }
 
 /* Animation for chat popup */
