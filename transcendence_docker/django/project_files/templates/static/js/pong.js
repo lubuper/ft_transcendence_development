@@ -1,9 +1,10 @@
 import { saveMatchHistory } from './components/pages/Dashboard.js';
 
 class Game {
-	constructor(gameMode, gameType) {
+	constructor(gameMode, gameType, onGameEnd) {
 		this.gameType = gameType;
 		this.gameMode = gameMode;
+		this.onGameEnd = onGameEnd;
 		this.isRunning = true;
 		this.env = null;
 		this.renderer = new THREE.WebGLRenderer({
@@ -636,6 +637,9 @@ class Game {
 		saveMatchHistory(match);
 		this.cleanup();
 		document.getElementById('gameOver').style.display = 'flex';
+		if (this.onGameEnd) {
+			this.onGameEnd();
+		}
 	}
 
 	gameWin() {
@@ -648,6 +652,9 @@ class Game {
 		saveMatchHistory(match);
 		this.cleanup();
 		document.getElementById('gameWin').style.display = 'flex';
+		if (this.onGameEnd) {
+			this.onGameEnd();
+		}
 	}
 	
 	tiltShip(direction) {
@@ -1088,8 +1095,8 @@ class Game {
 	}
 };
 
-export default function Pong(gameMode, gameType) {
-	const game = new Game(gameMode, gameType);
+export default function Pong(gameMode, gameType, onGameEnd) {
+	const game = new Game(gameMode, gameType, onGameEnd);
 	game.fetchShipAndColor().then(() => {
 		game.init();
 	});
