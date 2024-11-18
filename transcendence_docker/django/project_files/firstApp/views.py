@@ -36,7 +36,6 @@ def profile(request):
 	except Profile.DoesNotExist:
 		return JsonResponse({'message': 'Profile does not exist'}, status=404)
 
-		# Construct the absolute URL for the profile picture
 	profile_picture_url = profile.profile_picture.url if profile.profile_picture else None
 
 	return JsonResponse({
@@ -59,12 +58,6 @@ def current_user(request):
 			'username': user.username,
 			'profile_picture': profile_picture,
 	})
-# 	profile = Profile.objects.get(user=user)
-# 	return JsonResponse({
-# 		'username': user.username,
-# #         'profile_picture': request.build_absolute_uri(profile.profile_picture.url) if profile.profile_picture else None,
-# 		'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
-# 	})
 
 @csrf_exempt
 def logout_view(request):
@@ -121,14 +114,14 @@ def create_account(request):
 			return JsonResponse({'message': 'Password must contain at least one uppercase letter'}, status=400)
 
 		user = User.objects.create_user(username=username, email=email, password=password)
-		user.save()  # This ensures the user is stored in the database
+		user.save()
 
 		game_customization = GameCustomization.objects.create(
 			user=user,
 			ship = 1,
 			color = '#00ff00'
 		)
-		game_customization.save()  # Save the customization entry
+		game_customization.save()
 		return JsonResponse({'message': 'Account created successfully'}, status=200)
 
 	return JsonResponse({'message': 'Invalid request method'}, status=405)
@@ -171,20 +164,19 @@ def update_profile(request):
 			user.email = new_email
 
 		if new_password:
-			user.password = make_password(new_password)  # Hash the new password
+			user.password = make_password(new_password)
 
 		if profile_picture:
 					if not profile_picture.content_type.startswith('image/'):
-									return JsonResponse({"error": "Invalid file type. Please upload an image file."}, status=400)
+									return JsonResponse({'message': 'Invalid file type. Please upload an image file.'}, status=400)
 					try:
 						profile.profile_picture = profile_picture
 						profile.save()
 					except ValidationError as e:
-						return JsonResponse({"error": str(e)}, status=400)
+						return JsonResponse({'message': str(e)}, status=400)
 
 		user.save()
 		login(request, user)
-# 		user = authenticate(request, username=user.username, password=new_password)
 
 		return JsonResponse({'message': 'Account updated successfully'}, status=200)
 
@@ -195,10 +187,8 @@ def update_profile(request):
 def save_match_history(request):
 	if request.method == 'POST':
 			try:
-				# Parse JSON request body
 				data = json.loads(request.body)
 
-				# Create a new MatchHistory entry
 				match = MatchHistory.objects.create(
 					user=request.user,
 					score=data['score'],
@@ -206,14 +196,12 @@ def save_match_history(request):
 					game=data['game']
 				)
 
-				# Return a success response
 				return JsonResponse({'message': 'Match history saved successfully'}, status=200)
 			except json.JSONDecodeError:
 				return JsonResponse({'error': 'Invalid JSON data'}, status=400)
 			except Exception as e:
 				return JsonResponse({'error': str(e)}, status=500)
 	else:
-			# Handle invalid request methods
 			return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
@@ -242,24 +230,20 @@ def load_match_history(request):
 def save_customization(request):
 	if request.method == 'POST':
 		try:
-			# Load JSON data from the request body
 			data = json.loads(request.body)
 
 			user = request.user
-			ship = data.get('ship')  # Get the ship ID from the JSON data
-			color = data.get('color')  # Get the color from the JSON data
+			ship = data.get('ship')
+			color = data.get('color')
 
-			# Check if the ship value is valid
 			if not ship:
 				ship = 1
 
-			# Validate and convert the ship to an integer
 			try:
 				ship = int(ship)
 			except ValueError:
 				return JsonResponse({'error': 'Invalid ship ID.'}, status=400)
 
-			# Update or create the GameCustomization for the user
 			customization, created = GameCustomization.objects.update_or_create(
 				user=user,
 				defaults={'ship': ship, 'color': color},
