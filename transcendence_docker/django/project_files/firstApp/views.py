@@ -48,12 +48,23 @@ def profile(request):
 @login_required
 def current_user(request):
 	user = request.user
-	profile = Profile.objects.get(user=user)
+	try:
+		profile = Profile.objects.get(user=user)
+		profile_picture = profile.profile_picture.url if profile.profile_picture else None
+	except ObjectDoesNotExist:
+			logger.warning(f"No profile found for user {user.username}")
+			profile_picture = None
+
 	return JsonResponse({
-		'username': user.username,
-#         'profile_picture': request.build_absolute_uri(profile.profile_picture.url) if profile.profile_picture else None,
-		'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
+			'username': user.username,
+			'profile_picture': profile_picture,
 	})
+# 	profile = Profile.objects.get(user=user)
+# 	return JsonResponse({
+# 		'username': user.username,
+# #         'profile_picture': request.build_absolute_uri(profile.profile_picture.url) if profile.profile_picture else None,
+# 		'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
+# 	})
 
 @csrf_exempt
 def logout_view(request):
@@ -100,17 +111,25 @@ def create_account(request):
 		if password != confirm_password:
 			return JsonResponse({'message': 'Passwords do not match'}, status=400)
 
-		else:
-			user = User.objects.create_user(username=username, email=email, password=password)
-			user.save()  # This ensures the user is stored in the database
+		if len(password) < 8:
+			return JsonResponse({'message': 'Password must be at least 8 characters long'}, status=400)
 
-			game_customization = GameCustomization.objects.create(
-				user=user,
-				ship = 1,
-				color = '#00ff00'
-			)
-			game_customization.save()  # Save the customization entry
-			return JsonResponse({'message': 'Account created successfully'}, status=200)
+		if not any(char.isdigit() for char in password):
+			return JsonResponse({'message': 'Password must contain at least one number'}, status=400)
+
+		if not any(char.isupper() for char in password):
+			return JsonResponse({'message': 'Password must contain at least one uppercase letter'}, status=400)
+
+		user = User.objects.create_user(username=username, email=email, password=password)
+		user.save()  # This ensures the user is stored in the database
+
+		game_customization = GameCustomization.objects.create(
+			user=user,
+			ship = 1,
+			color = '#00ff00'
+		)
+		game_customization.save()  # Save the customization entry
+		return JsonResponse({'message': 'Account created successfully'}, status=200)
 
 	return JsonResponse({'message': 'Invalid request method'}, status=405)
 
@@ -132,8 +151,18 @@ def update_profile(request):
 		if not check_password(old_password, user.password):
 			return JsonResponse({'message': 'Wrong password!'}, status=400)
 
-		if new_password != new_confirm_password:
-			return JsonResponse({'message': 'New passwords do not match'}, status=400)
+		if new_password:
+			if new_password != new_confirm_password:
+				return JsonResponse({'message': 'New passwords do not match'}, status=400)
+
+			if len(new_password) < 8:
+				return JsonResponse({'message': 'Password must be at least 8 characters long'}, status=400)
+
+			if not any(char.isdigit() for char in new_password):
+				return JsonResponse({'message': 'Password must contain at least one number'}, status=400)
+
+			if not any(char.isupper() for char in new_password):
+				return JsonResponse({'message': 'Password must contain at least one uppercase letter'}, status=400)
 
 		if new_email and User.objects.filter(email=new_email).exists() and new_email != user.email:
 			return JsonResponse({'message': 'Email already exists!'}, status=400)
@@ -154,6 +183,8 @@ def update_profile(request):
 						return JsonResponse({"error": str(e)}, status=400)
 
 		user.save()
+		login(request, user)
+# 		user = authenticate(request, username=user.username, password=new_password)
 
 		return JsonResponse({'message': 'Account updated successfully'}, status=200)
 
