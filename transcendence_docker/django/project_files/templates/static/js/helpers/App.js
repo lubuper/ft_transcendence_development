@@ -12,6 +12,7 @@ import Pong from '../pong.js';
 import Profile from "../components/pages/Profile.js";
 import ProfileFriend from "../components/pages/ProfileFriend.js";
 import LocalPlay, { getSelectedGameMode, getSelectedGameType } from '../components/pages/LocalPlay.js';
+import RemotePlay from "../components/pages/RemotePlay.js";
 
 export default function App() {
 	initSPA();
@@ -29,6 +30,7 @@ const routes = {
 	'/dashboard': DashBoard,
 	'/createaccount': CreateAccount,
 	'/localplay': () => LocalPlay(navigate),
+	'/remoteplay': () => RemotePlay(navigate),
 	'/error': ErrorPage,
 	'/asteroids': Asteroids,
 	'/pong': Pong,
