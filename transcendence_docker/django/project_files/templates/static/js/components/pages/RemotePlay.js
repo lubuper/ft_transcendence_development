@@ -1,10 +1,51 @@
-let selectedGameMode = null;
-let selectedGameType = null;
-let tournamentPlayers = null;
-let playerNames = [];
+	// const base = `
+	// 			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative" style="background-color: rgba(0, 0, 0, 0.6); color: white;">
+    //             <div class="card bg-dark text-white mb-3" style="width: 400px;">
+    //             <div class="card-body text-center">
+    //             <img id="avatar" src="${userFriend.profile_picture}"
+    //                  class="rounded-circle mb-3"
+    //                  alt="Avatar"
+    //                  style="width: 100px; height: 100px;">
+    //             <h5 class="card-title">${currentFriend}</h5>
+    //             <p class="card-text">
+    //                 <img src="/static/media/rank/${pongRank.rank}.png"
+    //                  alt="${pongRank.rank}"
+    //                  style="width: 64px; height: 64px; margin-right: 2px;">
+    //                 ${pongRank.result}
+    //             </p>
+    //             <p class="card-text">
+    //                 <img src="/static/media/rank/${astRank.rank}.png"
+    //                  alt="${astRank.rank}"
+    //                  style="width: 64px; height: 64px; margin-right: 2px;">
+    //                 ${astRank.result}
+    //             </p>
+    //             </div>
+    //             </div>
+    //             <button class="btn btn-danger btn-lg text-white shadow-lg mt-3 custom-button">Block</button>
+    //             <button class="btn btn-danger btn-lg text-white shadow-lg mt-3 custom-button">Remove Friend</button>
+    //             <button class="btn btn-purple btn-lg text-white shadow-lg mt-3 custom-button" onclick="window.history.back()">Go Back To Dashboard</button>
+    //         </div>
+	// 		`;
+
+
+export async function getDataRemote() {
+	try {
+		const response = await fetch('/api/get-data-remote/');
+		if (!response.ok) {
+			throw new Error(`HTTP error! Status: ${response.status}`);
+		}
+		const dataRemote = await response.json();
+		return dataRemote;
+	} catch (error) {
+		console.error('Error fetching match history:', error);
+		throw error; // Rethrow or handle the error as needed
+	}
+}
 
 export default function RemotePlay(navigate) {
 	const $games = document.createElement('div');
+	getDataRemote().then(dataRemote => {
+		console.log("dataRemote: ", dataRemote)
 	$games.innerHTML = `
 		<div class="container vh-100 d-flex flex-column align-items-center justify-content-start pt-3">
 			<!-- Top Row for Game Mode and Game Type Cards -->
@@ -42,12 +83,14 @@ export default function RemotePlay(navigate) {
 					<div class="card bg-dark text-white w-100" style="border: 1px solid #343a40; opacity: 0.8;">
 						<div class="card-body">
 							<h5 class="card-title text-center">Invite a Friend</h5>
-							<label for="playerName" class="form-label">Player Name</label>
-							<input type="text" class="form-control" id="playerName" placeholder="Enter Player Name" required>
-							<div id="playerNamesContainer" class="mt-3"></div>
-							<div class="d-flex justify-content-center mt-4">
-								<button class="btn btn-purple btn-lg mx-5 text-white shadow-lg" id="startTournament">Start Game</button>
-							</div>
+							<form id="send-friend-invitation">
+								<input type="text" class="form-control mb-3" id="playerNameInvitation" name="username" placeholder="Enter Player Name" required>
+								<div id="playerNamesContainer" class="mt-3"></div>
+								<div class="d-flex justify-content-center mt-4">
+									<button class="btn btn-purple btn-lg mx-5 text-white shadow-lg" id="startRemoteGame">Start Game</button>
+								</div>
+								<div class="card-body" id="returned-message"></div>
+							</form>
 						</div>
 					</div>
 				</div>
@@ -61,7 +104,6 @@ export default function RemotePlay(navigate) {
 						<div class="card-body">
 							<h5 class="card-title text-center">How To Play</h5>
 							<p class="card-text">
-								Player 1:<br>
 								Move left/top: A<br>
 								Move right/bottom: D<br>
 							</p>
@@ -87,5 +129,46 @@ export default function RemotePlay(navigate) {
 		</div>
 	`;
 
+
+	document.getElementById('startRemoteGame').addEventListener('click', async function() {
+		event.preventDefault();
+		const username = document.getElementById('playerNameInvitation').value;
+
+		const returnedMessage = document.getElementById('returned-message');
+		if (username === dataRemote.username)
+		{
+			returnedMessage.innerHTML = `<p class="text-danger">You can not be friends with yourself!</p>`;
+			setTimeout(() => {
+				returnedMessage.innerHTML = '<p </p>';
+			}, 2000);
+			return;
+		}
+
+		// const response = await fetch('/send-friend-request/', {
+		// 	method: 'POST',
+		// 	headers: {
+		// 		'Content-Type': 'application/x-www-form-urlencoded', // or 'application/json'
+		// 		'X-CSRFToken': getCSRFToken(), // Make sure you include your CSRF token
+		// 	},
+		// 	body: JSON.stringify({
+		// 		'username': username
+		// 	})
+		// })
+		// const result = await response.json();
+		//
+		// if (response.ok) {
+		// 	friendMessage.innerHTML = '<p class="text-success">Friend request sent successfully!</p>';
+		// 	setTimeout(() => {
+		// 		friendMessage.innerHTML = '<p </p>';
+		// 	}, 2000);
+		// } else {
+		// 	friendMessage.innerHTML = `<p class="text-danger">Failed to send friend request! ${result.message} </p>`;
+		// 	setTimeout(() => {
+		// 		friendMessage.innerHTML = '<p </p>';
+		// 	}, 2000);
+		// }
+	});
+
+	});
 	return $games;
 }

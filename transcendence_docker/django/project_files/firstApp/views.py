@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import check_password, make_password
 from django.views.decorators.csrf import csrf_exempt
 import json  #
+import re
 from .models import Profile, MatchHistory, GameCustomization
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -100,6 +101,9 @@ def create_account(request):
 
 		if User.objects.filter(email=email).exists():
 			return JsonResponse({'message': 'Email already exists'}, status=400)
+
+		if not re.match(r'^[a-zA-Z0-9]+$', username):
+			return JsonResponse({'message': 'Username can only contain letters and numbers'}, status=400)
 
 		if password != confirm_password:
 			return JsonResponse({'message': 'Passwords do not match'}, status=400)
@@ -291,3 +295,13 @@ def get_profile_friend(request):
 				# Handle case where the username does not exist
 				return JsonResponse({'message': 'User not found'}, status=404)
 	return JsonResponse({'message': 'Invalid request'}, status=400)
+
+@login_required
+def get_data_remote(request):
+	try:
+			user = request.user
+			return JsonResponse({
+			'username': user.username},
+			safe=False)
+	except Exception as e:
+			return JsonResponse({'error': str(e)}, status=500)  # Return error as JSON
