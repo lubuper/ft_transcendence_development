@@ -36,7 +36,7 @@ class Game {
 		];
 		this.nextLevelTimer = 0;
 		this.player1Lives = 5;
-		if (this.gameMode === '1') {
+		if (this.gameMode === '1' || this.gameMode === '6') {
 			this.player2;
 			this.player2Lives = 5;
 			this.shield2 = null;
@@ -121,7 +121,7 @@ class Game {
 		this.camera.lookAt(this.scene.position);
 		this.camera.add(this.listener);
 		this.createEnvironment()
-		if (this.gameMode == '1') {
+		if (this.gameMode === '1' || this.gameMode === '6') {
 			this.createPlayer2(this.ship2Number);
 			this.displayLives2();
 			this.displayShieldBar2();
@@ -158,7 +158,7 @@ class Game {
 				life.material.dispose();
 			});
 		}
-		if (this.gameMode === '1') {
+		if (this.gameMode === '1' || this.gameMode === '6') {
 			this.lives2.forEach((life) => {
 				this.scene.remove(life);
 				life.geometry.dispose();
@@ -435,7 +435,7 @@ class Game {
 		if (this.gameMode === '2' || this.gameMode === '3' || this.gameMode === '4' || this.gameMode === '5') {
 			this.player1.position.set(0, 0, 5);
 		}
-		else if (this.gameMode === '1') {
+		else if (this.gameMode === '1' || this.gameMode === '6') {
 			this.player1.position.set(-20, 0, 5);
 		}
 		this.player1.velocity = { x: 0, y: 0 };
@@ -635,7 +635,7 @@ class Game {
 			const speed = 0.05 + Math.random() * 0.2;
 			const angle = Math.random() * Math.PI * 2;
 			cylinder.castShadow = true;
-            cylinder.receiveShadow = true;
+			cylinder.receiveShadow = true;
 			cylinder.velocity = {
 				x: Math.cos(angle) * speed,
 				y: Math.sin(angle) * speed
@@ -650,8 +650,25 @@ class Game {
 				y: Math.random() * 0.1 - 0.05,
 				z: Math.random() * 0.1 - 0.05
 			};
+			const powerupTypes = ['shield', 'tripleShot'];
+			const type = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
+			cylinder.type = type;
 			this.scene.add(cylinder);
 			this.powerups.push(cylinder);
+		}
+	}
+
+	absorbPowerup(player, powerup) {
+		const type = powerup.type;
+		if (type === 'shield') {
+			if (player.shield.lifetime < 80) {
+				player.shield.lifetime += 20;
+				if (player.shield.lifetime > 80) {
+					player.shield.lifetime = 80;
+				}
+			}
+		} else if (type === 'tripleShot') {
+			player.shotType = 2;
 		}
 	}
 
@@ -678,7 +695,7 @@ class Game {
 				this.shield1.visible = true;
 				this.actionStates.shield1.pressed = true;
 			}
-			if (this.gameMode === '1') {
+			if (this.gameMode === '1' || this.gameMode === '6') {
 				if (event.key === 'o' && this.player2IsActive && this.shield2.lifetime > 0) {
 					event.preventDefault();
 					if (!this.actionStates.shield2.pressed) {
@@ -705,7 +722,7 @@ class Game {
 				this.actionStates.shield1.pressed = false;
 				this.shield1.visible = false;
 			}
-			if (this.gameMode === '1') {
+			if (this.gameMode === '1' || this.gameMode === '6') {
 				if (event.key === 'p') {
 					this.actionStates.projectile2.pressed = false;
 				}
@@ -826,7 +843,7 @@ class Game {
 			this.player1VelocityX = 0;
 			this.player1VelocityY = 0;
 			this.player1.position.set(0, 0, 5);
-			if (this.gameMode === '1') {
+			if (this.gameMode === '1' || this.gameMode === '6') {
 				this.player1.position.set(-20, 0, 5);
 			}
 		}
@@ -888,10 +905,10 @@ class Game {
 			this.loader.load('/static/media/assets/lives.png', (livesTex) => {
 				const imageMaterial = new THREE.MeshBasicMaterial({ map: livesTex, transparent: true, opacity: 1, depthTest: true, depthWrite: false });
 				const LivesImage = new THREE.Mesh(imageGeometry, imageMaterial);
-				if (this.gameMode === '2') {
+				if (this.gameMode === '2' || this.gameMode === '3' || this.gameMode === '4' || this.gameMode === '5') {
 					LivesImage.position.set(i * 5 - 7.5, -44, 16);
 				}
-				else if (this.gameMode === '1') {
+				else if (this.gameMode === '1' || this.gameMode === '6') {
 					LivesImage.position.set(i * -4 - 5, -44, 16); // needs adjusting!
 				}
 				this.scene.add(LivesImage);
@@ -916,7 +933,7 @@ class Game {
 	}
 
 	checkLives() { // NEED TO UPDATE LIVES AS PLAYERS HAVE INFINITE LIVES
-		if (this.gameMode === '2') {
+		if (this.gameMode === '2' || this.gameMode === '3' || this.gameMode === '4' || this.gameMode === '5') {
 			if (this.player1Lives <= 0) {
 				this.gameOver();
 				return 0;
@@ -931,7 +948,7 @@ class Game {
 			}  
 			return 1;
 		}
-		else if (this.gameMode === '1') {
+		else if (this.gameMode === '1' || this.gameMode === '6') {
 			if (this.player1Lives <= 0 && this.player2Lives <= 0) {
 				this.gameOver();
 				return 0;
@@ -1011,10 +1028,10 @@ class Game {
 			this.spawnpowerups(this.levels[this.level].powerups);
 			this.player1VelocityX = 0;
 			this.player1VelocityY = 0;
-			if (this.gameMode === '2') {
+			if (this.gameMode === '2' || this.gameMode === '3' || this.gameMode === '4' || this.gameMode === '5') {
 				this.player1.position.set(0, 0, 5);
 			}
-			else if (this.gameMode === '1') {
+			else if (this.gameMode === '1' || this.gameMode === '6') {
 				this.player2VelocityX = 0;
 				this.player2VelocityY = 0;
 				this.shield2.visible = false;
@@ -1047,7 +1064,7 @@ class Game {
 				this.lvlCompleteScreen.material.opacity += 0.02;
 			}
 			this.shield1.visible = true;
-			if (this.gameMode === '1') {
+			if (this.gameMode === '1' || this.gameMode === '6') {
 				this.shield2.visible = true;
 			}
 			this.nextLevelTimer++;
@@ -1098,7 +1115,7 @@ class Game {
 			const color = colors[Math.floor(Math.random() * colors.length)];
 	
 			const particle = new THREE.Mesh(
-				new THREE.PlaneGeometry(particleSize, particleSize + (size / 10)),
+				new THREE.PlaneGeometry(particleSize, particleSize),
 				new THREE.MeshBasicMaterial({ color: color, transparent: true })
 			);
 			particle.position.set(
@@ -1138,7 +1155,7 @@ class Game {
 				this.env.position.y = this.boundaryY;
 			}
 		}
-		if (this.gameMode === '1') {
+		if (this.gameMode === '1' || this.gameMode === '6') {
 			if (this.player2IsActive) {
 				if (this.keysPressed['j']) {
 					this.player2.rotation.z += 0.05;
@@ -1340,6 +1357,20 @@ class Game {
 				powerup.rotation.y += powerup.rotationSpeed.y;
 				powerup.rotation.z += powerup.rotationSpeed.z;
 				this.checkBoundaries(powerup);
+				if (this.checkCollision(this.player1, powerup)) {
+					console.log("DEBUG: powerup colided!")
+					this.absorbPowerup(this.player1, powerup);
+					this.powerups.splice(i, 1);
+					i--;
+				}
+				if (this.gameMode === '1' || this.gameMode === '6') {
+					if (this.checkCollision(this.player2, powerup)) {
+						console.log("DEBUG: powerup colided!")
+						this.absorbPowerup(this.player2, powerup);
+						this.powerups.splice(i, 1);
+						i--;
+					}
+				}
 			}
 		}
 		this.checkLevelComplete();
@@ -1355,14 +1386,42 @@ class Game {
 		this.player1.position.x += this.player1VelocityX;
 		this.player1.position.y += this.player1VelocityY;
 		this.checkBoundaries(this.player1);
-		// Im here!
 		this.AIShips.forEach(collisionBox => {
 			collisionBox.position.x += collisionBox.velocity.x;
 			collisionBox.position.y += collisionBox.velocity.y;
 			const player1Position = new THREE.Vector3(this.player1.position.x, this.player1.position.y, this.player1.position.z);
-			const direction = new THREE.Vector3().subVectors(player1Position, collisionBox.position).normalize();
-			const angleToPlayer1 = Math.atan2(direction.y, direction.x);
-			collisionBox.rotation.z = angleToPlayer1;
+			if (this.gameMode === '1' || this.gameMode === '6') {
+				const player2Position = new THREE.Vector3(this.player2.position.x, this.player2.position.y, this.player2.position.z);
+				let targetPosition = null;
+				if (this.player1IsActive && this.player2IsActive) {
+					const distanceToPlayer1 = collisionBox.position.distanceTo(player1Position);
+					const distanceToPlayer2 = collisionBox.position.distanceTo(player2Position);
+					if (distanceToPlayer1 < distanceToPlayer2) {
+						targetPosition = player1Position;
+					}
+					else {
+						targetPosition = player2Position;
+					}
+				}
+				else if (this.player1IsActive) {
+					targetPosition = player1Position;
+				}
+				else if (this.player2IsActive) {
+					targetPosition = player2Position;
+				}
+				if (targetPosition) {
+					const direction = new THREE.Vector3().subVectors(targetPosition, collisionBox.position).normalize();
+					const angleToTarget = Math.atan2(direction.y, direction.x);
+					collisionBox.rotation.z = angleToTarget;
+				}
+			}
+			else {
+				if (this.player1IsActive) {
+					const direction = new THREE.Vector3().subVectors(player1Position, collisionBox.position).normalize();
+					const angleToPlayer1 = Math.atan2(direction.y, direction.x);
+					collisionBox.rotation.z = angleToPlayer1;
+				}
+			}
 			this.checkBoundaries(collisionBox);
 		});
 		this.asteroids.forEach(sphere => {
@@ -1395,7 +1454,7 @@ class Game {
 				const asteroid = this.asteroids[j];
 				if (this.checkCollision(projectile, asteroid)) {
 					this.playSound('/static/media/assets/sounds/explosion.mp3', 2);
-					this.createExplosion(asteroid.position.x, asteroid.position.y, 0);
+					this.createExplosion(asteroid.position.x, asteroid.position.y, 5);
 					if (asteroid.size > 1) {
 						asteroid.size -= 1;
 						for (let k = 0; k < 3; k++) {
@@ -1438,7 +1497,7 @@ class Game {
 				}
 			}
 			else {
-				if (this.gameMode === '1') {
+				if (this.gameMode === '1' || this.gameMode === '6') {
 					if (this.checkCollision(projectile, this.player2) && !this.shield2.visible) {
 						this.player2Death();
 						this.scene.remove(projectile);
