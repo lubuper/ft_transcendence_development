@@ -1,4 +1,6 @@
-	const base = `
+let selectedGameType = 'Pong';
+
+const base = `
 			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative">
                 <div class="card bg-dark text-white mb-3" style="width: 400px;">
                 <div class="card-body text-center">
@@ -16,6 +18,17 @@
             </div>
 			`;
 
+	function getCSRFToken() {
+		const name = 'csrftoken';
+		const cookies = document.cookie.split(';');
+		for (let cookie of cookies) {
+			const trimmedCookie = cookie.trim();
+			if (trimmedCookie.startsWith(name + '=')) {
+				return decodeURIComponent(trimmedCookie.substring(name.length + 1));
+			}
+		}
+		return null;
+	}
 
 export async function getDataRemote() {
 	try {
@@ -46,12 +59,12 @@ export default function RemotePlay(navigate) {
 						<div class="card-body">
 							<h5 class="card-title text-center">Select Game</h5>
 							<div class="form-check">
-								<input class="form-check-input" type="radio" name="gameMode" id="pvp" value="1" checked>
-								<label class="form-check-label" for="pvp">Pong</label>
+								<input class="form-check-input" type="radio" name="gameType" id="Pong" value="Pong" checked>
+								<label class="form-check-label" for="Pong" >Pong</label>
 							</div>
 							<div class="form-check">
-								<input class="form-check-input" type="radio" name="gameMode" id="ai" value="2">
-								<label class="form-check-label" for="ai">Asteroids</label>
+								<input class="form-check-input" type="radio" name="gameType" id="Astreroids" value="Astreroids">
+								<label class="form-check-label" for="Asteroids" >Asteroids</label>
 							</div>
 							</div>
 						</div>
@@ -61,7 +74,15 @@ export default function RemotePlay(navigate) {
 						<div class="card-body">
 							<h5 class="card-title text-center">Invitations</h5>
 								<div class="card-body">
-									<p>You currently have no invitations.</p>
+								${dataRemote.remote_game_invitations.length > 0 ?
+										dataRemote.remote_game_invitations.map(remote_game_invitations => `
+										<p>${remote_game_invitations}
+										<button id="AcceptRequest-${remote_game_invitations}" type="button" class="btn btn-success btn-sm ml-2">✔️</button>
+            							<button id="RejectRequest-${remote_game_invitations}" type="button" class="btn btn-danger btn-sm ml-2">X</button>
+            							</p>
+									`).join('') :
+										'<p>You currently have no friend requests.</p>'
+								}
 								</div>
 						</div>
 					</div>
@@ -120,6 +141,13 @@ export default function RemotePlay(navigate) {
 	`;
 
 
+	$games.addEventListener('click', (event) => {
+		if (event.target.name === 'gameType') {
+			event.preventDefault();
+			selectedGameType = document.querySelector('input[name="gameType"]:checked').value;
+			}
+		});
+
 	document.getElementById('startRemoteGame').addEventListener('click', async function() {
 		event.preventDefault();
 		const username = document.getElementById('playerNameInvitation').value;
@@ -134,30 +162,85 @@ export default function RemotePlay(navigate) {
 			return;
 		}
 
-		// const response = await fetch('/send-friend-request/', {
-		// 	method: 'POST',
-		// 	headers: {
-		// 		'Content-Type': 'application/x-www-form-urlencoded', // or 'application/json'
-		// 		'X-CSRFToken': getCSRFToken(), // Make sure you include your CSRF token
-		// 	},
-		// 	body: JSON.stringify({
-		// 		'username': username
-		// 	})
-		// })
-		// const result = await response.json();
-		//
-		// if (response.ok) {
-		// 	friendMessage.innerHTML = '<p class="text-success">Friend request sent successfully!</p>';
-		// 	setTimeout(() => {
-		// 		friendMessage.innerHTML = '<p </p>';
-		// 	}, 2000);
-		// } else {
-		// 	friendMessage.innerHTML = `<p class="text-danger">Failed to send friend request! ${result.message} </p>`;
-		// 	setTimeout(() => {
-		// 		friendMessage.innerHTML = '<p </p>';
-		// 	}, 2000);
-		// }
+		const response = await fetch('/send-game-invitation/', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded', // or 'application/json'
+				'X-CSRFToken': getCSRFToken(), // Make sure you include your CSRF token
+			},
+			body: JSON.stringify({
+				'username': username,
+				'game_name': selectedGameType
+			})
+		})
+		const result = await response.json();
+
+		if (response.ok) {
+			returnedMessage.innerHTML = '<p class="text-success">Game invitation sent successfully!</p>';
+			setTimeout(() => {
+				returnedMessage.innerHTML = '<p </p>';
+			}, 2000);
+		} else {
+			returnedMessage.innerHTML = `<p class="text-danger">Failed to send game invitation! ${result.message} </p>`;
+			setTimeout(() => {
+				returnedMessage.innerHTML = '<p </p>';
+			}, 2000);
+		}
 	});
+
+		dataRemote.remote_game_invitations.forEach(remote_game_invitations => {
+			// Adding event listener for the accept button
+			document.getElementById(`AcceptRequest-${remote_game_invitations}`).addEventListener('click', async function() {
+				const response = await fetch('/accept-game-invitation/', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'X-CSRFToken': getCSRFToken() // Ensure CSRF token is sent
+					},
+					body: JSON.stringify({
+						'username': friend_request // Send the username in the request body
+					}),
+				})
+
+				const result = await response.json();
+
+				if (response.ok) {
+					setTimeout(() => {
+						console.log('passou aqui 1', result);
+						navigate('/');
+					}, 2000);
+				} else {
+					setTimeout(() => {
+						console.log('passou aqui 2', result);
+					}, 2000);
+				}
+			});
+
+			document.getElementById(`RejectRequest-${remote_game_invitations}`).addEventListener('click', async function() {
+				const response = await fetch('/reject-game-invitation/', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'X-CSRFToken': getCSRFToken() // Ensure CSRF token is sent
+					},
+					body: JSON.stringify({
+						'username': friend_request // Send the username in the request body
+					}),
+				})
+				const result = await response.json();
+
+				if (response.ok) {
+					setTimeout(() => {
+						console.log('passou aqui 3', result);
+						navigate('/');
+					}, 1000);
+				} else {
+					setTimeout(() => {
+						console.log('passou aqui 4', result);
+					}, 1000);
+				}
+			});
+		});
 
 	})
 	.catch((error) => {

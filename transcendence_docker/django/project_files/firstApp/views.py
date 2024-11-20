@@ -17,6 +17,7 @@ import sys
 from django.db import IntegrityError
 from django.views.decorators.http import require_POST
 from friends.models import Relationship
+from remote.models import GameInvitation
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -315,8 +316,10 @@ def get_profile_friend(request):
 def get_data_remote(request):
 	try:
 			user = request.user
+			remote_game_invitations = GameInvitation.objects.filter(receiver__user=request.user, status='sent').values_list('sender__user__username', flat=True)
 			return JsonResponse({
-			'username': user.username},
+			'username': user.username,
+			'remote_game_invitations': list(remote_game_invitations)},
 			safe=False)
 	except Exception as e:
 			return JsonResponse({'error': str(e)}, status=500)  # Return error as JSON
