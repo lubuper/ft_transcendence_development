@@ -1,31 +1,20 @@
-	// const base = `
-	// 			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative" style="background-color: rgba(0, 0, 0, 0.6); color: white;">
-    //             <div class="card bg-dark text-white mb-3" style="width: 400px;">
-    //             <div class="card-body text-center">
-    //             <img id="avatar" src="${userFriend.profile_picture}"
-    //                  class="rounded-circle mb-3"
-    //                  alt="Avatar"
-    //                  style="width: 100px; height: 100px;">
-    //             <h5 class="card-title">${currentFriend}</h5>
-    //             <p class="card-text">
-    //                 <img src="/static/media/rank/${pongRank.rank}.png"
-    //                  alt="${pongRank.rank}"
-    //                  style="width: 64px; height: 64px; margin-right: 2px;">
-    //                 ${pongRank.result}
-    //             </p>
-    //             <p class="card-text">
-    //                 <img src="/static/media/rank/${astRank.rank}.png"
-    //                  alt="${astRank.rank}"
-    //                  style="width: 64px; height: 64px; margin-right: 2px;">
-    //                 ${astRank.result}
-    //             </p>
-    //             </div>
-    //             </div>
-    //             <button class="btn btn-danger btn-lg text-white shadow-lg mt-3 custom-button">Block</button>
-    //             <button class="btn btn-danger btn-lg text-white shadow-lg mt-3 custom-button">Remove Friend</button>
-    //             <button class="btn btn-purple btn-lg text-white shadow-lg mt-3 custom-button" onclick="window.history.back()">Go Back To Dashboard</button>
-    //         </div>
-	// 		`;
+	const base = `
+			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative" style="background-color: rgba(0, 0, 0, 0.6); color: white;">
+                <div class="card bg-dark text-white mb-3" style="width: 400px;">
+                <div class="card-body text-center">
+                <img src="/static/media/sadAlien.jpg" 
+                     alt="Sad Alien" 
+                     style="width: 300px; height: 300px; border-radius: 10px; margin-bottom: 20px;">
+                <h5 class="card-title">You must be logged to play remote!</h5>
+                </div>
+                </div>
+                <div class="d-flex">
+						<button class="btn btn-purple btn-lg mt-3 nav-link text-white shadow-lg me-3" data-path="/login">Login</button>
+						<button class="btn btn-purple btn-lg mt-3 nav-link text-white shadow-lg me-3" data-path="/createaccount">Create Account</button>
+						<button class="btn btn-purple btn-lg text-white shadow-lg mt-3 custom-button" onclick="window.history.back()">Go Back To HomePage</button>
+				</div>
+            </div>
+			`;
 
 
 export async function getDataRemote() {
@@ -36,8 +25,9 @@ export async function getDataRemote() {
 		}
 		const dataRemote = await response.json();
 		return dataRemote;
-	} catch (error) {
-		console.error('Error fetching match history:', error);
+	}
+	catch (error) {
+		// console.error('Error fetching match history:', error);
 		throw error; // Rethrow or handle the error as needed
 	}
 }
@@ -169,6 +159,10 @@ export default function RemotePlay(navigate) {
 		// }
 	});
 
+	})
+	.catch((error) => {
+		console.log("error", error);
+		$games.innerHTML = base;
 	});
 	return $games;
 }
