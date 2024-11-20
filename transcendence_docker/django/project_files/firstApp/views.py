@@ -19,6 +19,13 @@ from django.views.decorators.http import require_POST
 from friends.models import Relationship
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
+from django.utils import timezone
+from datetime import timedelta
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.contrib.auth.signals import user_logged_in
 
 # Create your views here.
 from .models import *
@@ -213,16 +220,24 @@ def save_match_history(request):
 def load_match_history(request):
 	try:
 			match_history = MatchHistory.objects.filter(user=request.user).values('timestamp', 'score', 'result', 'game')
-			friends = Profile.objects.filter(user=request.user).values_list('friends__username', flat=True)
+			""" friends = Profile.objects.filter(user=request.user).values_list('friends__username', flat=True) """
 			friend_requests = Relationship.objects.filter(receiver__user=request.user, status='sent').values_list('sender__user__username', flat=True)
 			profile = Profile.objects.get(user=request.user)
 			friends_count = profile.friends.count()
+			friends_status = []
+			for friend in profile.get_friends():
+				friend_profile = Profile.objects.get(user=friend)
+				is_online = friend_profile.is_online()
+				friends_status.append({
+				'username': friend.username,
+				'is_online': is_online
+				})
 			user = request.user
 			game_customization = GameCustomization.objects.filter(user=request.user).values('ship', 'color')
 			return JsonResponse({
 			'username': user.username,
 			'match_history': list(match_history),
-			'friends': list(friends),
+			'friends': friends_status,
 			'friends_count': friends_count,
 			'game_customization': list(game_customization),
 			'friend_requests': list(friend_requests)},

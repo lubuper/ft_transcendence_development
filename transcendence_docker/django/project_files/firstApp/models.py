@@ -4,6 +4,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
+from datetime import timedelta
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -17,6 +19,7 @@ class Profile(models.Model):
     friend_requests = models.ManyToManyField(User, related_name="friend_requests", blank=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
+    last_seen = models.DateField(null=True, blank=True)
 
     def get_friends(self):
         return self.friends.all()
@@ -30,6 +33,11 @@ class Profile(models.Model):
             return pending_requests
         else:
             return "You have no friend requests."
+
+    def is_online(self):
+        threshold = timezone.now() - timedelta(minutes=1)
+        return self.last_seen and self.last_seen > threshold  # This always returns True/False
+
 
     def __str__(self):
         return f"{self.user.username}"
@@ -62,3 +70,12 @@ class GameCustomization(models.Model):
 
     def __str__(self):
         return f'{self.user.username} - {self.ship} and {self.color}'
+
+class UpdateLastSeenMiddleWare:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.user.is_authenticated:
+            Profile.objects.filter(user=request.user).update(last_seen=timezone.now())
+        return self.get_response(request)

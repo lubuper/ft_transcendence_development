@@ -183,27 +183,27 @@ export default function DashBoard() {
 							<div class="card-body" id="friends-list">
 							${matchHistory.friends.map(friend => `
 							<p>
-      							${friend ? friend : 'You currently have no friends.'}
+      							${friend.username ? friend.username : 'You currently have no friends.'}
       							${friend ? `
-      								<img src="/static/media/icons/offline.png"
+      								<img src="/static/media/icons/${friend.is_online ? 'online' : 'offline'}.png"
       							       class="profile-icon ml-2"
       							       alt="Profile-friend-status"
-      							       style="width: 20px; height: 20px; cursor: pointer;"
-      							       id="Profile-status-${friend}">
+      							       style="width: 20px; height: 20px; pointer-events: none;"
+      							       id="friend-status-${friend.username}">
       								<img src="/static/media/icons/chat-icon.png"
       							       class="chat-icon ml-2"
       							       alt="Chat"
       							       style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);"
-      							       data-friend="${friend}"
+      							       data-friend="${friend.username}"
 									   user="${matchHistory.username}"
-      							       title="Chat with ${friend}">
+      							       title="Chat with ${friend.username}">
 									<img src="/static/media/icons/profile.png"
       							       class="profile-icon ml-2"
       							       alt="Profile-friend"
       							       style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);"
-      							       data-friend="${friend}"
+      							       data-friend="${friend.username}"
 									   user="${matchHistory.username}"
-      							       id="Profile-id-${friend}">
+      							       id="Profile-id-${friend.username}">
       							` : ''}
     						</p>
 						`).join('')}
@@ -296,6 +296,35 @@ export default function DashBoard() {
 
 	    setupChat(friendName, userName); // Initialize chat functionality for the friend
 	}
+
+	const socket = new WebSocket('ws://' + window.location.host + '/ws/friend-status/');
+
+	// Listen for messages from the server
+	socket.onmessage = function(e) {
+		const data = JSON.parse(e.data);
+
+		// Log the raw data to the browser console for debugging
+		console.log("WebSocket Message Received:", data);
+
+		const friendUsername = data.friend_;
+		const status = data.status;
+
+		// Log specific status update details
+		console.log(`Friend username: ${friendUsername}, Status: ${status}`);
+
+		// Update the status dot dynamically
+		const statusDot = document.getElementById(`friend-status-${friendUsername}`);
+		if (statusDot) {
+			statusDot.src = status === "online"
+				? "/static/media/icons/online.png"
+				: "/static/media/icons/offline.png";
+
+			// Log confirmation of status dot update
+			console.log(`Updated friend ${friendUsername}'s status icon to ${status}`);
+		} else {
+			console.warn(`Status dot for friend ${friendUsername} not found in the DOM.`);
+		}
+	};
 
 	function calculateRankedStats(matchHistory, gameName) {
 		const stats = { wins: 0, total: 0 };
