@@ -108,14 +108,24 @@ export default function LocalPlay(navigate) {
 					<div class="card bg-dark text-white mt-3 w-100" style="border: 1px solid #343a40; opacity: 0.8;">
 						<div class="card-body">
 							<h5 class="card-title text-center">How To Play</h5>
-							<p class="card-text">
-								Player 1:<br>
-								Move left/top: A<br>
-								Move right/bottom: D<br>
-								Player 2: J and L<br>
-								Move left/top: J<br>
-								Move right/bottom: L
-							</p>
+							<div class="card-text">
+								<div class="row">
+									<div class="col-6">
+										<h6>Player 1</h6>
+										<ul class="list-unstyled">
+											<li><i class="fas fa-arrow-left"></i> Move left/top: A</li>
+											<li><i class="fas fa-arrow-right"></i> Move right/bottom: D</li>
+										</ul>
+									</div>
+									<div class="col-6">
+										<h6>Player 2</h6>
+										<ul class="list-unstyled">
+											<li><i class="fas fa-arrow-left"></i> Move left/top: J</li>
+											<li><i class="fas fa-arrow-right"></i> Move right/bottom: L</li>
+										</ul>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 					<div class="d-flex justify-content-center mt-4">
@@ -128,12 +138,30 @@ export default function LocalPlay(navigate) {
 					<div class="card bg-dark text-white mt-3 w-100" style="border: 1px solid #343a40; opacity: 0.8;">
 						<div class="card-body">
 							<h5 class="card-title text-center">How To Play</h5>
-							<p class="card-text">
-								Rotate left: A<br>
-								Rotate right: D<br>
-								Fire: Space<br>
-								Shields: E
-							</p>
+							<div class="card-text">
+								<div class="row">
+									<div class="col-6">
+										<h6>Player 1</h6>
+										<ul class="list-unstyled">
+											<li><i class="fas fa-arrow-left"></i> Rotate left: A</li>
+											<li><i class="fas fa-arrow-right"></i> Rotate right: D</li>
+											<li><i class="fas fa-arrow-up"></i> Thruster: W</li>
+											<li><i class="fas fa-space-shuttle"></i> Fire: Space</li>
+											<li><i class="fas fa-shield-alt"></i> Shields: E</li>
+										</ul>
+									</div>
+									<div class="col-6">
+										<h6>Player 2</h6>
+										<ul class="list-unstyled">
+											<li><i class="fas fa-arrow-left"></i> Rotate left: J</li>
+											<li><i class="fas fa-arrow-right"></i> Rotate right: L</li>
+											<li><i class="fas fa-arrow-up"></i> Thruster: I</li>
+											<li><i class="fas fa-space-shuttle"></i> Fire: P</li>
+											<li><i class="fas fa-shield-alt"></i> Shields: O</li>
+										</ul>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 					<div class="d-flex justify-content-center mt-4">
@@ -193,6 +221,11 @@ export default function LocalPlay(navigate) {
 		}
 	});
 
+	function areNamesUnique(names) {
+		const nameSet = new Set(names);
+		return nameSet.size === names.length;
+	}
+
 	// Event listener to start the tournament
 	$games.querySelector('#startTournament').addEventListener('click', () => {
 		playerNames = [];
@@ -209,6 +242,11 @@ export default function LocalPlay(navigate) {
 			alert('Please enter all player names.');
 			return;
 		}
+			if (!areNamesUnique(playerNames)) {
+				alert('Player names must be unique.');
+				return;
+			}
+			
 		let NGameInstances;
 		if (tournamentPlayers === 2 || tournamentPlayers === 4) {
 			NGameInstances = 3;
