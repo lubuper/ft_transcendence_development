@@ -1,5 +1,5 @@
 	const base = `
-			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative" style="background-color: rgba(0, 0, 0, 0.6); color: white;">
+			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative">
                 <div class="card bg-dark text-white mb-3" style="width: 400px;">
                 <div class="card-body text-center">
                 <img src="/static/media/sadAlien.jpg" 
@@ -127,7 +127,7 @@ export default function RemotePlay(navigate) {
 		const returnedMessage = document.getElementById('returned-message');
 		if (username === dataRemote.username)
 		{
-			returnedMessage.innerHTML = `<p class="text-danger">You can not be friends with yourself!</p>`;
+			returnedMessage.innerHTML = `<p class="text-danger">You can not play with yourself!</p>`;
 			setTimeout(() => {
 				returnedMessage.innerHTML = '<p </p>';
 			}, 2000);

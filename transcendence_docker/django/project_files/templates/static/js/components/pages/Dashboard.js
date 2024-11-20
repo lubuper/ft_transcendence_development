@@ -85,7 +85,7 @@ export default function DashBoard() {
 		localStorage.setItem('selectedAvatarId', matchHistory.game_customization[0].ship);
 		localStorage.setItem('selectedColorId', matchHistory.game_customization[0].color);
 	$dashboard.innerHTML = `
-		<div class="vh-100 d-flex flex-column align-items-center justify-content-start position-relative" style="background-color: rgba(0, 0, 0, 0.6); color: white;">
+		<div class="vh-100 d-flex flex-column align-items-center justify-content-start position-relative">
 			<div class="container mt-3">
 				<div class="row align-items-start">
 					<div class="col-md-3">

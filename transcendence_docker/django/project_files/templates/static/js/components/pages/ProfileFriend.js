@@ -26,7 +26,7 @@ export default function ProfileFriend() {
             const pongRank = calculateRankedStats2(userFriend.match_history, "Pong")
             const astRank = calculateRankedStats2(userFriend.match_history, "Asteroids")
             $ProfileFriendForm.innerHTML = `
-			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative" style="background-color: rgba(0, 0, 0, 0.6); color: white;">
+			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative">
                 <div class="card bg-dark text-white mb-3" style="width: 400px;">
                 <div class="card-body text-center">
                 <img id="avatar" src="${userFriend.profile_picture}"
