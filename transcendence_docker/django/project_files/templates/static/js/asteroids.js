@@ -13,10 +13,11 @@ class Level {
 class Game {
 	constructor(gameMode) {
 		this.gameMode = gameMode;
-		if (this.gameMode !== '1' && this.gameMode !== '2' && this.gameMode !== '3' && this.gameMode !== '4') {
-			this.cleanup();
+		if (this.gameMode !== '1' && this.gameMode !== '2' && this.gameMode !== '3' &&
+			this.gameMode !== '4' && this.gameMode !== '5' && this.gameMode !== '6') {
+				this.cleanup();
 		}
-		if (this.gameMode === '3' || this.gameMode === '4') {
+		if (this.gameMode === '3' || this.gameMode === '4' || this.gameMode === '5') {
 			this.gameMode = '2';
 		}
 		console.log(this.gameMode);
@@ -150,11 +151,13 @@ class Game {
 		delete this.level;
 		window.removeEventListener('keydown', this.handleKeyDown);
 		window.removeEventListener('keyup', this.handleKeyUp);
-		this.lives1.forEach((life) => {
-			this.scene.remove(life);
-			life.geometry.dispose();
-			life.material.dispose();
-		});
+		if (this.lives1) {
+			this.lives1.forEach((life) => {
+				this.scene.remove(life);
+				life.geometry.dispose();
+				life.material.dispose();
+			});
+		}
 		if (this.gameMode === '1') {
 			this.lives2.forEach((life) => {
 				this.scene.remove(life);

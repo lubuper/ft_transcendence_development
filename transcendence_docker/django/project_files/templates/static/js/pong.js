@@ -1,10 +1,9 @@
 import { saveMatchHistory } from './components/pages/Dashboard.js';
 
 class Game {
-	constructor(gameMode, gameType, onGameEnd) {
+	constructor(gameMode, gameType) {
 		this.gameType = gameType;
 		this.gameMode = gameMode;
-		this.onGameEnd = onGameEnd;
 		this.isRunning = true;
 		this.env = null;
 		this.renderer = new THREE.WebGLRenderer({
@@ -174,29 +173,29 @@ class Game {
 		window.removeEventListener('keydown', this.handleKeyDown);
 		window.removeEventListener('keyup', this.handleKeyUp);
 		if (document.body.contains(this.renderer.domElement)) {
-		  document.body.removeChild(this.renderer.domElement);
+		document.body.removeChild(this.renderer.domElement);
 		}
 		this.renderer.dispose();
 		this.scene.traverse((object) => {
-		  if (object.isMesh) {
+		if (object.isMesh) {
 			object.geometry.dispose();
 			if (object.material) {
-			  if (Array.isArray(object.material)) {
+			if (Array.isArray(object.material)) {
 				object.material.forEach((material) => {
-				  material.dispose();
-				  // Dispose of textures
-				  if (material.map) material.map.dispose();
-				  if (material.normalMap) material.normalMap.dispose();
-				  if (material.specularMap) material.specularMap.dispose();
-				  if (material.roughnessMap) material.roughnessMap.dispose();
-				  if (material.metalnessMap) material.metalnessMap.dispose();
-				  if (material.aoMap) material.aoMap.dispose();
-				  if (material.emissiveMap) material.emissiveMap.dispose();
-				  if (material.envMap) material.envMap.dispose();
-				  if (material.lightMap) material.lightMap.dispose();
-				  if (material.bumpMap) material.bumpMap.dispose();
+				material.dispose();
+				// Dispose of textures
+				if (material.map) material.map.dispose();
+				if (material.normalMap) material.normalMap.dispose();
+				if (material.specularMap) material.specularMap.dispose();
+				if (material.roughnessMap) material.roughnessMap.dispose();
+				if (material.metalnessMap) material.metalnessMap.dispose();
+				if (material.aoMap) material.aoMap.dispose();
+				if (material.emissiveMap) material.emissiveMap.dispose();
+				if (material.envMap) material.envMap.dispose();
+				if (material.lightMap) material.lightMap.dispose();
+				if (material.bumpMap) material.bumpMap.dispose();
 				});
-			  } else {
+			} else {
 				object.material.dispose();
 				// Dispose of textures
 				if (object.material.map) object.material.map.dispose();
@@ -209,15 +208,15 @@ class Game {
 				if (object.material.envMap) object.material.envMap.dispose();
 				if (object.material.lightMap) object.material.lightMap.dispose();
 				if (object.material.bumpMap) object.material.bumpMap.dispose();
-			  }
 			}
-		  }
+			}
+		}
 		});
 		delete this.audioLoader;
 		delete this.loader;
 		this.scene.clear();
 		THREE.Cache.clear();
-	  }
+	}
 
 	restartLevel() {
 		this.scorePlayer1 = 0;
@@ -303,7 +302,7 @@ class Game {
 		const envGeometry = new THREE.SphereGeometry(400, 20, 10);
 		const envMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
 		this.env = new THREE.Mesh(envGeometry, envMaterial);
-	 		this.scene.add(this.env);
+			this.scene.add(this.env);
 			this.loader.load('/static/media/assets/mway8.jpg', function(texture) {
 				texture.wrapS = THREE.RepeatWrapping;
 				texture.wrapT = THREE.RepeatWrapping;
@@ -407,14 +406,14 @@ class Game {
 		this.playingSurface.add(barrier);
 		this.barrier = barrier;
 		new TWEEN.Tween(this.barrier.material)
-            .to({ opacity: 0 }, 1000)
-            .onComplete(() => {
-                this.playingSurface.remove(this.barrier);
-                this.barrier.geometry.dispose();
-                this.barrier.material.dispose();
-                this.barrier = null;
-            })
-            .start();
+			.to({ opacity: 0 }, 1000)
+			.onComplete(() => {
+				this.playingSurface.remove(this.barrier);
+				this.barrier.geometry.dispose();
+				this.barrier.material.dispose();
+				this.barrier = null;
+			})
+			.start();
 	}
 
 	activatePowerup(type, player) {
@@ -637,9 +636,6 @@ class Game {
 		saveMatchHistory(match);
 		this.cleanup();
 		document.getElementById('gameOver').style.display = 'flex';
-		if (this.onGameEnd) {
-			this.onGameEnd();
-		}
 	}
 
 	gameWin() {
@@ -652,9 +648,6 @@ class Game {
 		saveMatchHistory(match);
 		this.cleanup();
 		document.getElementById('gameWin').style.display = 'flex';
-		if (this.onGameEnd) {
-			this.onGameEnd();
-		}
 	}
 	
 	tiltShip(direction) {
@@ -794,7 +787,7 @@ class Game {
 	}
 	
 	gameControls() {
-		if (this.gameMode === '1') {
+		if (this.gameMode === '1' || this.gameMode === '6') {
 			if (this.keysPressed['l'] && this.ship2) {
 				this.env.rotation.x += 0.007;
 				if (this.player2.position.y >= this.minY) {
@@ -1006,7 +999,7 @@ class Game {
 				this.ship1.position.y -= 0.03;
 				const tweenLeft = new TWEEN.Tween(this.ship1.rotation)
 					.to({ z: THREE.Math.degToRad(30) }, 400) // Rotate 20 degrees to the left
-					   .easing(TWEEN.Easing.Quadratic.Out)
+					.easing(TWEEN.Easing.Quadratic.Out)
 					.start();
 			}
 		}
@@ -1095,10 +1088,20 @@ class Game {
 	}
 };
 
-export default function Pong(gameMode, gameType, onGameEnd) {
-	const game = new Game(gameMode, gameType, onGameEnd);
-	game.fetchShipAndColor().then(() => {
-		game.init();
-	});
+export default function Pong(gameMode, gameType) {
+	/* if (gameMode === '6') {
+		for (let i = 0; i < numberOfGames; i++) {
+			const game = new Game(gameMode, gameType, players);
+			game.fetchShipAndColor().then(() => {
+				game.init();
+			});
+		}
+	}
+	else { */
+		const game = new Game(gameMode, gameType);
+		game.fetchShipAndColor().then(() => {
+			game.init();
+		});
+	//}
 	return game;
 }

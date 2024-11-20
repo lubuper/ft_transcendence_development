@@ -2,6 +2,7 @@ let selectedGameMode = null;
 let selectedGameType = null;
 let tournamentPlayers = null;
 let playerNames = [];
+let currentGameIndex = 0;
 
 export default function LocalPlay(navigate) {
 	const $games = document.createElement('div');
@@ -85,6 +86,13 @@ export default function LocalPlay(navigate) {
 								</select>
 							</div>
 							<div id="playerNamesContainer" class="mt-3"></div>
+							<div class="form-group mt-3">
+								<label for="tournamentGameType" class="form-label">Select Game for Tournament</label>
+								<select class="form-control" id="tournamentGameType">
+									<option value="pong">Pong</option>
+									<option value="asteroids">Asteroids</option>
+								</select>
+							</div>
 							<div class="d-flex justify-content-center mt-4">
 								<button class="btn btn-purple btn-lg mx-5 text-white shadow-lg" id="startTournament">Start Tournament</button>
 							</div>
@@ -159,11 +167,11 @@ export default function LocalPlay(navigate) {
 
 	// Event listener to update player name inputs
 	$games.querySelector('#tournamentPlayers').addEventListener('change', (event) => {
-		const playerCount = event.target.value;
+		tournamentPlayers = event.target.value;
 		const playerNamesContainer = document.getElementById('playerNamesContainer');
 		playerNamesContainer.innerHTML = '';
-		if (playerCount) {
-			for (let i = 1; i <= playerCount; i++) {
+		if (tournamentPlayers) {
+			for (let i = 1; i <= tournamentPlayers; i++) {
 				const playerInput = document.createElement('div');
 				playerInput.className = 'form-group';
 				playerInput.innerHTML = `
@@ -187,7 +195,6 @@ export default function LocalPlay(navigate) {
 
 	// Event listener to start the tournament
 	$games.querySelector('#startTournament').addEventListener('click', () => {
-		tournamentPlayers = document.getElementById('tournamentPlayers').value;
 		playerNames = [];
 		let allNamesProvided = true;
 		for (let i = 1; i <= tournamentPlayers; i++) {
@@ -202,34 +209,41 @@ export default function LocalPlay(navigate) {
 			alert('Please enter all player names.');
 			return;
 		}
-		startTournament(navigate);
+		let NGameInstances;
+		if (tournamentPlayers === 2 || tournamentPlayers === 4) {
+			NGameInstances = 3;
+		}
+		else if (tournamentPlayers === 8) {
+			NGameInstances = 7;
+		}
+		else {
+			NGameInstances = 1;
+		}
+		startTournament(navigate, NGameInstances);
 	});
-
 	return $games;
 }
 
-function startTournament(navigate) {
-	alert(`Starting a tournament with ${tournamentPlayers} players: ${playerNames.join(', ')}`);
-	const gamePaths = ['/pong', '/asteroids']; // Add more game paths if needed
-	const gameMode = getSelectedGameMode();
-	const gameType = getSelectedGameType();
-	let currentGameIndex = 0;
-
-	function startNextGame() {
-		if (currentGameIndex < playerNames.length) {
-			const player1 = playerNames[currentGameIndex];
-			const player2 = playerNames[currentGameIndex + 1];
-			const gamePath = gamePaths[currentGameIndex % gamePaths.length]; // Rotate through game paths
-			alert(`Starting game between ${player1} and ${player2} at ${gamePath}`);
-			navigate(gamePath, { gameMode, gameType, onGameEnd: startNextGame });
-			currentGameIndex += 2;
-		} else {
-			alert('Tournament completed!');
-		}
+function startNextGame(navigate) {
+	if (currentGameIndex < playerNames.length) {
+		const player1 = playerNames[currentGameIndex];
+		const player2 = playerNames[currentGameIndex + 1];
+		const gamePath = document.getElementById('tournamentGameType').value === 'pong' ? '/pong' : '/asteroids';
+		alert(`Starting game between ${player1} and ${player2} at ${gamePath}`);
+		selectedGameMode = '6'; // Set the game mode for tournament
+		selectedGameType = document.getElementById('tournamentGameType').value;
+		navigate(gamePath);
+		currentGameIndex += 2;
+	} else {
+		alert('Tournament completed!');
 	}
+}
 
-	// Start the first game
-	startNextGame();
+function startTournament(navigate, NGameInstances) {
+	alert(`Starting a tournament with ${tournamentPlayers} players: ${playerNames.join(', ')}`);
+	for (let i = 0; i < NGameInstances; i++) {
+		startNextGame(navigate);
+	}
 }
 
 export function getSelectedGameMode() {
