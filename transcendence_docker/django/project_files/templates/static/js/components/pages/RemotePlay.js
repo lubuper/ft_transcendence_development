@@ -56,14 +56,14 @@ export default function RemotePlay(navigate) {
 				<!-- Select Game Mode Card -->
 				<div class="col-md-6 d-flex align-items-stretch">
 					<div class="card bg-dark text-white w-100" style="border: 1px solid #343a40; opacity: 0.8;">
-						<div class="card-body">
+						<div class="card-body" id="divGameType">
 							<h5 class="card-title text-center">Select Game</h5>
 							<div class="form-check">
 								<input class="form-check-input" type="radio" name="gameType" id="Pong" value="Pong" checked>
 								<label class="form-check-label" for="Pong" >Pong</label>
 							</div>
 							<div class="form-check">
-								<input class="form-check-input" type="radio" name="gameType" id="Astreroids" value="Astreroids">
+								<input class="form-check-input" type="radio" name="gameType" id="Asteroids" value="Asteroids">
 								<label class="form-check-label" for="Asteroids" >Asteroids</label>
 							</div>
 							</div>
@@ -141,11 +141,11 @@ export default function RemotePlay(navigate) {
 	`;
 
 
-	$games.addEventListener('click', (event) => {
+	$games.addEventListener('change', (event) => {
 		if (event.target.name === 'gameType') {
 			event.preventDefault();
 			selectedGameType = document.querySelector('input[name="gameType"]:checked').value;
-			}
+		}
 		});
 
 	document.getElementById('startRemoteGame').addEventListener('click', async function() {
