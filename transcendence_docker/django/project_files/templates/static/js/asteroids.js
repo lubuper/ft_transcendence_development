@@ -11,8 +11,9 @@ class Level {
 }
 
 class Game {
-	constructor(gameMode) {
+	constructor(gameMode, gameType) {
 		this.gameMode = gameMode;
+		this.gameType = gameType;
 		if (this.gameMode !== '1' && this.gameMode !== '2' && this.gameMode !== '3' &&
 			this.gameMode !== '4' && this.gameMode !== '5' && this.gameMode !== '6') {
 				this.cleanup();
@@ -22,7 +23,7 @@ class Game {
 		}
 		console.log(this.gameMode);
 		this.levels = [
-			new Level(0, 1, 0, 0, 1),
+			new Level(0, 1, 0, 0, 5),
 			new Level(1, 2, 0, 0, 0),
 			new Level(2, 3, 1, 0, 0),
 			new Level(3, 2, 1, 1, 0),
@@ -105,8 +106,6 @@ class Game {
 			this.ship1Number = data.ship;
 			if (this.ship1Number === 8)
 				this.ship2Number = 9;
-
-			console.log('Ship:', this.ship1Number);
 		} catch (error) {
 			console.error('Error fetching ship and color:', error);
 		}
@@ -134,7 +133,9 @@ class Game {
 		this.spawnAsteroids(this.levels[this.level].asteroids, 'asteroid');
 		this.spawnAsteroids(this.levels[this.level].sAsteroids, 'sAsteroid');
 		this.spawnAIships(this.levels[this.level].AIShips);
-		this.spawnpowerups(this.levels[this.level].powerups);
+		if (this.gameType === "powered") {
+			this.spawnpowerups(this.levels[this.level].powerups);
+		}
 		this.scene.add(light);
 		this.setupEventListeners();
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -630,6 +631,7 @@ class Game {
 		for (let n = 0; n < count; n++) {
 			// Create the cylinder geometry
 			const cylinderGeometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 32);
+			cylinderGeometry.parameters.radius = Math.sqrt(3) * 3/2;
 			const cylinderMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
 			const cylinder = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
 			const speed = 0.05 + Math.random() * 0.2;
@@ -658,17 +660,21 @@ class Game {
 		}
 	}
 
-	absorbPowerup(player, powerup) {
+	absorbPowerup(shield, powerup) {
 		const type = powerup.type;
 		if (type === 'shield') {
-			if (player.shield.lifetime < 80) {
-				player.shield.lifetime += 20;
-				if (player.shield.lifetime > 80) {
-					player.shield.lifetime = 80;
+			if (shield.lifetime < 80) {
+				shield.lifetime += 20;
+				if (shield.lifetime > 80) {
+					shield.lifetime = 80;
 				}
 			}
 		} else if (type === 'tripleShot') {
-			player.shotType = 2;
+			if (this.shotType != 2) {
+				this.shotType = 2;
+				this.shotType2Display.forEach(mesh => mesh.visible = true);
+				this.shotType1Display.visible = false;
+			}
 		}
 	}
 
@@ -1240,7 +1246,7 @@ class Game {
 
 		}
 		if (this.player1IsActive) {
-			if (this.keysPressed['f']) {
+			/* if (this.keysPressed['f']) {
 				this.keysPressed['f'] = false;
 				if (this.shotType === 1) {
 					this.shotType = 2;
@@ -1252,7 +1258,7 @@ class Game {
 					this.shotType1Display.visible = true;
 					this.shotType2Display.forEach(mesh => mesh.visible = false);
 				}
-			}
+			} */
 			if (this.keysPressed['a']) {
 				this.player1.rotation.z += 0.05;
 			}
@@ -1358,15 +1364,15 @@ class Game {
 				powerup.rotation.z += powerup.rotationSpeed.z;
 				this.checkBoundaries(powerup);
 				if (this.checkCollision(this.player1, powerup)) {
-					console.log("DEBUG: powerup colided!")
-					this.absorbPowerup(this.player1, powerup);
+					this.absorbPowerup(this.shield1, powerup);
+					this.scene.remove(powerup);
 					this.powerups.splice(i, 1);
 					i--;
 				}
 				if (this.gameMode === '1' || this.gameMode === '6') {
 					if (this.checkCollision(this.player2, powerup)) {
-						console.log("DEBUG: powerup colided!")
-						this.absorbPowerup(this.player2, powerup);
+						this.absorbPowerup(this.shield2, powerup);
+						this.scene.remove(powerup);
 						this.powerups.splice(i, 1);
 						i--;
 					}
@@ -1528,11 +1534,10 @@ class Game {
 	}
 }
 
-export default function Asteroids(gameMode) {
-	const game = new Game(gameMode);
+export default function Asteroids(gameMode, gameType) {
+	const game = new Game(gameMode, gameType);
 	game.fetchShipAndColor().then(() => {
 		game.init();
-		console.log('Game initialized with ship number:', game.ship1Number);
 	});
 	return game;
 }
