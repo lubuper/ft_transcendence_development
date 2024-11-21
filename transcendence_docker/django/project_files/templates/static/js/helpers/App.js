@@ -37,8 +37,13 @@ const routes = {
 	'/pong': Pong,
 	'/aboutus': AboutUs,
 	'/profile': Profile,
+<<<<<<< HEAD
 	'/profileFriend': ProfileFriend,
 	'/pongremote': PongRemote
+=======
+	'/profileFriend': ProfileFriend
+	'/pongremote' : PongRemote
+>>>>>>> bae628c (Pong tournament update)
 };
 
 let currentGameI = null;
@@ -52,13 +57,11 @@ export function navigate(path) {
 		return;
 	}
 	currentPath = path;
-
 	const allowedPaths = Object.keys(routes); // list of allowed paths for validation
 	if (allowedPaths.includes(path)) {
 		const existingCanvas = document.querySelector('canvas');
 		if (existingCanvas) {
 			if (currentGameI && typeof currentGameI.cleanup === 'function' && path !== '/asteroids' && path !== '/pong') {
-				console.log('DEBUG: Cleaning up current game instance');
 				currentGameI.cleanup();
 			}
 			if (existingCanvas.parentNode !== null) {

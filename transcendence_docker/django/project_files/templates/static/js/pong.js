@@ -76,6 +76,11 @@ class Game {
 		this.aiBotMov = 0;
 		this.aiCalculusFlag = false;
 		this.aiMovingDirection = true;
+		this.tournamentPlayersNames = [];
+		this.tournamentNumberOfPlays = 7;
+		this.currentTournamentPlay = 1;
+		if (this.gameMode === '7' || this.gameMode === '8' || this.gameMode === '9')
+			this.gameMode = '6';
 	}
 
 	async fetchShipAndColor() {
@@ -216,18 +221,6 @@ class Game {
 		delete this.loader;
 		this.scene.clear();
 		THREE.Cache.clear();
-	}
-
-	restartLevel() {
-		this.scorePlayer1 = 0;
-		this.scorePlayer2 = 0;
-		this.player1.position.set(-2.4, 0.2, 0);
-		this.ship1.position.set(-2.7, 0.2, 0);
-		this.player2.position.set(2.4, -0.2, 0);
-		this.ship2.position.set(2.7, player2.position.y, player2.z);
-		this.ball.position.set(0, 0, -0.01);
-		this.ball.velocity.set(0.02, 0.02, 0);
-		animate();
 	}
 	
 	createHexagon(size, opac) {
@@ -626,28 +619,60 @@ class Game {
 		});
 	}
 
+	tournamentHandler() {
+		console.log("current play:", this.currentTournamentPlay, " and number max of plays: ", this.tournamentNumberOfPlays)
+		if (this.currentTournamentPlay <= this.tournamentNumberOfPlays) {
+			this.scorePlayer1 = 0;
+			this.scorePlayer2 = 0;
+			this.updateScore(this.scorePlayer1, this.scorePlayer2);
+			this.resetBall();
+		}
+		else {
+			const match = {
+				result: `win`,
+				score: `${this.scorePlayer1}-${this.scorePlayer2}`,
+				game: `Pong Tournament`,
+			};
+			saveMatchHistory(match);
+			this.cleanup();
+			document.getElementById('gameWin').style.display = 'flex';
+		}
+
+	}
+
 	gameOver() {
-		this.isRunning = false;
-		const match = {
-			result: `loss`,
-			score: `${this.scorePlayer1}-${this.scorePlayer2}`,
-			game: `Pong`,
-		};
-		saveMatchHistory(match);
-		this.cleanup();
-		document.getElementById('gameOver').style.display = 'flex';
+		console.log(this.gameMode);
+		if (this.gameMode === '6') {
+			this.tournamentHandler();
+		}
+		else {
+			this.isRunning = false;
+			const match = {
+				result: `loss`,
+				score: `${this.scorePlayer1}-${this.scorePlayer2}`,
+				game: `Pong`,
+			};
+			saveMatchHistory(match);
+			this.cleanup();
+			document.getElementById('gameOver').style.display = 'flex';
+		}
 	}
 
 	gameWin() {
-		this.isRunning = false;
-		const match = {
-			result: `win`,
-			score: `${this.scorePlayer1}-${this.scorePlayer2}`,
-			game: `Pong`,
-		};
-		saveMatchHistory(match);
-		this.cleanup();
-		document.getElementById('gameWin').style.display = 'flex';
+		if (this.gameMode === '6') {
+			this.tournamentHandler();
+		}
+		else {
+			this.isRunning = false;
+			const match = {
+				result: `win`,
+				score: `${this.scorePlayer1}-${this.scorePlayer2}`,
+				game: `Pong`,
+			};
+			saveMatchHistory(match);
+			this.cleanup();
+			document.getElementById('gameWin').style.display = 'flex';
+		}
 	}
 	
 	tiltShip(direction) {
@@ -1066,7 +1091,6 @@ class Game {
 				this.ball.position.x + this.ball.geometry.parameters.radius > powerup.position.x - powerup.geometry.parameters.radius &&
 				this.ball.position.y + this.ball.geometry.parameters.radius > powerup.position.y - powerup.geometry.parameters.radius &&
 				this.ball.position.y - this.ball.geometry.parameters.radius < powerup.position.y + powerup.geometry.parameters.radius) {
-				console.log("DEBUG", powerup.type);
 				this.playingSurface.remove(powerup);
 				this.powerups.splice(index, 1);
 				powerup.geometry.dispose();
@@ -1089,19 +1113,9 @@ class Game {
 };
 
 export default function Pong(gameMode, gameType) {
-	/* if (gameMode === '6') {
-		for (let i = 0; i < numberOfGames; i++) {
-			const game = new Game(gameMode, gameType, players);
-			game.fetchShipAndColor().then(() => {
-				game.init();
-			});
-		}
-	}
-	else { */
 		const game = new Game(gameMode, gameType);
 		game.fetchShipAndColor().then(() => {
 			game.init();
 		});
-	//}
 	return game;
 }

@@ -2,7 +2,6 @@ let selectedGameMode = null;
 let selectedGameType = null;
 let tournamentPlayers = null;
 let playerNames = [];
-let currentGameIndex = 0;
 
 export default function LocalPlay(navigate) {
 	const $games = document.createElement('div');
@@ -24,7 +23,7 @@ export default function LocalPlay(navigate) {
 								<label class="form-check-label" for="ai">Play vs AI</label>
 							</div>
 							<div class="form-check">
-								<input class="form-check-input" type="radio" name="gameMode" id="tournament" value="3">
+								<input class="form-check-input" type="radio" name="gameMode" id="tournament" value="6">
 								<label class="form-check-label" for="tournament">Tournament Mode</label>
 							</div>
 							<div id="difficultyOptions" class="mt-1" style="display: none;">
@@ -184,7 +183,7 @@ export default function LocalPlay(navigate) {
 			} else if (selectedValue === '1') {
 				difficultyOptions.style.display = 'none';
 				tournamentSetup.style.display = 'none';
-			} else if (selectedValue === '3') {
+			} else if (selectedValue === '6') {
 				difficultyOptions.style.display = 'none';
 				tournamentSetup.style.display = 'block';
 				// Trigger change event to populate player names
@@ -195,10 +194,19 @@ export default function LocalPlay(navigate) {
 
 	// Event listener to update player name inputs
 	$games.querySelector('#tournamentPlayers').addEventListener('change', (event) => {
-		tournamentPlayers = event.target.value;
+		tournamentPlayers = Number(event.target.value);
 		const playerNamesContainer = document.getElementById('playerNamesContainer');
 		playerNamesContainer.innerHTML = '';
 		if (tournamentPlayers) {
+			if (tournamentPlayers === 2) {
+				selectedGameMode = '7';
+			}
+			else if (tournamentPlayers === 4) {
+				selectedGameMode = '8';
+			}
+			else if (tournamentPlayers === 8) {
+				selectedGameMode = '9';
+			}
 			for (let i = 1; i <= tournamentPlayers; i++) {
 				const playerInput = document.createElement('div');
 				playerInput.className = 'form-group';
@@ -246,42 +254,25 @@ export default function LocalPlay(navigate) {
 				alert('Player names must be unique.');
 				return;
 			}
-			
-		let NGameInstances;
-		if (tournamentPlayers === 2 || tournamentPlayers === 4) {
-			NGameInstances = 3;
-		}
-		else if (tournamentPlayers === 8) {
-			NGameInstances = 7;
-		}
-		else {
-			NGameInstances = 1;
-		}
-		startTournament(navigate, NGameInstances);
+		startTournament(navigate);
 	});
 	return $games;
 }
 
-function startNextGame(navigate) {
-	if (currentGameIndex < playerNames.length) {
-		const player1 = playerNames[currentGameIndex];
-		const player2 = playerNames[currentGameIndex + 1];
-		const gamePath = document.getElementById('tournamentGameType').value === 'pong' ? '/pong' : '/asteroids';
-		alert(`Starting game between ${player1} and ${player2} at ${gamePath}`);
-		selectedGameMode = '6'; // Set the game mode for tournament
-		selectedGameType = document.getElementById('tournamentGameType').value;
-		navigate(gamePath);
-		currentGameIndex += 2;
-	} else {
-		alert('Tournament completed!');
-	}
-}
-
-function startTournament(navigate, NGameInstances) {
-	alert(`Starting a tournament with ${tournamentPlayers} players: ${playerNames.join(', ')}`);
-	for (let i = 0; i < NGameInstances; i++) {
-		startNextGame(navigate);
-	}
+function startTournament(navigate) {
+    alert(`Starting a tournament with ${tournamentPlayers} players: ${playerNames.join(', ')}`);
+    const tournamentGameTypeElement = document.getElementById('tournamentGameType');
+    if (tournamentGameTypeElement) {
+        const gamePath = tournamentGameTypeElement.value === 'pong' ? '/pong' : '/asteroids';
+        const tournamentData = {
+            playerNames: playerNames,
+            gameType: tournamentGameTypeElement.value,
+            numberOfGames: tournamentPlayers / 2 // Assuming each game is between two players
+        };
+        navigate(gamePath, { state: tournamentData });
+    } else {
+        console.error('Tournament game type element not found when starting the tournament.');
+    }
 }
 
 export function getSelectedGameMode() {
