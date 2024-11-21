@@ -27,6 +27,8 @@ from asgiref.sync import async_to_sync
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.contrib.auth.signals import user_logged_in
+import logging
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 from .models import *
@@ -228,10 +230,10 @@ def load_match_history(request):
 			friends_status = []
 			for friend in profile.get_friends():
 				friend_profile = Profile.objects.get(user=friend)
-				is_online = friend_profile.is_online()
+				online_status = friend_profile.is_online()
 				friends_status.append({
 				'username': friend.username,
-				'is_online': is_online
+				'status': online_status
 				})
 			user = request.user
 			game_customization = GameCustomization.objects.filter(user=request.user).values('ship', 'color')

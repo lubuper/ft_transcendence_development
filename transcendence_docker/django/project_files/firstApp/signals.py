@@ -3,6 +3,7 @@ from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.dispatch import receiver
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from .models import Profile
 import logging
 logger = logging.getLogger(__name__)
 
@@ -13,11 +14,20 @@ status_change_signal = Signal()
 @receiver(user_logged_in)
 def handle_user_login(sender, request, user, **kwargs):
 	logger.info(f"User {user.username} logged in111111.")
+	profile = Profile.objects.get(user=user)
+	profile.online_status = True
+	profile.save()
+	logger.info(f"is user {profile.user} online? status: {profile.online_status}")
 	# Emit custom status change signal on login
 	status_change_signal.send(sender=user.__class__, username=user.username, status="online")
 
 @receiver(user_logged_out)
 def handle_user_logout(sender, request, user, **kwargs):
+	logger.info(f"User {user.username} logged out111111.")
+	profile = Profile.objects.get(user=user)
+	profile.online_status = False
+	profile.save()
+	logger.info(f"is user {profile.user} offline? status: {profile.online_status}")
 	# Emit custom status change signal on logout
 	status_change_signal.send(sender=user.__class__, username=user.username, status="offline")
 

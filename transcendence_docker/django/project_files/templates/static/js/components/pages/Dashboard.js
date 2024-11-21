@@ -185,7 +185,7 @@ export default function DashBoard() {
 							<p>
       							${friend.username ? friend.username : 'You currently have no friends.'}
       							${friend ? `
-      								<img src="/static/media/icons/${friend.is_online ? 'online' : 'offline'}.png"
+      								<img src="/static/media/icons/${friend.status ? 'online' : 'offline'}.png"
       							       class="profile-icon ml-2"
       							       alt="Profile-friend-status"
       							       style="width: 20px; height: 20px; pointer-events: none;"

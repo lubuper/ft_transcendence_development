@@ -20,6 +20,7 @@ class Profile(models.Model):
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
     last_seen = models.DateField(null=True, blank=True)
+    online_status = models.BooleanField(default=False)
 
     def get_friends(self):
         return self.friends.all()
@@ -35,8 +36,7 @@ class Profile(models.Model):
             return "You have no friend requests."
 
     def is_online(self):
-        threshold = timezone.now() - timedelta(minutes=1)
-        return self.last_seen and self.last_seen > threshold  # This always returns True/False
+        return self.online_status # This always returns True/False
 
     def __str__(self):
         return f"{self.user.username}"
