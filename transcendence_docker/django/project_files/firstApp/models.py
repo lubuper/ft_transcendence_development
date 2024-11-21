@@ -17,7 +17,6 @@ class Profile(models.Model):
     )
     friends = models.ManyToManyField(User, related_name="friends", blank=True)
     friend_requests = models.ManyToManyField(User, related_name="friend_requests", blank=True)
-    remote_game_invitations = models.ManyToManyField(User, related_name="remote_game_invitations", blank=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
     last_seen = models.DateField(null=True, blank=True)
@@ -38,10 +37,6 @@ class Profile(models.Model):
     def is_online(self):
         threshold = timezone.now() - timedelta(minutes=1)
         return self.last_seen and self.last_seen > threshold  # This always returns True/False
-
-
-    def get_game_invitations(self):
-            return self.remote_game_invitations.all()
 
     def __str__(self):
         return f"{self.user.username}"

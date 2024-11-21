@@ -5,6 +5,8 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import GameInvitation
 from firstApp.models import Profile
 import json
+import logging
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def send_game_invitation(request):
@@ -24,13 +26,12 @@ def send_game_invitation(request):
             receiver = Profile.objects.get(user__username=receiver_username)
 
             # Create a game invitation instance with status 'sent'
-            game_invitation, created = GameInvitation.objects.get_or_create(
+            game_invitation, created = GameInvitation.objects.update_or_create(
                 sender=Profile.objects.get(user=sender),
                 receiver=receiver,
                 game_id=game_name,
-                defaults={'status': 'sent'}
+                status='sent'
             )
-
             if created:
                 return JsonResponse({'message': f'Game invitation for {game_name} sent successfully!'}, status=200)
             else:
@@ -46,24 +47,24 @@ def send_game_invitation(request):
 def accept_game_invitation(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        username = data.get('username')
-        game_name = data.get('game_name')
+        sender_username = data.get('username')
+        game_id = data.get('game_name')
+        receiver_username = request.user
 
         try:
             receiver = request.user.profile  # Current user (receiver)
-            sender = Profile.objects.get(user__username=username)  # Sender of the invitation
-
+            sender = Profile.objects.get(user__username=sender_username)  # Sender of the invitation
             # Update the GameInvitation model to set status to 'accepted'
             game_invitation = GameInvitation.objects.get(
                 sender=sender,
                 receiver=receiver,
-                game_id=game_name,
+                game_id=game_id,
                 status='sent'
             )
             game_invitation.status = 'accepted'
             game_invitation.save()
 
-            return JsonResponse({'message': f'Game invitation for {game_name} accepted successfully!'}, status=200)
+            return JsonResponse({'message': f'Game invitation accepted successfully!'}, status=200)
         except Profile.DoesNotExist:
             return JsonResponse({'error': 'User not found'}, status=404)
         except GameInvitation.DoesNotExist:
@@ -95,7 +96,7 @@ def reject_game_invitation(request):
             game_invitation.status = 'rejected'
             game_invitation.save()
 
-            return JsonResponse({'message': f'Game invitation for {game_name} rejected successfully!'}, status=200)
+            return JsonResponse({'message': f'Game invitation rejected successfully!'}, status=200)
         except Profile.DoesNotExist:
             return JsonResponse({'error': 'User not found'}, status=404)
         except GameInvitation.DoesNotExist:

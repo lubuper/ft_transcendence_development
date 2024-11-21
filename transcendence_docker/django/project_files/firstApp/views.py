@@ -316,7 +316,10 @@ def get_profile_friend(request):
 def get_data_remote(request):
 	try:
 			user = request.user
-			remote_game_invitations = GameInvitation.objects.filter(receiver__user=request.user, status='sent').values_list('sender__user__username', flat=True)
+			try:
+				remote_game_invitations = GameInvitation.objects.filter(receiver__user=request.user, status='sent').values_list('sender__user__username', flat=True)
+			except remote_game_invitations.DoesNotExist:
+				remote_game_invitations = None
 			return JsonResponse({
 			'username': user.username,
 			'remote_game_invitations': list(remote_game_invitations)},

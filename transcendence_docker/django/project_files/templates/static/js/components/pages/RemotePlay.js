@@ -191,6 +191,7 @@ export default function RemotePlay(navigate) {
 		dataRemote.remote_game_invitations.forEach(remote_game_invitations => {
 			// Adding event listener for the accept button
 			document.getElementById(`AcceptRequest-${remote_game_invitations}`).addEventListener('click', async function() {
+				console.log('user que vai:', remote_game_invitations)
 				const response = await fetch('/accept-game-invitation/', {
 					method: 'POST',
 					headers: {
@@ -198,7 +199,8 @@ export default function RemotePlay(navigate) {
 						'X-CSRFToken': getCSRFToken() // Ensure CSRF token is sent
 					},
 					body: JSON.stringify({
-						'username': friend_request // Send the username in the request body
+						'username': remote_game_invitations,
+						'game_name': selectedGameType// Send the username in the request body
 					}),
 				})
 
@@ -224,7 +226,8 @@ export default function RemotePlay(navigate) {
 						'X-CSRFToken': getCSRFToken() // Ensure CSRF token is sent
 					},
 					body: JSON.stringify({
-						'username': friend_request // Send the username in the request body
+						'username': remote_game_invitations,
+						'game_name': selectedGameType// Send the username in the request body
 					}),
 				})
 				const result = await response.json();
