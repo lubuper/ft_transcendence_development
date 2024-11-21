@@ -37,13 +37,8 @@ const routes = {
 	'/pong': Pong,
 	'/aboutus': AboutUs,
 	'/profile': Profile,
-<<<<<<< HEAD
 	'/profileFriend': ProfileFriend,
-	'/pongremote': PongRemote
-=======
-	'/profileFriend': ProfileFriend
 	'/pongremote' : PongRemote
->>>>>>> bae628c (Pong tournament update)
 };
 
 let currentGameI = null;
