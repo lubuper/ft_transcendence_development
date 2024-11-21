@@ -192,6 +192,7 @@ export default function RemotePlay(navigate) {
 			socket.onmessage = function(event) {
 				const data = JSON.parse(event.data);
 				if (data.message.includes('joined')) {
+					socket.send(JSON.stringify({ 'message': 'Both players connected'}));
 					navigate('/pongremote');
 				}
 			};
@@ -235,13 +236,38 @@ export default function RemotePlay(navigate) {
 					// Connect to the WebSocket for this game
 					const socket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/`);
 
+					socket.onopen = function () {
+						console.log("WebSocket connected, sending message...");
+
+						// Now you can safely send a message
+						socket.send(JSON.stringify({
+							action: "join",
+							gameId: gameId
+						}));
+					};
+
 					socket.onmessage = function (event) {
 						const data = JSON.parse(event.data);
-						if (data.message.includes('joined')) {
+						if (data.message.includes('has joined the game.')) {
 							console.log('Both players connected. Starting game...');
 							navigate('/pongremote');
 						}
-					}
+					};
+
+					// Error handling
+					socket.onerror = function (error) {
+						console.error("WebSocket error:", error);
+					};
+
+					// socket.send(JSON.stringify({ 'message': 'has joined the game.'}));
+					//
+					// socket.onmessage = function (event) {
+					// 	const data = JSON.parse(event.data);
+					// 	if (data.message.includes('Both players connected')) {
+					// 		console.log('Both players connected. Starting game...');
+					// 		navigate('/pongremote');
+					// 	}
+					// }
 				} else {
 					setTimeout(() => {
 						console.log('passou aqui 2', result);
