@@ -319,7 +319,7 @@ def get_data_remote(request):
 	try:
 			user = request.user
 			try:
-				remote_game_invitations = GameInvitation.objects.filter(receiver__user=request.user, status='sent').values_list('sender__user__username', flat=True)
+				remote_game_invitations = GameInvitation.objects.filter(receiver__user=request.user, status='sent').values('sender__user__username', 'game_id')
 			except remote_game_invitations.DoesNotExist:
 				remote_game_invitations = None
 			return JsonResponse({

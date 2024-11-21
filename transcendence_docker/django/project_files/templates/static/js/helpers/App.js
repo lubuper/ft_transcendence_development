@@ -9,6 +9,7 @@ import ErrorPage from '../components/pages/ErrorPage.js';
 import AboutUs from '../components/pages/AboutUs.js';
 import Asteroids from '../asteroids.js';
 import Pong from '../pong.js';
+import PongRemote from '../pongRemote.js';
 import Profile from "../components/pages/Profile.js";
 import ProfileFriend from "../components/pages/ProfileFriend.js";
 import LocalPlay, { getSelectedGameMode, getSelectedGameType } from '../components/pages/LocalPlay.js';
@@ -36,7 +37,8 @@ const routes = {
 	'/pong': Pong,
 	'/aboutus': AboutUs,
 	'/profile': Profile,
-	'/profileFriend': ProfileFriend
+	'/profileFriend': ProfileFriend,
+	'/pongremote': PongRemote
 };
 
 let currentGameI = null;

@@ -1,3 +1,4 @@
+import { navigate } from '../../helpers/App.js';
 let selectedGameType = 'Pong';
 
 const base = `
@@ -53,7 +54,7 @@ export default function RemotePlay(navigate) {
 		<div class="container vh-100 d-flex flex-column align-items-center justify-content-start pt-3">
 			<!-- Top Row for Game Mode and Game Type Cards -->
 			<div class="row w-100 mb-3">
-				<!-- Select Game Mode Card -->
+				<!-- Select Game Card -->
 				<div class="col-md-6 d-flex align-items-stretch">
 					<div class="card bg-dark text-white w-100" style="border: 1px solid #343a40; opacity: 0.8;">
 						<div class="card-body" id="divGameType">
@@ -76,9 +77,9 @@ export default function RemotePlay(navigate) {
 								<div class="card-body">
 								${dataRemote.remote_game_invitations.length > 0 ?
 										dataRemote.remote_game_invitations.map(remote_game_invitations => `
-										<p>${remote_game_invitations}
-										<button id="AcceptRequest-${remote_game_invitations}" type="button" class="btn btn-success btn-sm ml-2">✔️</button>
-            							<button id="RejectRequest-${remote_game_invitations}" type="button" class="btn btn-danger btn-sm ml-2">X</button>
+										<p>${remote_game_invitations.sender__user__username} #${remote_game_invitations.game_id}
+										<button id="AcceptRequest-${remote_game_invitations.game_id}" value="${remote_game_invitations.game_id}" type="button" class="btn btn-success btn-sm ml-2">✔️</button>
+            							<button id="RejectRequest-${remote_game_invitations.game_id}" value="${remote_game_invitations.game_id}" type="button" class="btn btn-danger btn-sm ml-2">X</button>
             							</p>
 									`).join('') :
 										'<p>You currently have no friend requests.</p>'
@@ -88,7 +89,7 @@ export default function RemotePlay(navigate) {
 					</div>
 					</div>
 				</div>
-			<!-- Tournament Setup Section -->
+			<!-- Send invitation -->
 			<div class="row w-100 mb-3">
 				<div class="col-md-12">
 					<div class="card bg-dark text-white w-100" style="border: 1px solid #343a40; opacity: 0.8;">
@@ -106,7 +107,7 @@ export default function RemotePlay(navigate) {
 					</div>
 				</div>
 			</div>
-			<!-- Game Sections -->
+			<!-- Game Especifications -->
 			<div class="row w-100">
 				<!-- Pong Section -->
 				<div class="col-md-6 text-center d-flex flex-column align-items-center">
@@ -180,6 +181,21 @@ export default function RemotePlay(navigate) {
 			setTimeout(() => {
 				returnedMessage.innerHTML = '<p </p>';
 			}, 2000);
+			document.body.innerHTML = `
+			<div class="vh-100 d-flex flex-column align-items-center justify-content-center">
+				<h5>Waiting for the other opponent...</h5>
+			</div>
+			`;
+
+			const socket = new WebSocket(`ws://${window.location.host}/ws/game/${result.game_id}/`);
+
+			socket.onmessage = function(event) {
+				const data = JSON.parse(event.data);
+				if (data.message.includes('joined')) {
+					navigate('/pongremote');
+				}
+			};
+			// navigate('/pongremote');
 		} else {
 			returnedMessage.innerHTML = `<p class="text-danger">Failed to send game invitation! ${result.message} </p>`;
 			setTimeout(() => {
@@ -190,8 +206,9 @@ export default function RemotePlay(navigate) {
 
 		dataRemote.remote_game_invitations.forEach(remote_game_invitations => {
 			// Adding event listener for the accept button
-			document.getElementById(`AcceptRequest-${remote_game_invitations}`).addEventListener('click', async function() {
-				console.log('user que vai:', remote_game_invitations)
+			document.getElementById(`AcceptRequest-${remote_game_invitations.game_id}`).addEventListener('click', async function() {
+				console.log('user que vai:', remote_game_invitations.sender__user__username)
+				// const game_id = document.getElementById('AcceptRequest-${remote_game_invitations.game_id}').value;
 				const response = await fetch('/accept-game-invitation/', {
 					method: 'POST',
 					headers: {
@@ -199,18 +216,32 @@ export default function RemotePlay(navigate) {
 						'X-CSRFToken': getCSRFToken() // Ensure CSRF token is sent
 					},
 					body: JSON.stringify({
-						'username': remote_game_invitations,
-						'game_name': selectedGameType// Send the username in the request body
+						'username': remote_game_invitations.sender__user__username,
+						'game_id': remote_game_invitations.game_id// Send the username in the request body
 					}),
 				})
 
 				const result = await response.json();
 
 				if (response.ok) {
-					setTimeout(() => {
-						console.log('passou aqui 1', result);
-						navigate('/');
-					}, 2000);
+					console.log('Game accepted. Redirecting to remote play...');
+					const gameId = result.game_id;
+					document.body.innerHTML = `
+					<div class="vh-100 d-flex flex-column align-items-center justify-content-center">
+						<h5>Connecting to game...</h5>
+					</div>
+					`;
+
+					// Connect to the WebSocket for this game
+					const socket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/`);
+
+					socket.onmessage = function (event) {
+						const data = JSON.parse(event.data);
+						if (data.message.includes('joined')) {
+							console.log('Both players connected. Starting game...');
+							navigate('/pongremote');
+						}
+					}
 				} else {
 					setTimeout(() => {
 						console.log('passou aqui 2', result);
@@ -218,7 +249,8 @@ export default function RemotePlay(navigate) {
 				}
 			});
 
-			document.getElementById(`RejectRequest-${remote_game_invitations}`).addEventListener('click', async function() {
+			document.getElementById(`RejectRequest-${remote_game_invitations.game_id}`).addEventListener('click', async function() {
+				// const game_id = document.getElementById('RejectRequest-${remote_game_invitations.sender__user__username}').value;
 				const response = await fetch('/reject-game-invitation/', {
 					method: 'POST',
 					headers: {
@@ -226,8 +258,8 @@ export default function RemotePlay(navigate) {
 						'X-CSRFToken': getCSRFToken() // Ensure CSRF token is sent
 					},
 					body: JSON.stringify({
-						'username': remote_game_invitations,
-						'game_name': selectedGameType// Send the username in the request body
+						'username': remote_game_invitations.sender__user__username,
+						'game_id': remote_game_invitations.game_id// Send the username in the request body
 					}),
 				})
 				const result = await response.json();
