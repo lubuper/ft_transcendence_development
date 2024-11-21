@@ -6,7 +6,7 @@ from .models import Profile
 from datetime import timedelta
 from django.utils import timezone
 from .signals import status_change_signal
-from asgiref.sync import async_to_sync
+from asgiref.sync import async_to_sync, sync_to_async
 from channels.layers import get_channel_layer
 from django.dispatch import receiver
 import logging
@@ -22,6 +22,22 @@ class StatusConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
+        if self.scope["user"].is_authenticated:
+            profile = await sync_to_async(Profile.objects.get)(user=self.scope["user"])
+            profile.online_status = False
+            await sync_to_async(profile.save)()
+        """ # Notify the user's friends about the status change
+        friends = profile.get_friends()  # Assuming `get_friends()` returns a QuerySet of User objects
+        for friend in friends:
+            friend_group_name = f"user_{friend.id}"  # Each friend has their own group
+            await self.channel_layer.group_send(
+                friend_group_name,
+                {
+                    "type": "status_update",
+                    "username": self.scope["user"].username,
+                    "status": "offline",
+                },
+            ) """
 
     async def receive(self, text_data):
         data = json.loads(text_data)
