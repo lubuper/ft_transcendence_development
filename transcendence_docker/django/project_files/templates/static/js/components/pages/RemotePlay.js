@@ -32,18 +32,13 @@ const base = `
 	}
 
 export async function getDataRemote() {
-	try {
 		const response = await fetch('/api/get-data-remote/');
 		if (!response.ok) {
-			throw new Error(`HTTP error! Status: ${response.status}`);
+			const resp = await  response.json();
+			throw new Error(resp.error);
 		}
 		const dataRemote = await response.json();
 		return dataRemote;
-	}
-	catch (error) {
-		// console.error('Error fetching match history:', error);
-		throw error; // Rethrow or handle the error as needed
-	}
 }
 
 export default function RemotePlay(navigate) {
@@ -305,8 +300,22 @@ export default function RemotePlay(navigate) {
 
 	})
 	.catch((error) => {
-		console.log("error", error);
-		$games.innerHTML = base;
+		if (error.toString() === 'Error: Not logged') {
+			$games.innerHTML = base;
+		} else {
+			$games.innerHTML = `
+			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative">
+                <div class="card bg-dark text-white mb-3" style="width: 400px;">
+                <div class="card-body text-center">
+                <img src="/static/media/sadAlien.jpg" 
+                     alt="Sad Alien" 
+                     style="width: 300px; height: 300px; border-radius: 10px; margin-bottom: 20px;">
+                <h5 class="card-title">Something went wrong! Try again</h5>
+                </div>
+                </div>
+            </div>
+			`;
+		}
 	});
 	return $games;
 }
