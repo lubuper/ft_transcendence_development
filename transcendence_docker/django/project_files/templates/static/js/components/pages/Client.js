@@ -1,45 +1,81 @@
+const activeSockets = {}; // Store active WebSocket connections globally
+
 export function setupChat(friendName, userName) {
-    const messageContainer = document.getElementById(`messages-${userName}-${friendName}`);
+    // Generate a consistent key for chat pairs regardless of order
+    const chatKey = [userName, friendName].sort().join('-'); // Ensures consistent key (e.g., "rafa-ze" or "ze-rafa")
 
+    // Check if a WebSocket already exists for this chatKey
+    if (activeSockets[chatKey]) {
+        console.log(`Reusing existing WebSocket for chat between ${userName} and ${friendName}`);
+        return activeSockets[chatKey]; // Reuse the existing WebSocket
+    }
+
+    console.log(`Creating new WebSocket for chat between ${userName} and ${friendName}`);
+    // Create the WebSocket connection
     const chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${userName}/${friendName}/`);
+    activeSockets[chatKey] = chatSocket; // Store the WebSocket in the global object
 
-    chatSocket.onmessage = function(e) {
+    // Create the message container dynamically if it doesn't exist
+    let messageContainer = document.getElementById(`messages-${chatKey}`);
+    if (!messageContainer) {
+        messageContainer = document.createElement('div');
+        messageContainer.id = `messages-${chatKey}`;
+        messageContainer.classList.add('chat-messages');
+        document.body.appendChild(messageContainer); // Append to the body or a specific chat container
+    }
+
+    // WebSocket event handlers
+    chatSocket.onmessage = function (e) {
         const data = JSON.parse(e.data);
         const newMessage = document.createElement('p');
         newMessage.textContent = `${data.sender} : ${data.message}`;
+
+        // Determine the role dynamically based on the sender
         if (data.sender === userName) {
-            newMessage.classList.add('my-message');
-        } else if (data.sender === friendName) {
-            newMessage.classList.add('friend-message');
+            newMessage.classList.add('my-message'); // Message sent by the current user
+        } else {
+            newMessage.classList.add('friend-message'); // Message sent by the friend
         }
+
         messageContainer.appendChild(newMessage);
-        messageContainer.scrollTop = messageContainer.scrollHeight;
+        messageContainer.scrollTop = messageContainer.scrollHeight; // Scroll to the bottom
     };
 
-    chatSocket.onclose = function() {
-        console.log('Chat socket closed');
+    chatSocket.onclose = function () {
+        console.log(`Chat socket for ${chatKey} closed`);
+        delete activeSockets[chatKey]; // Remove the WebSocket from activeSockets when closed
     };
 
-    chatSocket.onerror = function(e) {
-        console.error('Chat socket error', e);
+    chatSocket.onerror = function (e) {
+        console.error(`Chat socket error for ${chatKey}`, e);
     };
 
+    // Attach event listeners for sending messages
     const senderButton = document.querySelector(`.sender`);
     const inputField = document.querySelector(`.message-input`);
 
     if (senderButton && inputField) {
-        senderButton.addEventListener('click', () => {
+        const sendMessage = () => {
             if (inputField.value.trim() !== '') {
-                chatSocket.send(JSON.stringify({ 'message': inputField.value }));
+                chatSocket.send(
+                    JSON.stringify({
+                        sender: userName, // Include the sender in the message
+                        message: inputField.value,
+                    })
+                );
                 inputField.value = ''; // Clear the input field after sending
             }
-        });
+        };
 
-        inputField.addEventListener('keyup', function(e) {
+        senderButton.addEventListener('click', sendMessage);
+
+        inputField.addEventListener('keyup', function (e) {
             if (e.key === 'Enter') {
-                senderButton.click();
+                sendMessage();
                 console.log('Message sent');
             }
         });
     }
+
+    return chatSocket; // Return the new WebSocket
 }
