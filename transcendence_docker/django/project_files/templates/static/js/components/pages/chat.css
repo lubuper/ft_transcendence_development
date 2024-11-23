@@ -22,6 +22,10 @@
     height: 0;
 }
 
+.display-none {
+    display: none;
+}
+
 /* Chat header with close and minimize buttons */
 .chat-header {
     display: flex;

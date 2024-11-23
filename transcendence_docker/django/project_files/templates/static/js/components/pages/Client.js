@@ -1,4 +1,4 @@
-const activeSockets = {}; // Store active WebSocket connections globally
+/* const activeSockets = {}; // Store active WebSocket connections globally
 
 export function setupChat(friendName, userName) {
     // Generate a consistent key for chat pairs regardless of order
@@ -78,4 +78,91 @@ export function setupChat(friendName, userName) {
     }
 
     return chatSocket; // Return the new WebSocket
+} */
+
+export function Initialize(friendName, userName) {
+    const chatSocket2 = new WebSocket(`ws://${window.location.host}/ws/chat/${userName}/${friendName}/`);
+
+    chatSocket2.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+
+        const chatIcons = document.querySelectorAll('.chat-icon');
+        const chatIcons2 = document.querySelectorAll('.chat-icon2');
+
+        if (data.sender === friendName) {
+            // Find the correct pair of icons by matching the data attributes
+            chatIcons.forEach((icon, index) => {
+                if (icon.getAttribute('data-friend') === friendName) {
+                    icon.classList.add('display-none');
+                    chatIcons2[index].classList.remove('display-none');
+                }
+            });
+        }
+    };
+}
+
+export function setupChat(friendName, userName) { //hand
+    const messageContainer = document.getElementById(`messages-${userName}-${friendName}`);
+
+    const chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${userName}/${friendName}/`);
+
+    chatSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        const newMessage = document.createElement('p');
+        newMessage.textContent = `${data.sender} : ${data.message}`;
+        if (data.sender === userName) {
+            newMessage.classList.add('my-message');
+        } else if (data.sender === friendName) {
+            newMessage.classList.add('friend-message');
+        }
+        messageContainer.appendChild(newMessage);
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+    };
+
+    chatSocket.onclose = function () {
+        console.log('Chat socket closed');
+    };
+
+    chatSocket.onerror = function (e) {
+        console.error('Chat socket error', e);
+    };
+
+    const senderButton = document.querySelector(`.sender`);
+    const inputField = document.querySelector(`.message-input`);
+
+    if (senderButton && inputField) {
+        senderButton.addEventListener('click', () => {
+            if (inputField.value.trim() !== '') {
+                chatSocket.send(JSON.stringify({ 'message': inputField.value }));
+                inputField.value = ''; // Clear the input field after sending
+            }
+        });
+
+        inputField.addEventListener('click', function (e){
+
+            let indexIcon = -1
+
+            const chatIcons = document.querySelectorAll('.chat-icon');
+	const chatIcons2 = document.querySelectorAll('.chat-icon2');
+
+	chatIcons2.forEach((icon, index) => {
+		if (!icon.classList.contains('display-none') && icon.getAttribute('data-friend') === friendName) {
+            indexIcon = index
+        }	
+	});
+
+    if(indexIcon !== -1){
+        chatIcons[indexIcon].classList.remove('display-none');
+				chatIcons2[indexIcon].classList.add('display-none');
+    }
+    })
+
+        inputField.addEventListener('keyup', function (e) {
+
+            if (e.key === 'Enter') {
+                senderButton.click();
+                console.log('Message sent');
+            }
+        });
+    }
 }

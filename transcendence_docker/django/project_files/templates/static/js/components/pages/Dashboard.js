@@ -1,5 +1,5 @@
 import { navigate } from '../../helpers/App.js';
-import { setupChat } from './Client.js';
+import { setupChat, Initialize } from './Client.js';
 
 
 const avatarPaths = [
@@ -197,6 +197,13 @@ export default function DashBoard() {
       							       data-friend="${friend.username}"
 									   user="${matchHistory.username}"
       							       title="Chat with ${friend.username}">
+									<img src="/static/media/icons/chat-icon2.png"
+      							       class="chat-icon2 ml-2 display-none"
+      							       alt="Chat"
+      							       style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);"
+      							       data-friend="${friend.username}"
+									   user="${matchHistory.username}"
+      							       title="Chat with ${friend.username}">
 									<img src="/static/media/icons/profile.png"
       							       class="profile-icon ml-2"
       							       alt="Profile-friend"
@@ -230,11 +237,33 @@ export default function DashBoard() {
 			</div>
 		</div>
 	`;
+
+	matchHistory.friends.map((friend, index) => {
+		Initialize(friend.username, matchHistory.username); // Initialize chat functionality for the friend
+	})
+
 	const chatIcons = document.querySelectorAll('.chat-icon');
+	const chatIcons2 = document.querySelectorAll('.chat-icon2');
+
+	chatIcons2.forEach((icon, index) => {
+		icon.addEventListener('click', (event) => {
+			const friendName = event.currentTarget.getAttribute('data-friend');
+			const userName = event.currentTarget.getAttribute('user');
+	
+			if (!icon.classList.contains('display-none')) {
+				chatIcons[index].classList.remove('display-none');
+				icon.classList.add('display-none');
+			}
+	
+			openChatBox(friendName, userName);
+		});
+	});
+
 	chatIcons.forEach(icon => {
 	    icon.addEventListener('click', (event) => {
 	        const friendName = event.currentTarget.getAttribute('data-friend');
 			const userName = event.currentTarget.getAttribute('user');
+
 	        openChatBox(friendName, userName);
 	    });
 	});
