@@ -98,8 +98,8 @@ export function navigate(path) {
 				$footer.remove();
 			}
 		}
-	} else {
-		// Redirect to the error page if the path is not allowed
+	}
+	else {
 		navigate('/error');
 	}
 }

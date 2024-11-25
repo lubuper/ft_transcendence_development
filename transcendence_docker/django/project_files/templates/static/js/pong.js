@@ -77,10 +77,20 @@ class Game {
 		this.aiCalculusFlag = false;
 		this.aiMovingDirection = true;
 		this.tournamentPlayersNames = [];
-		this.tournamentNumberOfPlays = 7;
+		this.tournamentNumberOfPlays = 1;
 		this.currentTournamentPlay = 1;
-		if (this.gameMode === '7' || this.gameMode === '8' || this.gameMode === '9')
+		if (this.gameMode === '7' || this.gameMode === '8' || this.gameMode === '9') {
+			if (this. gameMode === '7' || this.gameMode === '8') {
+				this.tournamentNumberOfPlays = 3;
+			}
+			else if (this.gameMode === '9') {
+				this.tournamentNumberOfPlays = 7;
+			}
 			this.gameMode = '6';
+		}
+		this.unpaused = true;
+		this.pauseCube = null;
+		window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 	}
 
 	async fetchShipAndColor() {
@@ -130,6 +140,7 @@ class Game {
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
 		document.body.appendChild(this.renderer.domElement);
 		this.createScoreboard();
+		this.createPauseCube();
 		this.animate = this.animate.bind(this);
 		setTimeout(() => {
 			this.animate();
@@ -281,6 +292,14 @@ class Game {
 		wallPositions.forEach(yPosition => this.createHexagonWall(yPosition));
 	}
 
+	createPauseCube() {
+		const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+		const material = new THREE.MeshBasicMaterial({ map: this.loader.load('/static/media/assets/pause.png'), visible: false });
+		this.pauseCube = new THREE.Mesh(geometry, material);
+		this.pauseCube.position.set(0, 0, 0);
+		this.scene.add(this.pauseCube);
+	}
+	
 	createEnvironment() {
 		const plane1Geometry = new THREE.PlaneGeometry(this.geox, this.geoy);
 		const plane1Material = new THREE.MeshBasicMaterial({ visible: false });
@@ -626,6 +645,8 @@ class Game {
 			this.scorePlayer2 = 0;
 			this.updateScore(this.scorePlayer1, this.scorePlayer2);
 			this.resetBall();
+			alert(`next match`);
+			this.unpaused = false;
 		}
 		else {
 			const match = {
@@ -983,132 +1004,144 @@ class Game {
 	}
 
 	animate() {
-		this.animateRings();
-		this.env.rotation.z += 0.0001;
-		this.env.rotation.y += 0.0001;
-		this.planetEarth.rotation.z += 0.0001;
-		this.planetEarth.rotation.y -= 0.0001;
-		this.planetEarth.rotation.x += 0.0001;
-		this.clouds.rotation.z += 0.0001;
-		this.clouds.rotation.y += 0.0001;
-		this.moon.rotation.z -= 0.001;
-		this.moon.rotation.y -= 0.001;
-		this.sun.rotation.x += 0.001;
-		this.animationFrameID = requestAnimationFrame(this.animate);
-		//this.controls.update();
-		this.checkBallOverHexagon();
-		TWEEN.update();
-		this.ball.rotation.x += 0.04;
-		this.ball.rotation.y += 0.04;
-		if (this.shake > 0) {
-			let newPos = Math.random() * this.shake * 2 - this.shake;
-			this.camerap1.position.x += newPos;
-			this.camerap1.position.y += newPos;
-			this.camerap1.position.z += newPos;
-			this.camerap2.position.x += newPos;
-			this.camerap2.position.y += newPos;
-			this.shake -= 0.005;
-		}
-		// boost powerup!
-/* 		if (this.keysPressed[' '] && (this.ball.position.x - this.player1.position.x < 0.1)) {
+		if (this.keysPressed[' ']) {
+			if (this.unpaused) {
+				this.unpaused = false;
+				this.pauseCube.visible = true;
+			}
+			else {
+				this.unpaused = true;
+				this.pauseCube.visible = false;
+			}
 			this.keysPressed[' '] = false;
-			this.ball.velocity.set(0, 0, 0);
-			setTimeout(() => {
-				this.ball.velocity.x = 0.10;
-			}, 300);
-		} */
-		if (this.keysPressed['a'] && this.ship1) {
-			this.env.rotation.x += 0.007;
-			if (this.player1.position.y >= this.minY) {
-				this.player1.position.y -= 0.03;
-				this.ship1.position.y -= 0.03;
-				const tweenLeft = new TWEEN.Tween(this.ship1.rotation)
-					.to({ z: THREE.Math.degToRad(30) }, 400) // Rotate 20 degrees to the left
+		}
+		if (this.unpaused === false) {
+			if (this.pauseCube) {
+				this.pauseCube.rotation.x += 0.1;
+				this.pauseCube.rotation.y += 0.1;
+			}
+		}
+		if (this.unpaused === true) {
+			this.animateRings();
+			this.env.rotation.z += 0.0001;
+			this.env.rotation.y += 0.0001;
+			this.planetEarth.rotation.z += 0.0001;
+			this.planetEarth.rotation.y -= 0.0001;
+			this.planetEarth.rotation.x += 0.0001;
+			this.clouds.rotation.z += 0.0001;
+			this.clouds.rotation.y += 0.0001;
+			this.moon.rotation.z -= 0.001;
+			this.moon.rotation.y -= 0.001;
+			this.sun.rotation.x += 0.001;
+			
+			//this.controls.update();
+			this.checkBallOverHexagon();
+			TWEEN.update();
+			this.ball.rotation.x += 0.04;
+			this.ball.rotation.y += 0.04;
+			if (this.shake > 0) {
+				let newPos = Math.random() * this.shake * 2 - this.shake;
+				this.camerap1.position.x += newPos;
+				this.camerap1.position.y += newPos;
+				this.camerap1.position.z += newPos;
+				this.camerap2.position.x += newPos;
+				this.camerap2.position.y += newPos;
+				this.shake -= 0.005;
+			}
+			if (this.keysPressed['a'] && this.ship1) {
+				this.env.rotation.x += 0.007;
+				if (this.player1.position.y >= this.minY) {
+					this.player1.position.y -= 0.03;
+					this.ship1.position.y -= 0.03;
+					const tweenLeft = new TWEEN.Tween(this.ship1.rotation)
+						.to({ z: THREE.Math.degToRad(30) }, 400) // Rotate 20 degrees to the left
+						.easing(TWEEN.Easing.Quadratic.Out)
+						.start();
+				}
+			}
+			if (this.keysPressed['d'] && this.ship1) {
+				this.env.rotation.x -= 0.007;
+				if (this.player1.position.y <= this.maxY) {
+					this.player1.position.y += 0.03;
+					this.ship1.position.y += 0.03;
+					const tweenRight = new TWEEN.Tween(this.ship1.rotation)
+						.to({ z: THREE.Math.degToRad(-30) }, 400) // Rotate 20 degrees to the right
+						.easing(TWEEN.Easing.Quadratic.Out)
+						.start();
+				}
+			}
+			if (!this.keysPressed['d'] && !this.keysPressed['a'] && this.ship1) {
+				const tweeBack = new TWEEN.Tween(this.ship1.rotation)
+					.to({ z: THREE.Math.degToRad(-0) }, 400)
 					.easing(TWEEN.Easing.Quadratic.Out)
 					.start();
 			}
-		}
-		if (this.keysPressed['d'] && this.ship1) {
-			this.env.rotation.x -= 0.007;
-			if (this.player1.position.y <= this.maxY) {
-				this.player1.position.y += 0.03;
-				this.ship1.position.y += 0.03;
-				const tweenRight = new TWEEN.Tween(this.ship1.rotation)
-					.to({ z: THREE.Math.degToRad(-30) }, 400) // Rotate 20 degrees to the right
-					.easing(TWEEN.Easing.Quadratic.Out)
-					.start();
+		
+			// movement in X axis powerup!
+			/* if (this.keysPressed['s'] && this.player1.position.x >= -this.geox / 2 + 0.1) {
+				this.player1.position.x -= 0.03;
 			}
-		}
-		if (!this.keysPressed['d'] && !this.keysPressed['a'] && this.ship1) {
-			const tweeBack = new TWEEN.Tween(this.ship1.rotation)
-				.to({ z: THREE.Math.degToRad(-0) }, 400)
-				.easing(TWEEN.Easing.Quadratic.Out)
-				.start();
-		}
-	
-		// movement in X axis powerup!
-/* 	  	if (this.keysPressed['s'] && this.player1.position.x >= -this.geox / 2 + 0.1) {
-			this.player1.position.x -= 0.03;
-		}
-		if (this.keysPressed['w'] && this.player1.position.x <= 0) {
-			this.player1.position.x += 0.03;
-		} */
-		if (this.keysPressed['c']) {
-			this.cameratoggle = (this.cameratoggle + 1) % 3;
-			this.keysPressed['c'] = false;
-		}
-		this.gameControls();
-		this.ball.position.add(this.ball.velocity);
-		// Check for scoring
-		if (this.scorePlayer2 >= 5)
-			this.gameOver();
-		if (this.scorePlayer1 >= 5)
-			this.gameWin();
-		if (this.ball.position.x + this.ball.geometry.parameters.radius > (this.geox / 2)/*  + 0.21 */) {
-			this.scorePlayer1++;
-			this.shake = 0.05;
-			this.updateScore(this.scorePlayer1, this.scorePlayer2);
-			this.resetBall();
-			this.aiCalculusFlag = false;
-			this.aiMoveFlag = 0;
-		}
-		else if (this.ball.position.x - this.ball.geometry.parameters.radius < (-this.geox / 2 )) {
-			this.scorePlayer2++;
-			this.shake = 0.05;
-			this.updateScore(this.scorePlayer1, this.scorePlayer2);
-			this.resetBall();
-		}
-		if (this.gameType == "powered") {
-			this.powerupTimer++;
-			if (this.powerupTimer == 1000) {
-				this.generatePowerup();
-				this.powerupTimer = 0;
+			if (this.keysPressed['w'] && this.player1.position.x <= 0) {
+				this.player1.position.x += 0.03;
+			} */
+			if (this.keysPressed['c']) {
+				this.cameratoggle = (this.cameratoggle + 1) % 3;
+				this.keysPressed['c'] = false;
 			}
-		}
-		// Ball colision with powerups
-		this.powerups.forEach((powerup, index) => {
-			if (this.ball.position.x - this.ball.geometry.parameters.radius < powerup.position.x + powerup.geometry.parameters.radius &&
-				this.ball.position.x + this.ball.geometry.parameters.radius > powerup.position.x - powerup.geometry.parameters.radius &&
-				this.ball.position.y + this.ball.geometry.parameters.radius > powerup.position.y - powerup.geometry.parameters.radius &&
-				this.ball.position.y - this.ball.geometry.parameters.radius < powerup.position.y + powerup.geometry.parameters.radius) {
-				this.playingSurface.remove(powerup);
-				this.powerups.splice(index, 1);
-				powerup.geometry.dispose();
-				powerup.material.dispose();
-				if (this.player1pup === true)
-					this.activatePowerup(powerup.type, this.player1);
-				if (this.player1pup === false)
-					this.activatePowerup(powerup.type, this.player2);
-				this.playSound('/static/media/assets/sounds/tp.mp3', 0.2);
+			this.gameControls();
+			this.ball.position.add(this.ball.velocity);
+			// Check for scoring
+			if (this.scorePlayer2 >= 5)
+				this.gameOver();
+			if (this.scorePlayer1 >= 5)
+				this.gameWin();
+			if (this.ball.position.x + this.ball.geometry.parameters.radius > (this.geox / 2)/*  + 0.21 */) {
+				this.scorePlayer1++;
+				this.shake = 0.05;
+				this.updateScore(this.scorePlayer1, this.scorePlayer2);
+				this.resetBall();
+				this.aiCalculusFlag = false;
+				this.aiMoveFlag = 0;
 			}
-		});
-		this.ballCollisions();
-		if (this.cameratoggle == 0)
-			this.renderer.render(this.scene,this.camerap1);
-		else if (this.cameratoggle == 1)
-			this.renderer.render(this.scene, this.camerap2);
-		else if (this.cameratoggle == 2)
-			this.renderer.render(this.scene, this.cameratop3);
+			else if (this.ball.position.x - this.ball.geometry.parameters.radius < (-this.geox / 2 )) {
+				this.scorePlayer2++;
+				this.shake = 0.05;
+				this.updateScore(this.scorePlayer1, this.scorePlayer2);
+				this.resetBall();
+			}
+			if (this.gameType == "powered") {
+				this.powerupTimer++;
+				if (this.powerupTimer == 1000) {
+					this.generatePowerup();
+					this.powerupTimer = 0;
+				}
+			}
+			// Ball colision with powerups
+			this.powerups.forEach((powerup, index) => {
+				if (this.ball.position.x - this.ball.geometry.parameters.radius < powerup.position.x + powerup.geometry.parameters.radius &&
+					this.ball.position.x + this.ball.geometry.parameters.radius > powerup.position.x - powerup.geometry.parameters.radius &&
+					this.ball.position.y + this.ball.geometry.parameters.radius > powerup.position.y - powerup.geometry.parameters.radius &&
+					this.ball.position.y - this.ball.geometry.parameters.radius < powerup.position.y + powerup.geometry.parameters.radius) {
+					this.playingSurface.remove(powerup);
+					this.powerups.splice(index, 1);
+					powerup.geometry.dispose();
+					powerup.material.dispose();
+					if (this.player1pup === true)
+						this.activatePowerup(powerup.type, this.player1);
+					if (this.player1pup === false)
+						this.activatePowerup(powerup.type, this.player2);
+					this.playSound('/static/media/assets/sounds/tp.mp3', 0.2);
+				}
+			});
+			this.ballCollisions();
+			if (this.cameratoggle == 0)
+				this.renderer.render(this.scene,this.camerap1);
+			else if (this.cameratoggle == 1)
+				this.renderer.render(this.scene, this.camerap2);
+			else if (this.cameratoggle == 2)
+				this.renderer.render(this.scene, this.cameratop3);
+		}
+		this.animationFrameID = requestAnimationFrame(this.animate);
 	}
 };
 
