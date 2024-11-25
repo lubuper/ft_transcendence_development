@@ -80,17 +80,36 @@ export function setupChat(friendName, userName) {
     return chatSocket; // Return the new WebSocket
 } */
 
+const messageCache = {};   
+
 export function Initialize(friendName, userName) {
     const chatSocket2 = new WebSocket(`ws://${window.location.host}/ws/chat/${userName}/${friendName}/`);
 
     chatSocket2.onmessage = function (e) {
         const data = JSON.parse(e.data);
 
+        const chat = document.getElementsByClassName('chat-popup')
+
+        if(chat.length === 0){
+
+            if(data.sender === friendName){
+                if (!messageCache[friendName]) {
+                    messageCache[friendName] = [];
+                }
+    
+                messageCache[friendName].push({
+                    sender: data.sender,
+                    message: data.message
+                });
+            }
+        }
+
         const chatIcons = document.querySelectorAll('.chat-icon');
         const chatIcons2 = document.querySelectorAll('.chat-icon2');
 
         if (data.sender === friendName) {
             // Find the correct pair of icons by matching the data attributes
+
             chatIcons.forEach((icon, index) => {
                 if (icon.getAttribute('data-friend') === friendName) {
                     icon.classList.add('display-none');
@@ -106,14 +125,43 @@ export function setupChat(friendName, userName) { //hand
 
     const chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${userName}/${friendName}/`);
 
+    if (messageCache[friendName]) {
+        displayMessages(friendName, userName);
+    }
+
     chatSocket.onmessage = function (e) {
+
+        const chat = document.getElementsByClassName('chat-popup')
+
         const data = JSON.parse(e.data);
         const newMessage = document.createElement('p');
         newMessage.textContent = `${data.sender} : ${data.message}`;
         if (data.sender === userName) {
             newMessage.classList.add('my-message');
+
+            if(chat.length !== 0){
+                if (!messageCache[userName]) {
+                    messageCache[userName] = [];
+                }
+    
+                messageCache[userName].push({
+                    sender: data.sender,
+                    message: data.message
+                });
+            }
         } else if (data.sender === friendName) {
             newMessage.classList.add('friend-message');
+
+            if(chat.length !== 0){
+                if (!messageCache[friendName]) {
+                    messageCache[friendName] = [];
+                }
+    
+                messageCache[friendName].push({
+                    sender: data.sender,
+                    message: data.message
+                });   
+            }
         }
         messageContainer.appendChild(newMessage);
         messageContainer.scrollTop = messageContainer.scrollHeight;
@@ -164,5 +212,31 @@ export function setupChat(friendName, userName) { //hand
                 console.log('Message sent');
             }
         });
+    }
+}
+
+function displayMessages(friendName, userName) {
+    
+    console.log(messageCache)
+
+    const messageContainer = document.getElementById(`messages-${userName}-${friendName}`);
+    if (!messageContainer) return;
+
+    // Clear the current messages
+    messageContainer.innerHTML = '';
+
+    // Display all cached messages
+    if (messageCache[friendName]) {
+        messageCache[friendName].forEach(msg => {
+            const newMessage = document.createElement('p');
+            newMessage.textContent = `${msg.sender}: ${msg.message}`;
+            if (msg.sender === userName) {
+                newMessage.classList.add('my-message');
+            } else {
+                newMessage.classList.add('friend-message');
+            }
+            messageContainer.appendChild(newMessage);
+        });
+        messageContainer.scrollTop = messageContainer.scrollHeight;
     }
 }
