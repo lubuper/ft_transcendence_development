@@ -639,7 +639,7 @@ class Game {
 	}
 
 	tournamentHandler() {
-		console.log("current play:", this.currentTournamentPlay, " and number max of plays: ", this.tournamentNumberOfPlays)
+		this.currentTournamentPlay++;
 		if (this.currentTournamentPlay <= this.tournamentNumberOfPlays) {
 			this.scorePlayer1 = 0;
 			this.scorePlayer2 = 0;
@@ -658,7 +658,6 @@ class Game {
 			this.cleanup();
 			document.getElementById('gameWin').style.display = 'flex';
 		}
-
 	}
 
 	gameOver() {

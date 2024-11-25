@@ -14,16 +14,22 @@ class Game {
 	constructor(gameMode, gameType) {
 		this.gameMode = gameMode;
 		this.gameType = gameType;
-		if (this.gameMode !== '1' && this.gameMode !== '2' && this.gameMode !== '3' &&
-			this.gameMode !== '4' && this.gameMode !== '5' && this.gameMode !== '6') {
-				this.cleanup();
+		this.tournamentNumberOfPlays = 1;
+		if (this.gameMode === '7' || this.gameMode === '8' || this.gameMode === '9') {
+			if (this. gameMode === '7' || this.gameMode === '8') {
+				this.tournamentNumberOfPlays = 3;
+			}
+			else if (this.gameMode === '9') {
+				this.tournamentNumberOfPlays = 7;
+			}
+			this.gameMode = '6';
 		}
-		if (this.gameMode === '3' || this.gameMode === '4' || this.gameMode === '5') {
-			this.gameMode = '2';
-		}
-		console.log(this.gameMode);
+		this.tournamentPlayersNames = [];
+		this.currentTournamentPlay = 1;
+		this.unpaused = true;
+		this.pauseCube = null;
 		this.levels = [
-			new Level(0, 1, 0, 0, 5),
+			new Level(0, 1, 0, 0, 0),
 			new Level(1, 2, 0, 0, 0),
 			new Level(2, 3, 1, 0, 0),
 			new Level(3, 2, 1, 1, 0),
@@ -141,9 +147,18 @@ class Game {
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
 		document.body.appendChild(this.renderer.domElement);
 		this.GameIsRunning = true;
+		this.createPauseCube();
 		setTimeout(() => {
 			this.animate();
 		}, 1000);
+	}
+
+	createPauseCube() {
+		const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+		const material = new THREE.MeshBasicMaterial({ map: this.loader.load('/static/media/assets/pause.png'), visible: false });
+		this.pauseCube = new THREE.Mesh(geometry, material);
+		this.pauseCube.position.set(0, 0, 0);
+		this.scene.add(this.pauseCube);
 	}
 
 	cleanup() {
@@ -246,29 +261,39 @@ class Game {
 	}
 
 	gameOver() {
-		this.GameIsRunning = false;
-		for (let i = 0; i < 1000; i++) {}
-		const match = {
-			result: `loss`,
-			score: `Level ${this.level}`,
-			game: `Asteroids`,
-		};
-		saveMatchHistory(match);
-		this.cleanup();
-		document.getElementById('gameOver').style.display = 'flex';
+		if (this.gameMode === '6') {
+			this.tournamentHandler();
+		}
+		else {
+			this.GameIsRunning = false;
+			for (let i = 0; i < 1000; i++) {}
+			const match = {
+				result: `loss`,
+				score: `Level ${this.level}`,
+				game: `Asteroids`,
+			};
+			saveMatchHistory(match);
+			this.cleanup();
+			document.getElementById('gameOver').style.display = 'flex';
+		}
 	}
 
 	gameWin() {
-		this.GameIsRunning = false;
-		for (let i = 0; i < 1000; i++) {}
-		const match = {
-			result: `win`,
-			score: `Level ${this.level}`,
-			game: `Asteroids`,
-		};
-		saveMatchHistory(match);
-		this.cleanup();
-		document.getElementById('gameWin').style.display = 'flex';
+		if (this.gameMode === '6') {
+			this.tournamentHandler();
+		}
+		else {
+			this.GameIsRunning = false;
+			for (let i = 0; i < 1000; i++) {}
+			const match = {
+				result: `win`,
+				score: `Level ${this.level}`,
+				game: `Asteroids`,
+			};
+			saveMatchHistory(match);
+			this.cleanup();
+			document.getElementById('gameWin').style.display = 'flex';
+		}
 	}
 
 	createEnvironment() {
@@ -741,6 +766,57 @@ class Game {
 		});
 	}
 
+	tournamentHandler() {
+		this.currentTournamentPlay++;
+		if (this.currentTournamentPlay <= this.tournamentNumberOfPlays) {
+			this.clearObjects(this.asteroids);
+			this.clearObjects(this.sAsteroids);
+			this.clearObjects(this.AIShips);
+			this.clearObjects(this.powerups);
+			this.clearObjects(this.projectiles);
+			this.level = 0;
+			this.player1Lives = 5;
+			this.player2Lives = 5;
+			if (this.level < this.levels.length) {
+				this.spawnAsteroids(this.levels[this.level].asteroids, 'asteroid');
+				this.spawnAsteroids(this.levels[this.level].sAsteroids, 'sAsteroid');
+				this.spawnAIships(this.levels[this.level].AIShips);
+				if (this.gameType === "powered") {
+					this.spawnpowerups(this.levels[this.level].powerups);
+				}
+				this.shield1.visible = false;
+				this.shield1.spawnTime = 100;
+				this.shield1.lifetime = 80;
+				this.shield2.visible = false;
+				this.shield2.spawnTime = 100;
+				this.shield2.lifetime = 80;
+				this.player1VelocityX = 0;
+				this.player1VelocityY = 0;
+				this.player2VelocityX = 0;
+				this.player2VelocityY = 0;
+				this.player1.position.set(-20, 0, 5);
+				this.player2.position.set(20, 0, 5);
+				this.scene.add(this.player1);
+				this.scene.add(this.player2);
+				this.displayLevel();
+				this.displayLives1();
+				this.displayLives2();
+			}
+			alert(`next match`);
+			this.unpaused = false;
+		}
+		else {
+			const match = {
+				result: `win`,
+				score: `Level ${this.level}`,
+				game: `Asteroids Tournament`,
+			};
+			saveMatchHistory(match);
+			this.cleanup();
+			document.getElementById('gameWin').style.display = 'flex';
+		}
+	}
+
 	playSound = (soundFilePath, volume) => {
 		if (this.audioLoader) {
 			const sound = new THREE.Audio(this.listener);
@@ -1026,7 +1102,6 @@ class Game {
 		this.level++;
 		this.shield1.visible = false;
 		this.shield1.spawnTime = 100;
-		this.nextLevelTimer = 0;
 		if (this.level < this.levels.length) {
 			this.spawnAsteroids(this.levels[this.level].asteroids, 'asteroid');
 			this.spawnAsteroids(this.levels[this.level].sAsteroids, 'sAsteroid');
@@ -1142,65 +1217,206 @@ class Game {
 	}
 
 	animate() {
-		if (this.GameIsRunning === false) {
-			cancelAnimationFrame(this.animate);
-			return;
+		if (this.keysPressed['t']) {
+			if (this.unpaused) {
+				this.unpaused = false;
+				this.pauseCube.visible = true;
+			}
+			else {
+				this.unpaused = true;
+				this.pauseCube.visible = false;
+			}
+			this.keysPressed['t'] = false;
 		}
-		this.animationFrameID = requestAnimationFrame(this.animate);
-		if (this.env) {
-			if (this.env.position.x > this.boundaryX) {
-				this.env.position.x = -this.boundaryX;
-			}
-			else if (this.env.position.x < -this.boundaryX) {
-				this.env.position.x = this.boundaryX;
-			}
-			if (this.env.position.y > this.boundaryY) {
-				this.env.position.y = -this.boundaryY;
-			}
-			else if (this.env.position.y < -this.boundaryY) {
-				this.env.position.y = this.boundaryY;
+		if (this.unpaused === false) {
+			if (this.pauseCube) {
+				this.pauseCube.rotation.x += 0.1;
+				this.pauseCube.rotation.y += 0.1;
 			}
 		}
-		if (this.gameMode === '1' || this.gameMode === '6') {
-			if (this.player2IsActive) {
-				if (this.keysPressed['j']) {
-					this.player2.rotation.z += 0.05;
+		if (this.unpaused === true) {
+
+			if (this.GameIsRunning === false) {
+				cancelAnimationFrame(this.animate);
+				return;
+			}
+			if (this.env) {
+				if (this.env.position.x > this.boundaryX) {
+					this.env.position.x = -this.boundaryX;
 				}
-				else if (this.keysPressed['l']) {
-					this.player2.rotation.z -= 0.05;
+				else if (this.env.position.x < -this.boundaryX) {
+					this.env.position.x = this.boundaryX;
 				}
-				if (this.keysPressed['i']) {
-					const directionX = Math.sin(this.player2.rotation.z);
-					const directionY = -Math.cos(this.player2.rotation.z);
-					this.player2VelocityX += directionX * 0.02;
-					this.player2VelocityY += directionY * 0.02;
-					const speed = Math.sqrt(this.player2VelocityX * this.player2VelocityX + this.player2VelocityY * this.player2VelocityY);
-					if (speed > this.maxSpeed) {
-						const normalizationFactor = this.maxSpeed / speed;
-						this.player2VelocityX *= normalizationFactor;
-						this.player2VelocityY *= normalizationFactor;
+				if (this.env.position.y > this.boundaryY) {
+					this.env.position.y = -this.boundaryY;
+				}
+				else if (this.env.position.y < -this.boundaryY) {
+					this.env.position.y = this.boundaryY;
+				}
+			}
+			if (this.gameMode === '1' || this.gameMode === '6') {
+				if (this.player2IsActive) {
+					if (this.keysPressed['j']) {
+						this.player2.rotation.z += 0.05;
+					}
+					else if (this.keysPressed['l']) {
+						this.player2.rotation.z -= 0.05;
+					}
+					if (this.keysPressed['i']) {
+						const directionX = Math.sin(this.player2.rotation.z);
+						const directionY = -Math.cos(this.player2.rotation.z);
+						this.player2VelocityX += directionX * 0.02;
+						this.player2VelocityY += directionY * 0.02;
+						const speed = Math.sqrt(this.player2VelocityX * this.player2VelocityX + this.player2VelocityY * this.player2VelocityY);
+						if (speed > this.maxSpeed) {
+							const normalizationFactor = this.maxSpeed / speed;
+							this.player2VelocityX *= normalizationFactor;
+							this.player2VelocityY *= normalizationFactor;
+						}
+					}
+					if (this.keysPressed['o'] && this.shield2.lifetime > 0) {
+						this.shield2.lifetime--;
+					}
+					else if (this.shield2.lifetime === 0) {
+						this.shield2.visible = false;
+					}
+					if (!this.shield2.visible) {
+						for (let i = this.asteroids.length - 1; i >= 0; i--) {
+							const asteroid = this.asteroids[i];
+							if (this.checkCollision(this.player2, asteroid)) {
+								this.createExplosion(this.player2.position.x, this.player2.position.y, 2);
+								this.player2Death();
+								break;
+							}
+						}
+						for (let i = this.sAsteroids.length - 1; i >= 0; i--) {
+							const sAsteroid = this.sAsteroids[i];
+							if (this.checkCollision(this.player2, sAsteroid)) {
+								this.createExplosion(this.player2.position.x, this.player2.position.y, 3);
+								this.player2Death();
+								break;
+							}
+						}
+					}
+					else {
+						for (let i = this.asteroids.length - 1; i >= 0; i--) {
+							const asteroid = this.asteroids[i];
+							if (this.checkCollision(this.player2, asteroid)) {
+								this.createExplosion(this.player2.position.x, this.player2.position.y, 2);
+								break;
+							}
+						}
+						for (let i = this.sAsteroids.length - 1; i >= 0; i--) {
+							const sAsteroid = this.sAsteroids[i];
+							if (this.checkCollision(this.player2, sAsteroid)) {
+								this.createExplosion(this.player2.position.x, this.player2.position.y, 3);
+								this.player2VelocityX += sAsteroid.velocity.x * 0.5; // Adjust the factor as needed
+								this.player2VelocityY += sAsteroid.velocity.y * 0.5; // Adjust the factor as needed
+								if (this.player2VelocityX > 0.5) {
+									this.player2VelocityX = 0.5;
+								}
+								if (this.player2VelocityY > 0.5) {
+									this.player2VelocityY = 0.5;
+								}
+								break;
+							}
+						}
 					}
 				}
-				if (this.keysPressed['o'] && this.shield2.lifetime > 0) {
-					this.shield2.lifetime--;
+				if (this.shield2.spawnTime > 0) {
+					this.shield2.spawnTime--;
+					if (this.shield2.spawnTime === 0) {
+						this.shield2.visible = false;
+					}
 				}
-				else if (this.shield2.lifetime === 0) {
-					this.shield2.visible = false;
+				if (this.shieldBar2) {
+					this.shieldBar2.scale.x = this.shield2.lifetime / 80;
 				}
-				if (!this.shield2.visible) {
+				this.player2.position.x += this.player2VelocityX;
+				this.player2.position.y += this.player2VelocityY;
+				this.checkBoundaries(this.player2);
+	
+	
+			}
+			if (this.player1IsActive) {
+				/* if (this.keysPressed['f']) {
+					this.keysPressed['f'] = false;
+					if (this.shotType === 1) {
+						this.shotType = 2;
+						this.shotType2Display.forEach(mesh => mesh.visible = true);
+						this.shotType1Display.visible = false;
+					}
+					else if (this.shotType === 2) {
+						this.shotType = 1;
+						this.shotType1Display.visible = true;
+						this.shotType2Display.forEach(mesh => mesh.visible = false);
+					}
+				} */
+				if (this.keysPressed['a']) {
+					this.player1.rotation.z += 0.05;
+				}
+				else if (this.keysPressed['d']) {
+					this.player1.rotation.z -= 0.05;
+				}
+				if (this.keysPressed['w']) {
+					const directionX = Math.sin(this.player1.rotation.z);
+					const directionY = -Math.cos(this.player1.rotation.z);
+					this.player1VelocityX += directionX * 0.02;
+					this.player1VelocityY += directionY * 0.02;
+					const speed = Math.sqrt(this.player1VelocityX * this.player1VelocityX + this.player1VelocityY * this.player1VelocityY);
+					if (speed > this.maxSpeed) {
+						const normalizationFactor = this.maxSpeed / speed;
+						this.player1VelocityX *= normalizationFactor;
+						this.player1VelocityY *= normalizationFactor;
+					}
+				}
+				if (this.keysPressed['e'] && this.shield1.lifetime > 0) {
+					this.shield1.lifetime--;
+				}
+				else if (this.shield1.lifetime === 0) {
+					this.shield1.visible = false;
+				}
+				if (this.AIShips) {
+					this.AIShips.forEach(ship => {
+						if (ship.shootTimer > 0) {
+							ship.shootTimer--;
+						}
+						if (ship.moveTimer > 0) {
+							ship.moveTimer--;
+						}
+						if (ship.shootTimer === 0) {
+							this.createProjectile(ship, 0, 0);
+							ship.shootTimer = Math.floor(Math.random() * (200 - 60 + 1)) + 60;
+						}
+						if (ship.moveTimer === 0) {
+							const randomFactorX = (Math.random() < 0.5 ? -1 : 1) * 0.05;
+							const randomFactorY = (Math.random() < 0.5 ? -1 : 1) * 0.05;
+							ship.velocity.x += randomFactorX;
+							ship.velocity.y += randomFactorY;
+							if (ship.velocity.x > 0.7) {
+								ship.velocity.x = 0.7;
+							}
+							if (ship.velocity.y > 0.7) {
+								ship.velocity.y = 0.7;
+							}
+							ship.moveTimer = 100;
+						}
+					});
+				}
+				if (!this.shield1.visible) {
 					for (let i = this.asteroids.length - 1; i >= 0; i--) {
 						const asteroid = this.asteroids[i];
-						if (this.checkCollision(this.player2, asteroid)) {
-							this.createExplosion(this.player2.position.x, this.player2.position.y, 2);
-							this.player2Death();
+						if (this.checkCollision(this.player1, asteroid)) {
+							this.createExplosion(this.player1.position.x, this.player1.position.y, 2);
+							this.player1Death();
 							break;
 						}
 					}
 					for (let i = this.sAsteroids.length - 1; i >= 0; i--) {
 						const sAsteroid = this.sAsteroids[i];
-						if (this.checkCollision(this.player2, sAsteroid)) {
-							this.createExplosion(this.player2.position.x, this.player2.position.y, 3);
-							this.player2Death();
+						if (this.checkCollision(this.player1, sAsteroid)) {
+							this.createExplosion(this.player1.position.x, this.player1.position.y, 3);
+							this.player1Death();
 							break;
 						}
 					}
@@ -1208,329 +1424,207 @@ class Game {
 				else {
 					for (let i = this.asteroids.length - 1; i >= 0; i--) {
 						const asteroid = this.asteroids[i];
-						if (this.checkCollision(this.player2, asteroid)) {
-							this.createExplosion(this.player2.position.x, this.player2.position.y, 2);
+						if (this.checkCollision(this.player1, asteroid)) {
+							this.createExplosion(this.player1.position.x, this.player1.position.y, 2);
+	
 							break;
 						}
 					}
 					for (let i = this.sAsteroids.length - 1; i >= 0; i--) {
 						const sAsteroid = this.sAsteroids[i];
-						if (this.checkCollision(this.player2, sAsteroid)) {
-							this.createExplosion(this.player2.position.x, this.player2.position.y, 3);
-							this.player2VelocityX += sAsteroid.velocity.x * 0.5; // Adjust the factor as needed
-							this.player2VelocityY += sAsteroid.velocity.y * 0.5; // Adjust the factor as needed
-							if (this.player2VelocityX > 0.5) {
-								this.player2VelocityX = 0.5;
+						if (this.checkCollision(this.player1, sAsteroid)) {
+							this.createExplosion(this.player1.position.x, this.player1.position.y, 3);
+							this.player1VelocityX += sAsteroid.velocity.x * 0.5; // Adjust the factor as needed
+							this.player1VelocityY += sAsteroid.velocity.y * 0.5; // Adjust the factor as needed
+							if (this.player1VelocityX > 0.5) {
+								this.player1VelocityX = 0.5;
 							}
-							if (this.player2VelocityY > 0.5) {
-								this.player2VelocityY = 0.5;
+							if (this.player1VelocityY > 0.5) {
+								this.player1VelocityY = 0.5;
 							}
 							break;
 						}
 					}
 				}
 			}
-			if (this.shield2.spawnTime > 0) {
-				this.shield2.spawnTime--;
-				if (this.shield2.spawnTime === 0) {
-					this.shield2.visible = false;
-				}
-			}
-			if (this.shieldBar2) {
-				this.shieldBar2.scale.x = this.shield2.lifetime / 80;
-			}
-			this.player2.position.x += this.player2VelocityX;
-			this.player2.position.y += this.player2VelocityY;
-			this.checkBoundaries(this.player2);
-
-
-		}
-		if (this.player1IsActive) {
-			/* if (this.keysPressed['f']) {
-				this.keysPressed['f'] = false;
-				if (this.shotType === 1) {
-					this.shotType = 2;
-					this.shotType2Display.forEach(mesh => mesh.visible = true);
-					this.shotType1Display.visible = false;
-				}
-				else if (this.shotType === 2) {
-					this.shotType = 1;
-					this.shotType1Display.visible = true;
-					this.shotType2Display.forEach(mesh => mesh.visible = false);
-				}
-			} */
-			if (this.keysPressed['a']) {
-				this.player1.rotation.z += 0.05;
-			}
-			else if (this.keysPressed['d']) {
-				this.player1.rotation.z -= 0.05;
-			}
-			if (this.keysPressed['w']) {
-				const directionX = Math.sin(this.player1.rotation.z);
-				const directionY = -Math.cos(this.player1.rotation.z);
-				this.player1VelocityX += directionX * 0.02;
-				this.player1VelocityY += directionY * 0.02;
-				const speed = Math.sqrt(this.player1VelocityX * this.player1VelocityX + this.player1VelocityY * this.player1VelocityY);
-				if (speed > this.maxSpeed) {
-					const normalizationFactor = this.maxSpeed / speed;
-					this.player1VelocityX *= normalizationFactor;
-					this.player1VelocityY *= normalizationFactor;
-				}
-			}
-			if (this.keysPressed['e'] && this.shield1.lifetime > 0) {
-				this.shield1.lifetime--;
-			}
-			else if (this.shield1.lifetime === 0) {
-				this.shield1.visible = false;
-			}
-			if (this.AIShips) {
-				this.AIShips.forEach(ship => {
-					if (ship.shootTimer > 0) {
-						ship.shootTimer--;
-					}
-					if (ship.moveTimer > 0) {
-						ship.moveTimer--;
-					}
-					if (ship.shootTimer === 0) {
-						this.createProjectile(ship, 0, 0);
-						ship.shootTimer = Math.floor(Math.random() * (200 - 60 + 1)) + 60;
-					}
-					if (ship.moveTimer === 0) {
-						const randomFactorX = (Math.random() < 0.5 ? -1 : 1) * 0.05;
-						const randomFactorY = (Math.random() < 0.5 ? -1 : 1) * 0.05;
-						ship.velocity.x += randomFactorX;
-						ship.velocity.y += randomFactorY;
-						if (ship.velocity.x > 0.7) {
-							ship.velocity.x = 0.7;
-						}
-						if (ship.velocity.y > 0.7) {
-							ship.velocity.y = 0.7;
-						}
-						ship.moveTimer = 100;
-					}
-				});
-			}
-			if (!this.shield1.visible) {
-				for (let i = this.asteroids.length - 1; i >= 0; i--) {
-					const asteroid = this.asteroids[i];
-					if (this.checkCollision(this.player1, asteroid)) {
-						this.createExplosion(this.player1.position.x, this.player1.position.y, 2);
-						this.player1Death();
-						break;
-					}
-				}
-				for (let i = this.sAsteroids.length - 1; i >= 0; i--) {
-					const sAsteroid = this.sAsteroids[i];
-					if (this.checkCollision(this.player1, sAsteroid)) {
-						this.createExplosion(this.player1.position.x, this.player1.position.y, 3);
-						this.player1Death();
-						break;
-					}
-				}
-			}
-			else {
-				for (let i = this.asteroids.length - 1; i >= 0; i--) {
-					const asteroid = this.asteroids[i];
-					if (this.checkCollision(this.player1, asteroid)) {
-						this.createExplosion(this.player1.position.x, this.player1.position.y, 2);
-
-						break;
-					}
-				}
-				for (let i = this.sAsteroids.length - 1; i >= 0; i--) {
-					const sAsteroid = this.sAsteroids[i];
-					if (this.checkCollision(this.player1, sAsteroid)) {
-						this.createExplosion(this.player1.position.x, this.player1.position.y, 3);
-						this.player1VelocityX += sAsteroid.velocity.x * 0.5; // Adjust the factor as needed
-						this.player1VelocityY += sAsteroid.velocity.y * 0.5; // Adjust the factor as needed
-						if (this.player1VelocityX > 0.5) {
-							this.player1VelocityX = 0.5;
-						}
-						if (this.player1VelocityY > 0.5) {
-							this.player1VelocityY = 0.5;
-						}
-						break;
-					}
-				}
-			}
-		}
-		if (this.powerups) {
-			for (let i = 0; i < this.powerups.length; i++) {
-				const powerup = this.powerups[i];
-				powerup.position.x += powerup.velocity.x;
-				powerup.position.y += powerup.velocity.y;
-				powerup.rotation.x += powerup.rotationSpeed.x;
-				powerup.rotation.y += powerup.rotationSpeed.y;
-				powerup.rotation.z += powerup.rotationSpeed.z;
-				this.checkBoundaries(powerup);
-				if (this.checkCollision(this.player1, powerup)) {
-					this.absorbPowerup(this.shield1, powerup);
-					this.scene.remove(powerup);
-					this.powerups.splice(i, 1);
-					i--;
-				}
-				if (this.gameMode === '1' || this.gameMode === '6') {
-					if (this.checkCollision(this.player2, powerup)) {
-						this.absorbPowerup(this.shield2, powerup);
+			if (this.powerups) {
+				for (let i = 0; i < this.powerups.length; i++) {
+					const powerup = this.powerups[i];
+					powerup.position.x += powerup.velocity.x;
+					powerup.position.y += powerup.velocity.y;
+					powerup.rotation.x += powerup.rotationSpeed.x;
+					powerup.rotation.y += powerup.rotationSpeed.y;
+					powerup.rotation.z += powerup.rotationSpeed.z;
+					this.checkBoundaries(powerup);
+					if (this.checkCollision(this.player1, powerup)) {
+						this.absorbPowerup(this.shield1, powerup);
 						this.scene.remove(powerup);
 						this.powerups.splice(i, 1);
 						i--;
 					}
-				}
-			}
-		}
-		this.checkLevelComplete();
-		if (this.shield1.spawnTime > 0) {
-			this.shield1.spawnTime--;
-			if (this.shield1.spawnTime === 0) {
-				this.shield1.visible = false;
-			}
-		}
-		if (this.shieldBar1) {
-			this.shieldBar1.scale.x = this.shield1.lifetime / 80;
-		}
-		this.player1.position.x += this.player1VelocityX;
-		this.player1.position.y += this.player1VelocityY;
-		this.checkBoundaries(this.player1);
-		this.AIShips.forEach(collisionBox => {
-			collisionBox.position.x += collisionBox.velocity.x;
-			collisionBox.position.y += collisionBox.velocity.y;
-			const player1Position = new THREE.Vector3(this.player1.position.x, this.player1.position.y, this.player1.position.z);
-			if (this.gameMode === '1' || this.gameMode === '6') {
-				const player2Position = new THREE.Vector3(this.player2.position.x, this.player2.position.y, this.player2.position.z);
-				let targetPosition = null;
-				if (this.player1IsActive && this.player2IsActive) {
-					const distanceToPlayer1 = collisionBox.position.distanceTo(player1Position);
-					const distanceToPlayer2 = collisionBox.position.distanceTo(player2Position);
-					if (distanceToPlayer1 < distanceToPlayer2) {
-						targetPosition = player1Position;
-					}
-					else {
-						targetPosition = player2Position;
-					}
-				}
-				else if (this.player1IsActive) {
-					targetPosition = player1Position;
-				}
-				else if (this.player2IsActive) {
-					targetPosition = player2Position;
-				}
-				if (targetPosition) {
-					const direction = new THREE.Vector3().subVectors(targetPosition, collisionBox.position).normalize();
-					const angleToTarget = Math.atan2(direction.y, direction.x);
-					collisionBox.rotation.z = angleToTarget;
-				}
-			}
-			else {
-				if (this.player1IsActive) {
-					const direction = new THREE.Vector3().subVectors(player1Position, collisionBox.position).normalize();
-					const angleToPlayer1 = Math.atan2(direction.y, direction.x);
-					collisionBox.rotation.z = angleToPlayer1;
-				}
-			}
-			this.checkBoundaries(collisionBox);
-		});
-		this.asteroids.forEach(sphere => {
-			sphere.position.x += sphere.velocity.x;
-			sphere.position.y += sphere.velocity.y;
-			sphere.rotation.x += sphere.rotationSpeed.x;
-			sphere.rotation.y += sphere.rotationSpeed.y;
-			sphere.rotation.z += sphere.rotationSpeed.z;
-			this.checkBoundaries(sphere);
-		});
-		this.sAsteroids.forEach(sphere => {
-			sphere.position.x += sphere.velocity.x;
-			sphere.position.y += sphere.velocity.y;
-			sphere.rotation.x += sphere.rotationSpeed.x;
-			sphere.rotation.y += sphere.rotationSpeed.y;
-			sphere.rotation.z += sphere.rotationSpeed.z;
-			this.checkBoundaries(sphere);
-		});
-		if (this.explosionGroup.length > 0)
-			this.updateExplosion();
-		// projectilewise code
-		for (let i = this.projectiles.length - 1; i >= 0; i--) {
-			const projectile = this.projectiles[i];
-			projectile.position.x += projectile.velocity.x;
-			projectile.position.y += projectile.velocity.y;
-			this.checkBoundaries(projectile);
-			projectile.lifetime--;
-			// Asteroid checks
-			for (let j = this.asteroids.length - 1; j >= 0; j--) {
-				const asteroid = this.asteroids[j];
-				if (this.checkCollision(projectile, asteroid)) {
-					this.playSound('/static/media/assets/sounds/explosion.mp3', 2);
-					this.createExplosion(asteroid.position.x, asteroid.position.y, 5);
-					if (asteroid.size > 1) {
-						asteroid.size -= 1;
-						for (let k = 0; k < 3; k++) {
-							const newAsteroid = this.spawnAsteroid('asteroid', asteroid.position, asteroid.size);
-							newAsteroid.size = asteroid.size; // Set the size of the new asteroids
-							this.asteroids.push(newAsteroid);
+					if (this.gameMode === '1' || this.gameMode === '6') {
+						if (this.checkCollision(this.player2, powerup)) {
+							this.absorbPowerup(this.shield2, powerup);
+							this.scene.remove(powerup);
+							this.powerups.splice(i, 1);
+							i--;
 						}
 					}
-					this.scene.remove(asteroid);
-					this.asteroids.splice(j, 1);
-					this.scene.remove(projectile);
-					this.projectiles.splice(i, 1);
-					break;
 				}
 			}
-			for (let j = this.sAsteroids.length - 1; j >= 0; j--) {
-				const sAsteroid = this.sAsteroids[j];
-				if (this.checkCollision(projectile, sAsteroid)) {
-					this.playSound('/static/media/assets/sounds/hit.mp3', 0.3);
-					sAsteroid.velocity.x += projectile.velocity.x * 0.2;
-					sAsteroid.velocity.y += projectile.velocity.y * 0.2;
-					this.scene.remove(projectile);
-					this.projectiles.splice(i, 1);
-					break;
+			this.checkLevelComplete();
+			if (this.shield1.spawnTime > 0) {
+				this.shield1.spawnTime--;
+				if (this.shield1.spawnTime === 0) {
+					this.shield1.visible = false;
 				}
 			}
-			// AI checks
-			if (projectile.isPlayer === true) {
-				for (let j = this.AIShips.length - 1; j >= 0; j--) {
-					const AIShip = this.AIShips[j];
-					if (this.checkCollision(projectile, AIShip)) {
+			if (this.shieldBar1) {
+				this.shieldBar1.scale.x = this.shield1.lifetime / 80;
+			}
+			this.player1.position.x += this.player1VelocityX;
+			this.player1.position.y += this.player1VelocityY;
+			this.checkBoundaries(this.player1);
+			this.AIShips.forEach(collisionBox => {
+				collisionBox.position.x += collisionBox.velocity.x;
+				collisionBox.position.y += collisionBox.velocity.y;
+				const player1Position = new THREE.Vector3(this.player1.position.x, this.player1.position.y, this.player1.position.z);
+				if (this.gameMode === '1' || this.gameMode === '6') {
+					const player2Position = new THREE.Vector3(this.player2.position.x, this.player2.position.y, this.player2.position.z);
+					let targetPosition = null;
+					if (this.player1IsActive && this.player2IsActive) {
+						const distanceToPlayer1 = collisionBox.position.distanceTo(player1Position);
+						const distanceToPlayer2 = collisionBox.position.distanceTo(player2Position);
+						if (distanceToPlayer1 < distanceToPlayer2) {
+							targetPosition = player1Position;
+						}
+						else {
+							targetPosition = player2Position;
+						}
+					}
+					else if (this.player1IsActive) {
+						targetPosition = player1Position;
+					}
+					else if (this.player2IsActive) {
+						targetPosition = player2Position;
+					}
+					if (targetPosition) {
+						const direction = new THREE.Vector3().subVectors(targetPosition, collisionBox.position).normalize();
+						const angleToTarget = Math.atan2(direction.y, direction.x);
+						collisionBox.rotation.z = angleToTarget;
+					}
+				}
+				else {
+					if (this.player1IsActive) {
+						const direction = new THREE.Vector3().subVectors(player1Position, collisionBox.position).normalize();
+						const angleToPlayer1 = Math.atan2(direction.y, direction.x);
+						collisionBox.rotation.z = angleToPlayer1;
+					}
+				}
+				this.checkBoundaries(collisionBox);
+			});
+			this.asteroids.forEach(sphere => {
+				sphere.position.x += sphere.velocity.x;
+				sphere.position.y += sphere.velocity.y;
+				sphere.rotation.x += sphere.rotationSpeed.x;
+				sphere.rotation.y += sphere.rotationSpeed.y;
+				sphere.rotation.z += sphere.rotationSpeed.z;
+				this.checkBoundaries(sphere);
+			});
+			this.sAsteroids.forEach(sphere => {
+				sphere.position.x += sphere.velocity.x;
+				sphere.position.y += sphere.velocity.y;
+				sphere.rotation.x += sphere.rotationSpeed.x;
+				sphere.rotation.y += sphere.rotationSpeed.y;
+				sphere.rotation.z += sphere.rotationSpeed.z;
+				this.checkBoundaries(sphere);
+			});
+			if (this.explosionGroup.length > 0)
+				this.updateExplosion();
+			// projectilewise code
+			for (let i = this.projectiles.length - 1; i >= 0; i--) {
+				const projectile = this.projectiles[i];
+				projectile.position.x += projectile.velocity.x;
+				projectile.position.y += projectile.velocity.y;
+				this.checkBoundaries(projectile);
+				projectile.lifetime--;
+				// Asteroid checks
+				for (let j = this.asteroids.length - 1; j >= 0; j--) {
+					const asteroid = this.asteroids[j];
+					if (this.checkCollision(projectile, asteroid)) {
 						this.playSound('/static/media/assets/sounds/explosion.mp3', 2);
-						this.createExplosion(AIShip.position.x, AIShip.position.y, 3);
-						this.scene.remove(AIShip);
-						this.AIShips.splice(j, 1);
+						this.createExplosion(asteroid.position.x, asteroid.position.y, 5);
+						if (asteroid.size > 1) {
+							asteroid.size -= 1;
+							for (let k = 0; k < 3; k++) {
+								const newAsteroid = this.spawnAsteroid('asteroid', asteroid.position, asteroid.size);
+								newAsteroid.size = asteroid.size; // Set the size of the new asteroids
+								this.asteroids.push(newAsteroid);
+							}
+						}
+						this.scene.remove(asteroid);
+						this.asteroids.splice(j, 1);
 						this.scene.remove(projectile);
 						this.projectiles.splice(i, 1);
 						break;
 					}
 				}
-			}
-			else {
-				if (this.gameMode === '1' || this.gameMode === '6') {
-					if (this.checkCollision(projectile, this.player2) && !this.shield2.visible) {
-						this.player2Death();
+				for (let j = this.sAsteroids.length - 1; j >= 0; j--) {
+					const sAsteroid = this.sAsteroids[j];
+					if (this.checkCollision(projectile, sAsteroid)) {
+						this.playSound('/static/media/assets/sounds/hit.mp3', 0.3);
+						sAsteroid.velocity.x += projectile.velocity.x * 0.2;
+						sAsteroid.velocity.y += projectile.velocity.y * 0.2;
+						this.scene.remove(projectile);
+						this.projectiles.splice(i, 1);
+						break;
+					}
+				}
+				// AI checks
+				if (projectile.isPlayer === true) {
+					for (let j = this.AIShips.length - 1; j >= 0; j--) {
+						const AIShip = this.AIShips[j];
+						if (this.checkCollision(projectile, AIShip)) {
+							this.playSound('/static/media/assets/sounds/explosion.mp3', 2);
+							this.createExplosion(AIShip.position.x, AIShip.position.y, 3);
+							this.scene.remove(AIShip);
+							this.AIShips.splice(j, 1);
+							this.scene.remove(projectile);
+							this.projectiles.splice(i, 1);
+							break;
+						}
+					}
+				}
+				else {
+					if (this.gameMode === '1' || this.gameMode === '6') {
+						if (this.checkCollision(projectile, this.player2) && !this.shield2.visible) {
+							this.player2Death();
+							this.scene.remove(projectile);
+							this.projectiles.splice(i, 1);
+						}
+						else if (this.checkCollision(projectile, this.player2) && this.shield2.visible) {
+							this.scene.remove(projectile);
+							this.projectiles.splice(i, 1);
+						}
+					}
+					if (this.checkCollision(projectile, this.player1) && !this.shield1.visible) {
+						this.player1Death();
 						this.scene.remove(projectile);
 						this.projectiles.splice(i, 1);
 					}
-					else if (this.checkCollision(projectile, this.player2) && this.shield2.visible) {
+					else if (this.checkCollision(projectile, this.player1) && this.shield1.visible) {
 						this.scene.remove(projectile);
 						this.projectiles.splice(i, 1);
 					}
 				}
-				if (this.checkCollision(projectile, this.player1) && !this.shield1.visible) {
-					this.player1Death();
+				if (projectile.lifetime <= 0) {
 					this.scene.remove(projectile);
 					this.projectiles.splice(i, 1);
 				}
-				else if (this.checkCollision(projectile, this.player1) && this.shield1.visible) {
-					this.scene.remove(projectile);
-					this.projectiles.splice(i, 1);
-				}
-			}
-			if (projectile.lifetime <= 0) {
-				this.scene.remove(projectile);
-				this.projectiles.splice(i, 1);
 			}
 		}
-
 		this.renderer.render(this.scene, this.camera);
+		this.animationFrameID = requestAnimationFrame(this.animate);
 	}
 }
 
