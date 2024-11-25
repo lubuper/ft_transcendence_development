@@ -81,137 +81,114 @@ export function setupChat(friendName, userName) {
 } */
 
 const messageCache = {};   
+const chatSockets = {}; // Track active WebSocket connections
 
 export function Initialize(friendName, userName) {
+    const chatKey = `${userName}-${friendName}`;
+    
+    if (chatSockets[chatKey]) {
+        console.log(`WebSocket for ${chatKey} already exists.`);
+        return; // Prevent multiple connections for the same user-friend pair
+    }
+
     const chatSocket2 = new WebSocket(`ws://${window.location.host}/ws/chat/${userName}/${friendName}/`);
+    chatSockets[chatKey] = chatSocket2; // Store the WebSocket connection
 
     chatSocket2.onmessage = function (e) {
         const data = JSON.parse(e.data);
 
-        const chat = document.getElementsByClassName('chat-popup')
-
-        if(chat.length === 0){
-
-            if(data.sender === friendName){
-                if (!messageCache[friendName]) {
-                    messageCache[friendName] = [];
-                }
-    
-                messageCache[friendName].push({
-                    sender: data.sender,
-                    message: data.message
-                });
-            }
+        if (!messageCache[friendName]) {
+            messageCache[friendName] = [];
         }
-
-        const chatIcons = document.querySelectorAll('.chat-icon');
-        const chatIcons2 = document.querySelectorAll('.chat-icon2');
 
         if (data.sender === friendName) {
-            // Find the correct pair of icons by matching the data attributes
-
-            chatIcons.forEach((icon, index) => {
-                if (icon.getAttribute('data-friend') === friendName) {
-                    icon.classList.add('display-none');
-                    chatIcons2[index].classList.remove('display-none');
-                }
+            messageCache[friendName].push({
+                sender: data.sender,
+                message: data.message,
             });
         }
+
+        updateChatIcons(friendName);
+    };
+
+    chatSocket2.onclose = function () {
+        console.log(`Chat socket closed for ${chatKey}`);
+        delete chatSockets[chatKey]; // Clean up the WebSocket reference
     };
 }
 
-export function setupChat(friendName, userName) { //hand
+export function setupChat(friendName, userName) {
+    const chatKey = `${userName}-${friendName}`;
     const messageContainer = document.getElementById(`messages-${userName}-${friendName}`);
 
-    const chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${userName}/${friendName}/`);
+    if (!messageContainer) {
+        console.error(`Message container for ${chatKey} not found`);
+        return;
+    }
 
+    // Display cached messages if they exist
     if (messageCache[friendName]) {
         displayMessages(friendName, userName);
     }
 
-    chatSocket.onmessage = function (e) {
+    // Prevent reopening WebSocket for the same user-friend pair
+    if (chatSockets[chatKey]) {
+        console.log(`WebSocket already active for ${chatKey}`);
+    } else {
+        const chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${userName}/${friendName}/`);
+        chatSockets[chatKey] = chatSocket;
 
-        const chat = document.getElementsByClassName('chat-popup')
+        chatSocket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            const newMessage = document.createElement('p');
+            newMessage.textContent = `${data.sender} : ${data.message}`;
 
-        const data = JSON.parse(e.data);
-        const newMessage = document.createElement('p');
-        newMessage.textContent = `${data.sender} : ${data.message}`;
-        if (data.sender === userName) {
-            newMessage.classList.add('my-message');
-
-            if(chat.length !== 0){
-                if (!messageCache[userName]) {
-                    messageCache[userName] = [];
-                }
-    
-                messageCache[userName].push({
-                    sender: data.sender,
-                    message: data.message
-                });
+            if (!messageCache[friendName]) {
+                messageCache[friendName] = [];
             }
-        } else if (data.sender === friendName) {
-            newMessage.classList.add('friend-message');
 
-            if(chat.length !== 0){
-                if (!messageCache[friendName]) {
-                    messageCache[friendName] = [];
-                }
-    
-                messageCache[friendName].push({
-                    sender: data.sender,
-                    message: data.message
-                });   
+            // Cache messages and update UI
+            if (data.sender === friendName) {
+                newMessage.classList.add('friend-message');
+                messageCache[friendName].push({ sender: data.sender, message: data.message });
+            } else if (data.sender === userName) {
+                newMessage.classList.add('my-message');
+                messageCache[userName].push({ sender: data.sender, message: data.message });
             }
-        }
-        messageContainer.appendChild(newMessage);
-        messageContainer.scrollTop = messageContainer.scrollHeight;
-    };
 
-    chatSocket.onclose = function () {
-        console.log('Chat socket closed');
-    };
+            messageContainer.appendChild(newMessage);
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        };
 
-    chatSocket.onerror = function (e) {
-        console.error('Chat socket error', e);
-    };
+        chatSocket.onclose = function () {
+            console.log(`Chat socket closed for ${chatKey}`);
+            delete chatSockets[chatKey];
+        };
+    }
 
-    const senderButton = document.querySelector(`.sender`);
-    const inputField = document.querySelector(`.message-input`);
+    // Attach event listener for the "SEND" button
+    const senderButton = document.querySelector(`#chat-box-${userName}-${friendName} .sender`);
+    const inputField = document.querySelector(`#chat-box-${userName}-${friendName} .message-input`);
 
     if (senderButton && inputField) {
-        senderButton.addEventListener('click', () => {
-            if (inputField.value.trim() !== '') {
-                chatSocket.send(JSON.stringify({ 'message': inputField.value }));
-                inputField.value = ''; // Clear the input field after sending
+        senderButton.onclick = () => {
+            const message = inputField.value.trim();
+            if (message && chatSockets[chatKey] && chatSockets[chatKey].readyState === WebSocket.OPEN) {
+                chatSockets[chatKey].send(JSON.stringify({ message })); // Send message through WebSocket
+                inputField.value = ''; // Clear input field
+            } else {
+                console.error('WebSocket is not open or message is empty');
             }
-        });
+        };
 
-        inputField.addEventListener('click', function (e){
-
-            let indexIcon = -1
-
-            const chatIcons = document.querySelectorAll('.chat-icon');
-	const chatIcons2 = document.querySelectorAll('.chat-icon2');
-
-	chatIcons2.forEach((icon, index) => {
-		if (!icon.classList.contains('display-none') && icon.getAttribute('data-friend') === friendName) {
-            indexIcon = index
-        }	
-	});
-
-    if(indexIcon !== -1){
-        chatIcons[indexIcon].classList.remove('display-none');
-				chatIcons2[indexIcon].classList.add('display-none');
-    }
-    })
-
-        inputField.addEventListener('keyup', function (e) {
-
+        // Add "Enter" key functionality
+        inputField.onkeyup = (e) => {
             if (e.key === 'Enter') {
                 senderButton.click();
-                console.log('Message sent');
             }
-        });
+        };
+    } else {
+        console.error('Sender button or input field not found');
     }
 }
 
@@ -239,4 +216,16 @@ function displayMessages(friendName, userName) {
         });
         messageContainer.scrollTop = messageContainer.scrollHeight;
     }
+}
+
+function updateChatIcons(friendName) {
+    const chatIcons = document.querySelectorAll('.chat-icon');
+    const chatIcons2 = document.querySelectorAll('.chat-icon2');
+
+    chatIcons.forEach((icon, index) => {
+        if (icon.getAttribute('data-friend') === friendName) {
+            icon.classList.add('display-none');
+            chatIcons2[index].classList.remove('display-none');
+        }
+    });
 }
