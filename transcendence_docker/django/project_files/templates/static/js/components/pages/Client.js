@@ -85,6 +85,7 @@ const chatSockets = {}; // Track active WebSocket connections
 
 export function Initialize(friendName, userName) {
     const chatKey = `${userName}-${friendName}`;
+    const chat = document.getElementsByClassName('chat-popup')
     
     if (chatSockets[chatKey]) {
         console.log(`WebSocket for ${chatKey} already exists.`);
@@ -94,8 +95,12 @@ export function Initialize(friendName, userName) {
     const chatSocket2 = new WebSocket(`ws://${window.location.host}/ws/chat/${userName}/${friendName}/`);
     chatSockets[chatKey] = chatSocket2; // Store the WebSocket connection
 
-    chatSocket2.onmessage = function (e) {
+    chatSocket2.addEventListener('message', function (e) {
         const data = JSON.parse(e.data);
+
+        if(chat.length !== 0){
+            return
+        }
 
         if (!messageCache[friendName]) {
             messageCache[friendName] = [];
@@ -109,7 +114,7 @@ export function Initialize(friendName, userName) {
         }
 
         updateChatIcons(friendName);
-    };
+    })
 
     chatSocket2.onclose = function () {
         console.log(`Chat socket closed for ${chatKey}`);
@@ -126,45 +131,71 @@ export function setupChat(friendName, userName) {
         return;
     }
 
-    // Display cached messages if they exist
-    if (messageCache[friendName]) {
-        displayMessages(friendName, userName);
-    }
+    console.log(messageCache)
+
+    let chatSocket
 
     // Prevent reopening WebSocket for the same user-friend pair
     if (chatSockets[chatKey]) {
         console.log(`WebSocket already active for ${chatKey}`);
-    } else {
-        const chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${userName}/${friendName}/`);
+        chatSocket = chatSockets[chatKey]
+    }else{
+        chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${userName}/${friendName}/`);
         chatSockets[chatKey] = chatSocket;
+    }
 
-        chatSocket.onmessage = function (e) {
-            const data = JSON.parse(e.data);
-            const newMessage = document.createElement('p');
-            newMessage.textContent = `${data.sender} : ${data.message}`;
+    const handler =  (e) => {
+        const data = JSON.parse(e.data);
+        const newMessage = document.createElement('p');
+        newMessage.textContent = `${data.sender} : ${data.message}`;
 
-            if (!messageCache[friendName]) {
-                messageCache[friendName] = [];
-            }
+        if (!messageCache[friendName]) {
+            messageCache[friendName] = [];
+        }
 
-            // Cache messages and update UI
-            if (data.sender === friendName) {
-                newMessage.classList.add('friend-message');
-                messageCache[friendName].push({ sender: data.sender, message: data.message });
-            } else if (data.sender === userName) {
-                newMessage.classList.add('my-message');
-                messageCache[userName].push({ sender: data.sender, message: data.message });
-            }
+        if (!messageCache[userName]) {
+            messageCache[userName] = [];
+        }
 
-            messageContainer.appendChild(newMessage);
-            messageContainer.scrollTop = messageContainer.scrollHeight;
-        };
+        // Cache messages and update UI
+        if (data.sender === friendName) {
+            newMessage.classList.add('friend-message');
+            messageCache[friendName].push({ sender: data.sender, message: data.message });
+            updateChatIcons(friendName);
+        } else if (data.sender === userName) {
+            newMessage.classList.add('my-message');
+            messageCache[userName].push({ sender: data.sender, message: data.message, destination: friendName });
+        }
+
+        messageContainer.appendChild(newMessage);
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+    }
+
+    chatSocket.addEventListener('message', handler)
+
+    document.querySelector('.close-btn').addEventListener('click', () => {
+        chatSocket.removeEventListener('message', handler)
+    });
+
+    const chatIcons = document.querySelectorAll('.chat-icon');
+    const chatIcons2 = document.querySelectorAll('.chat-icon2');
+
+    chatIcons.forEach((icon, index) => {
+        icon.addEventListener('click', (event) => {
+            chatSocket.removeEventListener('message', handler)
+		});
+    });
+
+    chatIcons2.forEach((icon, index) => {
+        icon.addEventListener('click', (event) => {
+            chatSocket.removeEventListener('message', handler)
+		});
+    });
 
         chatSocket.onclose = function () {
             console.log(`Chat socket closed for ${chatKey}`);
             delete chatSockets[chatKey];
         };
-    }
 
     // Attach event listener for the "SEND" button
     const senderButton = document.querySelector(`#chat-box-${userName}-${friendName} .sender`);
@@ -192,7 +223,7 @@ export function setupChat(friendName, userName) {
     }
 }
 
-function displayMessages(friendName, userName) {
+export function displayMessages(friendName, userName) {
     
     console.log(messageCache)
 
@@ -202,17 +233,29 @@ function displayMessages(friendName, userName) {
     // Clear the current messages
     messageContainer.innerHTML = '';
 
-    // Display all cached messages
+    // Display all cached messages for friend
     if (messageCache[friendName]) {
         messageCache[friendName].forEach(msg => {
             const newMessage = document.createElement('p');
-            newMessage.textContent = `${msg.sender}: ${msg.message}`;
-            if (msg.sender === userName) {
-                newMessage.classList.add('my-message');
-            } else {
+            if (msg.sender === friendName) {
                 newMessage.classList.add('friend-message');
+                newMessage.textContent = `${msg.sender}: ${msg.message}`;
+                messageContainer.appendChild(newMessage);
             }
-            messageContainer.appendChild(newMessage);
+        });
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+    }
+
+     // Display all cached messages for user
+     if (messageCache[userName]) {
+        messageCache[userName].forEach(msg => {
+            const newMessage = document.createElement('p');
+            if (msg.sender === userName && msg.destination === friendName) {
+                newMessage.classList.add('my-message');
+                newMessage.textContent = `${msg.sender}: ${msg.message}`;
+                messageContainer.appendChild(newMessage);
+
+            }
         });
         messageContainer.scrollTop = messageContainer.scrollHeight;
     }

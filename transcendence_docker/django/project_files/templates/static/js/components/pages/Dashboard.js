@@ -1,5 +1,5 @@
 import { navigate } from '../../helpers/App.js';
-import { setupChat, Initialize } from './Client.js';
+import { setupChat, Initialize, displayMessages} from './Client.js';
 
 
 const avatarPaths = [
