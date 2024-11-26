@@ -1,5 +1,6 @@
 import { navigate } from '../../helpers/App.js';
 let selectedGameType = 'Pong';
+let selectedGameID = null;
 
 const base = `
 			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative">
@@ -41,7 +42,7 @@ export async function getDataRemote() {
 		return dataRemote;
 }
 
-export default function RemotePlay(navigate) {
+export default function RemotePlay() {
 	const $games = document.createElement('div');
 	getDataRemote().then(dataRemote => {
 		console.log("dataRemote: ", dataRemote)
@@ -172,26 +173,12 @@ export default function RemotePlay(navigate) {
 		const result = await response.json();
 
 		if (response.ok) {
+			selectedGameID = result.game_id;
 			returnedMessage.innerHTML = '<p class="text-success">Game invitation sent successfully!</p>';
 			setTimeout(() => {
 				returnedMessage.innerHTML = '<p </p>';
 			}, 2000);
-			document.body.innerHTML = `
-			<div class="vh-100 d-flex flex-column align-items-center justify-content-center">
-				<h5>Waiting for the other opponent...</h5>
-			</div>
-			`;
-
-			const socket = new WebSocket(`ws://${window.location.host}/ws/game/${result.game_id}/`);
-
-			socket.onmessage = function(event) {
-				const data = JSON.parse(event.data);
-				if (data.message.includes('joined')) {
-					socket.send(JSON.stringify({ 'message': 'Both players connected'}));
-					navigate('/pongremote');
-				}
-			};
-			// navigate('/pongremote');
+			navigate('/pongremote');
 		} else {
 			returnedMessage.innerHTML = `<p class="text-danger">Failed to send game invitation! ${result.message} </p>`;
 			setTimeout(() => {
@@ -221,48 +208,8 @@ export default function RemotePlay(navigate) {
 
 				if (response.ok) {
 					console.log('Game accepted. Redirecting to remote play...');
-					const gameId = result.game_id;
-					document.body.innerHTML = `
-					<div class="vh-100 d-flex flex-column align-items-center justify-content-center">
-						<h5>Connecting to game...</h5>
-					</div>
-					`;
-
-					// Connect to the WebSocket for this game
-					const socket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/`);
-
-					socket.onopen = function () {
-						console.log("WebSocket connected, sending message...");
-
-						// Now you can safely send a message
-						socket.send(JSON.stringify({
-							action: "join",
-							gameId: gameId
-						}));
-					};
-
-					socket.onmessage = function (event) {
-						const data = JSON.parse(event.data);
-						if (data.message.includes('has joined the game.')) {
-							console.log('Both players connected. Starting game...');
-							navigate('/pongremote');
-						}
-					};
-
-					// Error handling
-					socket.onerror = function (error) {
-						console.error("WebSocket error:", error);
-					};
-
-					// socket.send(JSON.stringify({ 'message': 'has joined the game.'}));
-					//
-					// socket.onmessage = function (event) {
-					// 	const data = JSON.parse(event.data);
-					// 	if (data.message.includes('Both players connected')) {
-					// 		console.log('Both players connected. Starting game...');
-					// 		navigate('/pongremote');
-					// 	}
-					// }
+					selectedGameID = result.game_id
+					navigate('/pongremote');
 				} else {
 					setTimeout(() => {
 						console.log('passou aqui 2', result);
@@ -318,4 +265,8 @@ export default function RemotePlay(navigate) {
 		}
 	});
 	return $games;
+}
+
+export function getSelectedGameID() {
+	return selectedGameID;
 }
