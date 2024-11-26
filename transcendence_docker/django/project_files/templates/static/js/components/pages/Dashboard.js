@@ -1,5 +1,5 @@
 import { navigate } from '../../helpers/App.js';
-import { setupChat, Initialize } from './Client.js';
+import { setupChat, Initialize, displayMessages} from './Client.js';
 
 
 const avatarPaths = [
@@ -271,59 +271,59 @@ export default function DashBoard() {
 	let currentChatBox = null; // Track the currently open chat box
 
 	function openChatBox(friendName, userName) {
-	    // Close and remove the currently open chat box if it exists
-	    if (currentChatBox) {
-	        currentChatBox.remove(); // Directly remove the previous chat box
-	        currentChatBox = null; // Reset the tracker
-	    }
-
-	    currentFriend = friendName;
-	    const shortName = friendName.length > 6 ? friendName.slice(0, 6) : friendName; // Limit to first 6 characters
-	    const chatBox = document.createElement('div');
-	    chatBox.classList.add('chat-popup');
-	    chatBox.id = `chat-box-${userName}-${friendName}`; // Set a unique ID for each friend's chat box
-
-	    chatBox.innerHTML = `
-	        <div class="chat-box">
-	            <div class="chat-header">
-	                <span>${shortName} Live-Chat</span>
-	                <div>
-	                    <button class="minimize-btn">-</button> <!-- Minimize Button -->
-	                    <button class="close-btn">&times;</button>
-	                </div>
-	            </div>
-	            <div class="chat-content"> <!-- Wrapping content to toggle visibility -->
-	                <div class="messages" id="messages-${userName}-${friendName}">
-	                    <!-- Messages will load here -->
-	                </div>
-	                <div class="input-container">
-	                    <input type="text" class="message-input" placeholder="Type your message...">
-	                    <button class="sender">SEND</button>
-	                </div>
-	            </div>
-	        </div>
-	    `;
-
-	    document.getElementsByClassName('friends-column')[0].appendChild(chatBox);
-
-	    // Update the current chat box tracker
-	    currentChatBox = chatBox;
-
-	    // Close the chat box with animation when the X button is clicked
-	    chatBox.querySelector('.close-btn').addEventListener('click', () => {
-	        chatBox.remove(); // Remove the chat box immediately
-	        currentChatBox = null; // Reset the tracker when closed manually
-	    });
-
-	    // Minimize/maximize functionality for the chat box
-	    const minimizeButton = chatBox.querySelector('.minimize-btn');
-	    const chatContent = chatBox.querySelector('.chat-content');
-	    minimizeButton.addEventListener('click', () => {
-	        chatContent.classList.toggle('hidden'); // Toggle visibility
-	        minimizeButton.textContent = chatContent.classList.contains('hidden') ? '+' : '-'; // Change button text
-	    });
-
-	    setupChat(friendName, userName); // Initialize chat functionality for the friend
+		// Close and remove the currently open chat box if it exists
+		if (currentChatBox) {
+			currentChatBox.remove();
+			currentChatBox = null;
+		}
+	
+		currentFriend = friendName;
+		const shortName = friendName.length > 6 ? friendName.slice(0, 6) : friendName;
+		const chatBox = document.createElement('div');
+		chatBox.classList.add('chat-popup');
+		chatBox.id = `chat-box-${userName}-${friendName}`;
+	
+		chatBox.innerHTML = `
+			<div class="chat-box">
+				<div class="chat-header">
+					<span>${shortName} Live-Chat</span>
+					<div>
+						<button class="minimize-btn">-</button>
+						<button class="close-btn">&times;</button>
+					</div>
+				</div>
+				<div class="chat-content">
+					<div class="messages" id="messages-${userName}-${friendName}"></div>
+					<div class="input-container">
+						<input type="text" class="message-input" placeholder="Type your message...">
+						<button class="sender">SEND</button>
+					</div>
+				</div>
+			</div>
+		`;
+	
+		document.getElementsByClassName('friends-column')[0].appendChild(chatBox);
+		currentChatBox = chatBox;
+	
+		// Display cached messages for the friend, if available
+		displayMessages(friendName, userName);
+	
+		// Close the chat box with animation when the X button is clicked
+		chatBox.querySelector('.close-btn').addEventListener('click', () => {
+			chatBox.remove();
+			currentChatBox = null;
+		});
+	
+		// Minimize/maximize functionality for the chat box
+		const minimizeButton = chatBox.querySelector('.minimize-btn');
+		const chatContent = chatBox.querySelector('.chat-content');
+		minimizeButton.addEventListener('click', () => {
+			chatContent.classList.toggle('hidden');
+			minimizeButton.textContent = chatContent.classList.contains('hidden') ? '+' : '-';
+		});
+	
+		// Initialize WebSocket or reuse existing connection
+		setupChat(friendName, userName);
 	}
 
 	const socket = new WebSocket('ws://' + window.location.host + '/ws/friend-status/');
