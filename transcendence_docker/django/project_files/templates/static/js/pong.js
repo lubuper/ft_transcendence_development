@@ -96,6 +96,7 @@ class Game {
 		this.currentPlayerIndex = 1;
 		this.unpaused = true;
 		this.pauseCube = null;
+		this.winners = [];
 		window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 	}
 
@@ -643,70 +644,106 @@ class Game {
 			this.keysPressed[event.key] = false;
 		});
 	}
-	//tournament logic:asdasdasdasdasdasdasdas
-
+	//tournament logic
 	tournamentHandler() {
-		// Prevent execution if the tournament is over
 		if (this.tournamentOver) return;
+	
 		const tournamentData = getTournamentData();
 		if (!tournamentData) return;
+	
 		const { playerNames } = tournamentData;
-		// Initialize the winners array if it doesn't exist
-		const winners = JSON.parse(localStorage.getItem('tournamentWinners')) || [];
+		this.winners = this.winners || []; // Ensure this.winners is initialized
+	
 		let player1, player2;
-		if (this.currentPlayerIndex < playerNames.length) { // 1 < 4
+	
+		// Determine players for the match
+		if (this.currentPlayerIndex < playerNames.length) {
 			player1 = playerNames[this.currentPlayerIndex - 1];
 			player2 = playerNames[this.currentPlayerIndex];
+		} else if (this.winners.length > 1) {
+			player1 = this.winners[0];
+			player2 = this.winners[1];
+		} else {
+			console.error("Not enough players to continue.");
+			return;
 		}
-		else {
-			player1 = playerNames[winners[0]];
-			player2 = playerNames[winners[1]];
-		}
+	
+		console.log("Match Between:", player1, "vs", player2);
+	
+		// Determine the winner and loser
 		const winner = this.scorePlayer1 > this.scorePlayer2 ? player1 : player2;
-		winners.push(winner); // Add the winner to the winners array
-		if (this.currentTournamentPlay === 3 && playerNames.length === 4) {
-			winners.splice(0, 2);
+		const loser = winner === player1 ? player2 : player1;
+		console.log("Winner:", winner);
+		console.log("Loser:", loser);
+	
+		// After player names are exhausted (moving to winners phase)
+		if (this.currentPlayerIndex >= playerNames.length) {
+			// Remove the loser from the winners array
+			const loserIndex = this.winners.indexOf(loser);
+			if (loserIndex !== -1) {
+				this.winners.splice(loserIndex, 1); // Remove the loser
+			} else {
+				console.warn("Loser not found in winners array.");
+			}
+	
+			// Rotate the winner to the end of the array
+			if (this.winners[0] === winner) {
+				// If the winner is already at the front, just move it to the end
+				const rotatedWinner = this.winners.shift(); // Remove the winner from the start
+				this.winners.push(rotatedWinner); // Push it to the end
+			} else {
+				// If the winner is not at the front, just push it to the end
+				this.winners.push(winner);
+			}
+		} else {
+			// During the initial phase, simply collect winners
+			this.winners.push(winner);
 		}
-		else if (this.currentTournamentPlay > 4 && playerNames.length === 8) {
-			winners.splice(0, 2); // need to adjust to the last iteration
-		}
-		localStorage.setItem('tournamentWinners', JSON.stringify(winners));
+	
+		console.log("Updated Winners Array:", this.winners);
+	
+		// Advance tournament state
 		this.currentPlayerIndex += 2;
 		this.currentTournamentPlay++;
+	
 		if (this.currentTournamentPlay > this.tournamentNumberOfPlays) {
-			if (winners.length === 1) {
-				alert(`Tournament Winner: ${winners[0]}!`);
-			}
-			else {
-				alert(`Tournament Over. No clear winner.`);
+			if (this.winners.length === 1) {
+				alert(`Tournament Winner: ${this.winners[0]}!`);
+			} else {
+				alert("Tournament Over. No clear winner.");
 			}
 			this.tournamentOver = true;
 			this.cleanup();
 			document.getElementById('gameWin').style.display = 'flex';
 			return;
 		}
+	
+		// Reset scores and prepare for the next match
 		this.scorePlayer1 = 0;
 		this.scorePlayer2 = 0;
 		this.updateScore(this.scorePlayer1, this.scorePlayer2);
 		this.resetBall();
 	
+		// Prepare the next match
 		if (this.currentPlayerIndex < playerNames.length) {
 			player1 = playerNames[this.currentPlayerIndex - 1];
 			player2 = playerNames[this.currentPlayerIndex];
+		} else if (this.winners.length > 1) {
+			player1 = this.winners[0];
+			player2 = this.winners[1];
 		}
-		else if (winners.length > 1) {
-				player1 = winners[0];
-				player2 = winners[1];
-		}
-		console.log("player1:", player1, "player2:", player2);
+	
 		if (player1 && player2) {
-			alert(`Next match: ${player1} vs ${player2}`);
-		}	
+			alert(`Next Match: ${player1} vs ${player2}!`);
+		} else {
+			console.error("Unable to determine next match players.");
+		}
+	
 		this.unpaused = false;
-	}	
+	}
+	
 				
 	gameOver() {
-		console.log(this.gameMode);
 		if (this.gameMode === '6') {
 			this.tournamentHandler();
 		}

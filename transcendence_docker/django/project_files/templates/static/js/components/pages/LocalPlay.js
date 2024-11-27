@@ -261,6 +261,7 @@ export default function LocalPlay(navigate) {
 
 function startTournament(navigate) {
 	alert(`Starting a tournament with ${tournamentPlayers} players: ${playerNames.join(', ')}`);
+	alert(`First Match: ${playerNames[0]} vs ${playerNames[1]}!`);
 	const tournamentGameTypeElement = document.getElementById('tournamentGameType');
 	if (tournamentGameTypeElement) {
 		const gamePath = tournamentGameTypeElement.value === 'pong' ? '/pong' : '/asteroids';
