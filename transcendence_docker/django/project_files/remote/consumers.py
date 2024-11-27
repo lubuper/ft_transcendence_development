@@ -98,12 +98,30 @@ class GameConsumer(AsyncWebsocketConsumer):
                 }
             )
 
+        if action == 'update_ball':
+                # Broadcast ball state to all clients
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'update_ball',
+                        'ball_state': data.get('ball_state'),
+                    }
+                )
+
+
     async def player_move(self, event):
         # Send the move to WebSocket clients
         await self.send(text_data=json.dumps({
             'action': 'player_move',
             'player': event['player'],  # Include the player ID
             'move_data': event['move_data'],
+        }))
+
+    async def update_ball(self, event):
+        # Send ball state to WebSocket clients
+        await self.send(text_data=json.dumps({
+            'action': 'update_ball',
+            'ball_state': event['ball_state'],
         }))
 
     async def notify_players(self):
