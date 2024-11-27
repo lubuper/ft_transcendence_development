@@ -234,6 +234,14 @@ export default function LocalPlay(navigate) {
 		return nameSet.size === names.length;
 	}
 
+	function shuffleArray(array) { //Fisher-Yates algorithm
+		for (let i = array.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[array[i], array[j]] = [array[j], array[i]];
+		}
+		return array;
+	}
+
 	// Event listener to start the tournament
 	$games.querySelector('#startTournament').addEventListener('click', () => {
 		playerNames = [];
@@ -254,6 +262,7 @@ export default function LocalPlay(navigate) {
 				alert('Player names must be unique.');
 				return;
 			}
+		playerNames = shuffleArray(playerNames);
 		startTournament(navigate);
 	});
 	return $games;

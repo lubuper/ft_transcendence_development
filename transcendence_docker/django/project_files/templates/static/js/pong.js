@@ -645,7 +645,7 @@ class Game {
 		});
 	}
 	//tournament logic
-	tournamentHandler() {
+		tournamentHandler() {
 		if (this.tournamentOver) return;
 	
 		const tournamentData = getTournamentData();
