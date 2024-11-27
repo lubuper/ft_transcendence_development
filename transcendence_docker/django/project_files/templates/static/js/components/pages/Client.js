@@ -1,85 +1,3 @@
-/* const activeSockets = {}; // Store active WebSocket connections globally
-
-export function setupChat(friendName, userName) {
-    // Generate a consistent key for chat pairs regardless of order
-    const chatKey = [userName, friendName].sort().join('-'); // Ensures consistent key (e.g., "rafa-ze" or "ze-rafa")
-
-    // Check if a WebSocket already exists for this chatKey
-    if (activeSockets[chatKey]) {
-        console.log(`Reusing existing WebSocket for chat between ${userName} and ${friendName}`);
-        return activeSockets[chatKey]; // Reuse the existing WebSocket
-    }
-
-    console.log(`Creating new WebSocket for chat between ${userName} and ${friendName}`);
-    // Create the WebSocket connection
-    const chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${userName}/${friendName}/`);
-    activeSockets[chatKey] = chatSocket; // Store the WebSocket in the global object
-
-    // Create the message container dynamically if it doesn't exist
-    let messageContainer = document.getElementById(`messages-${chatKey}`);
-    if (!messageContainer) {
-        messageContainer = document.createElement('div');
-        messageContainer.id = `messages-${chatKey}`;
-        messageContainer.classList.add('chat-messages');
-        document.body.appendChild(messageContainer); // Append to the body or a specific chat container
-    }
-
-    // WebSocket event handlers
-    chatSocket.onmessage = function (e) {
-        const data = JSON.parse(e.data);
-        const newMessage = document.createElement('p');
-        newMessage.textContent = `${data.sender} : ${data.message}`;
-
-        // Determine the role dynamically based on the sender
-        if (data.sender === userName) {
-            newMessage.classList.add('my-message'); // Message sent by the current user
-        } else {
-            newMessage.classList.add('friend-message'); // Message sent by the friend
-        }
-
-        messageContainer.appendChild(newMessage);
-        messageContainer.scrollTop = messageContainer.scrollHeight; // Scroll to the bottom
-    };
-
-    chatSocket.onclose = function () {
-        console.log(`Chat socket for ${chatKey} closed`);
-        delete activeSockets[chatKey]; // Remove the WebSocket from activeSockets when closed
-    };
-
-    chatSocket.onerror = function (e) {
-        console.error(`Chat socket error for ${chatKey}`, e);
-    };
-
-    // Attach event listeners for sending messages
-    const senderButton = document.querySelector(`.sender`);
-    const inputField = document.querySelector(`.message-input`);
-
-    if (senderButton && inputField) {
-        const sendMessage = () => {
-            if (inputField.value.trim() !== '') {
-                chatSocket.send(
-                    JSON.stringify({
-                        sender: userName, // Include the sender in the message
-                        message: inputField.value,
-                    })
-                );
-                inputField.value = ''; // Clear the input field after sending
-            }
-        };
-
-        senderButton.addEventListener('click', sendMessage);
-
-        inputField.addEventListener('keyup', function (e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-                console.log('Message sent');
-            }
-        });
-    }
-
-    return chatSocket; // Return the new WebSocket
-} */
-
 const messageCache = {};   
 const chatSockets = {}; // Track active WebSocket connections
 
@@ -97,6 +15,8 @@ export function Initialize(friendName, userName) {
 
     chatSocket2.addEventListener('message', function (e) {
         const data = JSON.parse(e.data);
+        const timestamp = Date.now();
+        const formattedTime = formatTimestamp(timestamp);
 
         if(chat.length !== 0){
             return
@@ -110,6 +30,7 @@ export function Initialize(friendName, userName) {
             messageCache[friendName].push({
                 sender: data.sender,
                 message: data.message,
+                timestamp
             });
         }
 
@@ -147,7 +68,10 @@ export function setupChat(friendName, userName) {
     const handler =  (e) => {
         const data = JSON.parse(e.data);
         const newMessage = document.createElement('p');
-        newMessage.textContent = `${data.sender} : ${data.message}`;
+        const timestamp = Date.now();
+        const formattedTime = formatTimestamp(timestamp); // Get the current timestamp
+
+        newMessage.textContent = `${data.sender} ${formattedTime}: ${data.message}`;
 
         if (!messageCache[friendName]) {
             messageCache[friendName] = [];
@@ -160,11 +84,11 @@ export function setupChat(friendName, userName) {
         // Cache messages and update UI
         if (data.sender === friendName) {
             newMessage.classList.add('friend-message');
-            messageCache[friendName].push({ sender: data.sender, message: data.message });
+            messageCache[friendName].push({ sender: data.sender, message: data.message, timestamp });
             updateChatIcons(friendName);
         } else if (data.sender === userName) {
             newMessage.classList.add('my-message');
-            messageCache[userName].push({ sender: data.sender, message: data.message, destination: friendName });
+            messageCache[userName].push({ sender: data.sender, message: data.message, timestamp, destination: friendName });
         }
 
         messageContainer.appendChild(newMessage);
@@ -212,6 +136,19 @@ export function setupChat(friendName, userName) {
             }
         };
 
+         // Add event listener to clear notifications on focus
+         inputField.addEventListener('focus', () => {
+            const chatIcon = document.querySelector(`.chat-icon[data-friend="${friendName}"]`);
+            const chatIcon2 = document.querySelector(`.chat-icon2[data-friend="${friendName}"]`);
+
+            if (chatIcon) {
+                chatIcon.classList.remove('display-none');
+            }
+            if (chatIcon2) {
+                chatIcon2.classList.add('display-none');
+            }
+        });
+
         // Add "Enter" key functionality
         inputField.onkeyup = (e) => {
             if (e.key === 'Enter') {
@@ -224,41 +161,34 @@ export function setupChat(friendName, userName) {
 }
 
 export function displayMessages(friendName, userName) {
-    
-    console.log(messageCache)
-
     const messageContainer = document.getElementById(`messages-${userName}-${friendName}`);
     if (!messageContainer) return;
 
     // Clear the current messages
     messageContainer.innerHTML = '';
 
-    // Display all cached messages for friend
-    if (messageCache[friendName]) {
-        messageCache[friendName].forEach(msg => {
-            const newMessage = document.createElement('p');
-            if (msg.sender === friendName) {
-                newMessage.classList.add('friend-message');
-                newMessage.textContent = `${msg.sender}: ${msg.message}`;
-                messageContainer.appendChild(newMessage);
-            }
-        });
-        messageContainer.scrollTop = messageContainer.scrollHeight;
-    }
+    // Combine and sort messages by timestamp
+    const combinedMessages = [
+        ...(messageCache[friendName] || []),
+        ...(messageCache[userName]?.filter(msg => msg.destination === friendName) || [])
+    ].sort((a, b) => a.timestamp - b.timestamp);
 
-     // Display all cached messages for user
-     if (messageCache[userName]) {
-        messageCache[userName].forEach(msg => {
-            const newMessage = document.createElement('p');
-            if (msg.sender === userName && msg.destination === friendName) {
-                newMessage.classList.add('my-message');
-                newMessage.textContent = `${msg.sender}: ${msg.message}`;
-                messageContainer.appendChild(newMessage);
+    // Display the sorted messages with timestamps
+    combinedMessages.forEach(msg => {
+        const newMessage = document.createElement('p');
+        const formattedTime = formatTimestamp(msg.timestamp); // Format the timestamp
 
-            }
-        });
-        messageContainer.scrollTop = messageContainer.scrollHeight;
-    }
+        if (msg.sender === friendName) {
+            newMessage.classList.add('friend-message');
+        } else if (msg.sender === userName) {
+            newMessage.classList.add('my-message');
+        }
+
+        newMessage.textContent = `${msg.sender} ${formattedTime}: ${msg.message}`; // Include timestamp
+        messageContainer.appendChild(newMessage);
+    });
+
+    messageContainer.scrollTop = messageContainer.scrollHeight;
 }
 
 function updateChatIcons(friendName) {
@@ -271,4 +201,12 @@ function updateChatIcons(friendName) {
             chatIcons2[index].classList.remove('display-none');
         }
     });
+}
+
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
 }
