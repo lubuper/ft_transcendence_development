@@ -56,7 +56,7 @@ export function navigate(path) {
 	if (allowedPaths.includes(path)) {
 		const existingCanvas = document.querySelector('canvas');
 		if (existingCanvas) {
-			if (currentGameI && typeof currentGameI.cleanup === 'function' && path !== '/asteroids' && path !== '/pong') {
+			if (currentGameI && typeof currentGameI.cleanup === 'function' && path !== '/asteroids' && path !== '/pong' && path !== '/pongremote') {
 				currentGameI.cleanup();
 			}
 			if (existingCanvas.parentNode !== null) {

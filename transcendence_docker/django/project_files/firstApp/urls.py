@@ -2,7 +2,7 @@ from django.urls import path, re_path
 from . import views
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import create_account, login_view, current_user, logout_view, profile, update_profile, save_match_history, load_match_history, save_customization, get_ship_and_color, get_profile_friend, get_data_remote
+from .views import create_account, login_view, current_user, logout_view, profile, update_profile, save_match_history, load_match_history, save_customization, get_ship_and_color, get_profile_friend, get_data_remote, get_ship_and_color_remote
 
 #urlpatterns = [
 #    path('', views.homepage, name="homepage"),
@@ -23,7 +23,7 @@ urlpatterns = [
     path('api/get-ship-and-color/', get_ship_and_color, name='get-ship-and-color'),
     path('get-profile-friend/', get_profile_friend, name='get_profile_friend'),
     path('api/get-data-remote/', get_data_remote, name='get_data_remote'),
-	path('lobby/', views.lobby, name='lobby'),
+    path('api/get-ship-and-color-remote/', get_ship_and_color_remote, name='get-ship-and-color_remote'),
 ]
 
 if settings.DEBUG:

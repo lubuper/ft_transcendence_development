@@ -328,3 +328,33 @@ def get_data_remote(request):
 	except Exception as e:
 			return JsonResponse({'error': 'Not logged'}, status=404)  # Return error as JSON
 	return JsonResponse({'error': str(e)}, status=500)
+
+def get_ship_and_color_remote(request):
+	if request.method == 'POST':
+		try:
+			data = json.loads(request.body)
+			user_player_one = request.user
+			username_guest = data.get('username_guest')
+			try:
+				user_player_two = User.objects.get(username=username_guest)
+			except User.DoesNotExist:
+				return JsonResponse({'error': 'User does not exist'}, status=404)
+			try:
+				game_customization_player_one = GameCustomization.objects.get(user=user_player_one)
+				ship_number_player_one = game_customization_player_one.ship
+				hexagon_color = game_customization_player_one.color
+				game_customization_player_two = GameCustomization.objects.get(user=user_player_two)
+				ship_number_player_two = game_customization_player_two.ship
+			except GameCustomization.DoesNotExist:
+				ship_number_player_one = 1
+				hexagon_color = '#00ff00'
+				ship_number_player_two = 2
+		except json.JSONDecodeError:
+			return JsonResponse({'error': 'Invalid JSON.'}, status=400)
+		return JsonResponse({
+			'username': user_player_one.username,
+			'ship_player_one': ship_number_player_one,
+			'color': hexagon_color,
+			'ship_player_two': ship_number_player_two
+		})
+	return JsonResponse({'error': 'Invalid request'}, status=400)

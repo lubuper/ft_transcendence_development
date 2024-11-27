@@ -1,6 +1,7 @@
 import { navigate } from '../../helpers/App.js';
 let selectedGameType = 'Pong';
 let selectedGameID = null;
+let otherPlayer = null;
 
 const base = `
 			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative">
@@ -174,6 +175,7 @@ export default function RemotePlay() {
 
 		if (response.ok) {
 			selectedGameID = result.game_id;
+			otherPlayer = username;
 			returnedMessage.innerHTML = '<p class="text-success">Game invitation sent successfully!</p>';
 			setTimeout(() => {
 				returnedMessage.innerHTML = '<p </p>';
@@ -208,7 +210,8 @@ export default function RemotePlay() {
 
 				if (response.ok) {
 					console.log('Game accepted. Redirecting to remote play...');
-					selectedGameID = result.game_id
+					selectedGameID = result.game_id;
+					otherPlayer = remote_game_invitations.sender__user__username;
 					navigate('/pongremote');
 				} else {
 					setTimeout(() => {
@@ -269,4 +272,8 @@ export default function RemotePlay() {
 
 export function getSelectedGameID() {
 	return selectedGameID;
+}
+
+export function getOtherPlayer() {
+	return otherPlayer;
 }

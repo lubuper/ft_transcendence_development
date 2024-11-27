@@ -1,4 +1,19 @@
 import { saveMatchHistory } from './components/pages/Dashboard.js';
+import {getSelectedGameID} from "./components/pages/RemotePlay.js";
+
+
+function getCSRFToken() {
+	const name = 'csrftoken';
+	const cookies = document.cookie.split(';');
+	for (let cookie of cookies) {
+		const trimmedCookie = cookie.trim();
+		if (trimmedCookie.startsWith(name + '=')) {
+			return decodeURIComponent(trimmedCookie.substring(name.length + 1));
+		}
+	}
+	return null;
+}
+
 
 class Game {
 	constructor() {
@@ -64,18 +79,26 @@ class Game {
 		this.lastDirection = 0;
 	}
 
-	async fetchShipAndColor() {
+	async fetchShipAndColorRemote() {
+		const otherPlayer = getOtherPlayer();
 		try {
-			const response = await fetch('/api/get-ship-and-color/');
+			const response = await fetch('/api/get-ship-and-color-remote/', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': getCSRFToken() // Ensure CSRF token is sent
+				},
+				body: JSON.stringify({
+					'username_guest': otherPlayer // Send the username in the request body
+				}),
+			})
 			if (!response.ok) {
 				throw new Error('Failed to fetch ship and color');
 			}
-
 			const data = await response.json();
-			this.ship1Number = data.ship;
+			this.ship1Number = data.ship_player_one;
+			this.ship2Number = data.ship_player_two;
 			this.hexagoncolor = data.color;
-			if (this.ship1Number === 4)
-				this.ship2Number = 1;
 		} catch (error) {
 			console.error('Error fetching ship and color:', error);
 		}
@@ -841,12 +864,33 @@ class Game {
 			this.renderer.render(this.scene, this.cameratop3);
 		this.animationFrameID = requestAnimationFrame(this.animate);
 	}
-};
+}
 
-export default function Pong() {
-		const game = new Game();
-		game.fetchShipAndColor().then(() => {
-			game.init();
-		});
+export default function PongRemote() {
+	const gameId = getSelectedGameID();
+	const gameWebsocket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/`);
+
+	const game = new Game();
+	gameWebsocket.onmessage = function (event) {
+		const data = JSON.parse(event.data);
+
+		console.log('data::::::', data.action);
+		if (data.action === 'waiting') {
+			document.body.innerHTML = `
+					<div class="vh-100 d-flex flex-column align-items-center justify-content-center">
+						<div class="card bg-dark text-white mt-3 w-100" id="waiting" style="display: none;">Waiting for the other player to join...</div>
+					</div>
+					`;
+		} else if (data.action === 'start_game') {
+			game.fetchShipAndColorRemote().then(() => {
+				game.init();
+			});
+		} else if (data.action === 'player_left') {
+			console.log('nao passa aqui??::::::', data.action);
+			// Show an alert when a player leaves
+			alert(data.message);
+			// Return to waiting state
+		}
+	};
 	return game;
 }

@@ -85,17 +85,26 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
+        action = data.get('action')
 
-        if data['action'] == 'update_score':
-            # Broadcast the updated score
+        if action == 'player_move':
+            # Broadcast the move with player ID
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
-                    'type': 'update_scores',
-                    'player': data['player'],
-                    'score': data['score'],
+                    'type': 'player_move',
+                    'player': data.get('player'),  # Include the player ID
+                    'move_data': data.get('move_data'),
                 }
             )
+
+    async def player_move(self, event):
+        # Send the move to WebSocket clients
+        await self.send(text_data=json.dumps({
+            'action': 'player_move',
+            'player': event['player'],  # Include the player ID
+            'move_data': event['move_data'],
+        }))
 
     async def notify_players(self):
         # Notify if the room has 2 players
