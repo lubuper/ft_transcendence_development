@@ -189,7 +189,9 @@ export default function DashBoard() {
       							       class="profile-icon ml-2"
       							       alt="Profile-friend-status"
       							       style="width: 20px; height: 20px; pointer-events: none;"
-      							       id="friend-status-${friend.username}">
+      							       id="friend-status-${friend.username}"
+									   data-status="${friend.status === true ? 'online' : friend.status}"
+									   >
       								<img src="/static/media/icons/chat-icon.png"
       							       class="chat-icon ml-2"
       							       alt="Chat"
@@ -347,6 +349,8 @@ export default function DashBoard() {
 			statusDot.src = status === "online"
 				? "/static/media/icons/online.png"
 				: "/static/media/icons/offline.png";
+
+				statusDot.setAttribute('data-status', status);
 
 			// Log confirmation of status dot update
 			console.log(`Updated friend ${friendUsername}'s status icon to ${status}`);

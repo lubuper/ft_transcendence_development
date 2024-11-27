@@ -16,7 +16,6 @@ export function Initialize(friendName, userName) {
     chatSocket2.addEventListener('message', function (e) {
         const data = JSON.parse(e.data);
         const timestamp = Date.now();
-        const formattedTime = formatTimestamp(timestamp);
 
         if(chat.length !== 0){
             return
@@ -52,8 +51,6 @@ export function setupChat(friendName, userName) {
         return;
     }
 
-    console.log(messageCache)
-
     let chatSocket
 
     // Prevent reopening WebSocket for the same user-friend pair
@@ -70,6 +67,7 @@ export function setupChat(friendName, userName) {
         const newMessage = document.createElement('p');
         const timestamp = Date.now();
         const formattedTime = formatTimestamp(timestamp); // Get the current timestamp
+        const statusDot = document.getElementById(`friend-status-${friendName}`).getAttribute('data-status');
 
         newMessage.textContent = `${data.sender} ${formattedTime}: ${data.message}`;
 
@@ -88,7 +86,11 @@ export function setupChat(friendName, userName) {
             updateChatIcons(friendName);
         } else if (data.sender === userName) {
             newMessage.classList.add('my-message');
-            messageCache[userName].push({ sender: data.sender, message: data.message, timestamp, destination: friendName });
+            if(statusDot === 'online'){
+                messageCache[userName].push({ sender: data.sender, message: data.message, timestamp, destination: friendName });
+            }else{
+                newMessage.textContent = `-- Message was not sent. ${friendName} is offline --`;
+            }
         }
 
         messageContainer.appendChild(newMessage);
