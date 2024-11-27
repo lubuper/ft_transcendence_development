@@ -260,19 +260,21 @@ export default function LocalPlay(navigate) {
 }
 
 function startTournament(navigate) {
-    alert(`Starting a tournament with ${tournamentPlayers} players: ${playerNames.join(', ')}`);
-    const tournamentGameTypeElement = document.getElementById('tournamentGameType');
-    if (tournamentGameTypeElement) {
-        const gamePath = tournamentGameTypeElement.value === 'pong' ? '/pong' : '/asteroids';
-        const tournamentData = {
-            playerNames: playerNames,
-            gameType: tournamentGameTypeElement.value,
-            numberOfGames: tournamentPlayers / 2 // Assuming each game is between two players
-        };
-        navigate(gamePath, { state: tournamentData });
-    } else {
-        console.error('Tournament game type element not found when starting the tournament.');
-    }
+	alert(`Starting a tournament with ${tournamentPlayers} players: ${playerNames.join(', ')}`);
+	const tournamentGameTypeElement = document.getElementById('tournamentGameType');
+	if (tournamentGameTypeElement) {
+		const gamePath = tournamentGameTypeElement.value === 'pong' ? '/pong' : '/asteroids';
+		const tournamentData = {
+			playerNames: playerNames,
+			gameType: tournamentGameTypeElement.value,
+			numberOfGames: tournamentPlayers / 2 // Assuming each game is between two players
+		};
+		localStorage.setItem('tournamentData', JSON.stringify(tournamentData)); // Store data in local storage
+        localStorage.setItem('tournamentWinners', JSON.stringify([])); // Initialize winners
+		navigate(gamePath);
+	} else {
+		console.error('Tournament game type element not found when starting the tournament.');
+	}
 }
 
 export function getSelectedGameMode() {

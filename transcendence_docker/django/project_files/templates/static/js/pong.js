@@ -1,5 +1,10 @@
 import { saveMatchHistory } from './components/pages/Dashboard.js';
 
+//getter for the players name passed through localstorage
+function getTournamentData() {
+    return JSON.parse(localStorage.getItem('tournamentData'));
+}
+
 class Game {
 	constructor(gameMode, gameType) {
 		this.gameType = gameType;
@@ -88,6 +93,7 @@ class Game {
 			}
 			this.gameMode = '6';
 		}
+		this.currentPlayerIndex = 1;
 		this.unpaused = true;
 		this.pauseCube = null;
 		window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
@@ -637,29 +643,68 @@ class Game {
 			this.keysPressed[event.key] = false;
 		});
 	}
+	//tournament logic:asdasdasdasdasdasdasdas
 
 	tournamentHandler() {
-		this.currentTournamentPlay++;
-		if (this.currentTournamentPlay <= this.tournamentNumberOfPlays) {
-			this.scorePlayer1 = 0;
-			this.scorePlayer2 = 0;
-			this.updateScore(this.scorePlayer1, this.scorePlayer2);
-			this.resetBall();
-			alert(`next match`);
-			this.unpaused = false;
+		// Prevent execution if the tournament is over
+		if (this.tournamentOver) return;
+		const tournamentData = getTournamentData();
+		if (!tournamentData) return;
+		const { playerNames } = tournamentData;
+		// Initialize the winners array if it doesn't exist
+		const winners = JSON.parse(localStorage.getItem('tournamentWinners')) || [];
+		let player1, player2;
+		if (this.currentPlayerIndex < playerNames.length) { // 1 < 4
+			player1 = playerNames[this.currentPlayerIndex - 1];
+			player2 = playerNames[this.currentPlayerIndex];
 		}
 		else {
-			const match = {
-				result: `win`,
-				score: `${this.scorePlayer1}-${this.scorePlayer2}`,
-				game: `Pong Tournament`,
-			};
-			saveMatchHistory(match);
+			player1 = playerNames[winners[0]];
+			player2 = playerNames[winners[1]];
+		}
+		const winner = this.scorePlayer1 > this.scorePlayer2 ? player1 : player2;
+		winners.push(winner); // Add the winner to the winners array
+		if (this.currentTournamentPlay === 3 && playerNames.length === 4) {
+			winners.splice(0, 2);
+		}
+		else if (this.currentTournamentPlay > 4 && playerNames.length === 8) {
+			winners.splice(0, 2); // need to adjust to the last iteration
+		}
+		localStorage.setItem('tournamentWinners', JSON.stringify(winners));
+		this.currentPlayerIndex += 2;
+		this.currentTournamentPlay++;
+		if (this.currentTournamentPlay > this.tournamentNumberOfPlays) {
+			if (winners.length === 1) {
+				alert(`Tournament Winner: ${winners[0]}!`);
+			}
+			else {
+				alert(`Tournament Over. No clear winner.`);
+			}
+			this.tournamentOver = true;
 			this.cleanup();
 			document.getElementById('gameWin').style.display = 'flex';
+			return;
 		}
-	}
-
+		this.scorePlayer1 = 0;
+		this.scorePlayer2 = 0;
+		this.updateScore(this.scorePlayer1, this.scorePlayer2);
+		this.resetBall();
+	
+		if (this.currentPlayerIndex < playerNames.length) {
+			player1 = playerNames[this.currentPlayerIndex - 1];
+			player2 = playerNames[this.currentPlayerIndex];
+		}
+		else if (winners.length > 1) {
+				player1 = winners[0];
+				player2 = winners[1];
+		}
+		console.log("player1:", player1, "player2:", player2);
+		if (player1 && player2) {
+			alert(`Next match: ${player1} vs ${player2}`);
+		}	
+		this.unpaused = false;
+	}	
+				
 	gameOver() {
 		console.log(this.gameMode);
 		if (this.gameMode === '6') {

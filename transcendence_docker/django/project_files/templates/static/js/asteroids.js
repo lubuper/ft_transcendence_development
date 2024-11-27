@@ -711,14 +711,14 @@ class Game {
 			projectile2: {pressed: false}
 		};
 		window.addEventListener('keydown', (event) => {
-			if (event.key === ' ') {
+			if (event.key === ' ' && this.player1IsActive && this.unpaused) {
 				event.preventDefault();
 				if (!this.actionStates.projectile1.pressed && this.player1IsActive) {
 					this.shoot(this.shotType, true, this.player1);
 				}
 				this.actionStates.projectile1.pressed = true;
 			}
-			if (event.key === 'e' && this.player1IsActive && this.shield1.lifetime > 0) {
+			if (event.key === 'e' && this.player1IsActive && this.shield1.lifetime > 0 && this.unpaused) {
 				event.preventDefault();
 				if (!this.actionStates.shield1.pressed) {
 					this.playSound('/static/media/assets/sounds/shield.mp3', 0.4);
@@ -727,7 +727,7 @@ class Game {
 				this.actionStates.shield1.pressed = true;
 			}
 			if (this.gameMode === '1' || this.gameMode === '6') {
-				if (event.key === 'o' && this.player2IsActive && this.shield2.lifetime > 0) {
+				if (event.key === 'o' && this.player2IsActive && this.shield2.lifetime > 0 && this.unpaused) {
 					event.preventDefault();
 					if (!this.actionStates.shield2.pressed) {
 						this.playSound('/static/media/assets/sounds/shield.mp3', 0.4);
@@ -735,7 +735,7 @@ class Game {
 					this.shield2.visible = true;
 					this.actionStates.shield2.pressed = true;
 				}
-				if (event.key === 'p') {
+				if (event.key === 'p' && this.unpaused) {
 					event.preventDefault();
 					if (!this.actionStates.projectile2.pressed && this.player2IsActive) {
 						this.shoot(this.shotType, true, this.player2);
@@ -777,6 +777,8 @@ class Game {
 			this.level = 0;
 			this.player1Lives = 5;
 			this.player2Lives = 5;
+			this.player1IsActive = true;
+			this.player2IsActive = true;
 			if (this.level < this.levels.length) {
 				this.spawnAsteroids(this.levels[this.level].asteroids, 'asteroid');
 				this.spawnAsteroids(this.levels[this.level].sAsteroids, 'sAsteroid');
@@ -802,8 +804,10 @@ class Game {
 				this.displayLives1();
 				this.displayLives2();
 			}
+			setTimeout(() => {
+				this.unpaused = false;
+			}, 1000);
 			alert(`next match`);
-			this.unpaused = false;
 		}
 		else {
 			const match = {
@@ -1234,8 +1238,7 @@ class Game {
 				this.pauseCube.rotation.y += 0.1;
 			}
 		}
-		if (this.unpaused === true) {
-
+		else {
 			if (this.GameIsRunning === false) {
 				cancelAnimationFrame(this.animate);
 				return;
