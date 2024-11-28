@@ -1,4 +1,5 @@
 import { saveMatchHistory } from './components/pages/Dashboard.js';
+import { navigate } from './helpers/App.js';
 
 function getTournamentData() {
 	return JSON.parse(localStorage.getItem('tournamentData'));
@@ -282,7 +283,7 @@ class Game {
 			};
 			saveMatchHistory(match);
 			this.cleanup();
-			document.getElementById('gameOver').style.display = 'flex';
+			navigate('/gamelost');
 		}
 	}
 
@@ -300,7 +301,7 @@ class Game {
 			};
 			saveMatchHistory(match);
 			this.cleanup();
-			document.getElementById('gameWin').style.display = 'flex';
+			navigate('/gamewin');
 		}
 	}
 

@@ -1,4 +1,5 @@
 import { saveMatchHistory } from './components/pages/Dashboard.js';
+import { navigate } from './helpers/App.js';
 
 //getter for the players name passed through localstorage
 function getTournamentData() {

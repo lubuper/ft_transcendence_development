@@ -14,6 +14,8 @@ import Profile from "../components/pages/Profile.js";
 import ProfileFriend from "../components/pages/ProfileFriend.js";
 import LocalPlay, { getSelectedGameMode, getSelectedGameType } from '../components/pages/LocalPlay.js';
 import RemotePlay from "../components/pages/RemotePlay.js";
+import GameLost from "../components/pages/GameLost.js";
+import GameWon from "../components/pages/GameWon.js";
 
 export default function App() {
 	initSPA();
@@ -38,7 +40,9 @@ const routes = {
 	'/aboutus': AboutUs,
 	'/profile': Profile,
 	'/profileFriend': ProfileFriend,
-	'/pongremote' : PongRemote
+	'/pongremote' : PongRemote,
+	'/gamelost' : GameLost,
+	'/gamewon' : GameWon
 };
 
 let currentGameI = null;
