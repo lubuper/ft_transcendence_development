@@ -79,7 +79,6 @@ export default function LocalPlay(navigate) {
 								<label for="tournamentPlayers" class="form-label">Number of Players</label>
 								<select class="form-control" id="tournamentPlayers">
 									<option value="" selected>Select number of players</option>
-									<option value="2">2</option>
 									<option value="4">4</option>
 									<option value="8">8</option>
 								</select>
@@ -198,10 +197,7 @@ export default function LocalPlay(navigate) {
 		const playerNamesContainer = document.getElementById('playerNamesContainer');
 		playerNamesContainer.innerHTML = '';
 		if (tournamentPlayers) {
-			if (tournamentPlayers === 2) {
-				selectedGameMode = '7';
-			}
-			else if (tournamentPlayers === 4) {
+			if (tournamentPlayers === 4) {
 				selectedGameMode = '8';
 			}
 			else if (tournamentPlayers === 8) {

@@ -1,5 +1,9 @@
 import { saveMatchHistory } from './components/pages/Dashboard.js';
 
+function getTournamentData() {
+	return JSON.parse(localStorage.getItem('tournamentData'));
+}
+
 class Level {
 	constructor(number, asteroids, sAsteroids, AIShips, powerups) {
 		this.number = number;
@@ -15,7 +19,7 @@ class Game {
 		this.gameMode = gameMode;
 		this.gameType = gameType;
 		this.tournamentNumberOfPlays = 1;
-		if (this.gameMode === '7' || this.gameMode === '8' || this.gameMode === '9') {
+		if (this.gameMode === '8' || this.gameMode === '9') {
 			if (this. gameMode === '7' || this.gameMode === '8') {
 				this.tournamentNumberOfPlays = 3;
 			}
@@ -54,6 +58,10 @@ class Game {
 			this.player2IsActive = true;
 			this.lives2 = [];
 			this.ship2Number = 8;  // Player 2 ship - change here 
+			this.playerHasLost = false;
+			this.player1Loser;
+			this.winners = [];
+			this.currentPlayerIndex = 1;
 		}
 		this.ship1Number = 7; // Player 1 ship - change here
 		this.level = 0;
@@ -767,58 +775,131 @@ class Game {
 	}
 
 	tournamentHandler() {
-		this.currentTournamentPlay++;
-		if (this.currentTournamentPlay <= this.tournamentNumberOfPlays) {
-			this.clearObjects(this.asteroids);
-			this.clearObjects(this.sAsteroids);
-			this.clearObjects(this.AIShips);
-			this.clearObjects(this.powerups);
-			this.clearObjects(this.projectiles);
-			this.level = 0;
-			this.player1Lives = 5;
-			this.player2Lives = 5;
-			this.player1IsActive = true;
-			this.player2IsActive = true;
-			if (this.level < this.levels.length) {
-				this.spawnAsteroids(this.levels[this.level].asteroids, 'asteroid');
-				this.spawnAsteroids(this.levels[this.level].sAsteroids, 'sAsteroid');
-				this.spawnAIships(this.levels[this.level].AIShips);
-				if (this.gameType === "powered") {
-					this.spawnpowerups(this.levels[this.level].powerups);
-				}
-				this.shield1.visible = false;
-				this.shield1.spawnTime = 100;
-				this.shield1.lifetime = 80;
-				this.shield2.visible = false;
-				this.shield2.spawnTime = 100;
-				this.shield2.lifetime = 80;
-				this.player1VelocityX = 0;
-				this.player1VelocityY = 0;
-				this.player2VelocityX = 0;
-				this.player2VelocityY = 0;
-				this.player1.position.set(-20, 0, 5);
-				this.player2.position.set(20, 0, 5);
-				this.scene.add(this.player1);
-				this.scene.add(this.player2);
-				this.displayLevel();
-				this.displayLives1();
-				this.displayLives2();
-			}
-			setTimeout(() => {
-				this.unpaused = false;
-			}, 1000);
-			alert(`next match`);
+		if (this.tournamentOver) {
+			return;	
+		}
+		const tournamentData = getTournamentData();
+		if (!tournamentData) {
+			return;
+		}
+		const { playerNames } = tournamentData;	
+		let player1, player2;
+		// Determine players for the match
+		if (this.currentPlayerIndex < playerNames.length) {
+			player1 = playerNames[this.currentPlayerIndex - 1];
+			player2 = playerNames[this.currentPlayerIndex];
+		}
+		else if (this.winners.length > 1) {
+			player1 = this.winners[0];
+			player2 = this.winners[1];
+		}
+		// Determine the winner and loser
+		let winner;
+		let loser;
+		if (this.player1Loser) {
+			winner = player1;
+			loser = player2;
 		}
 		else {
-			const match = {
-				result: `win`,
-				score: `Level ${this.level}`,
-				game: `Asteroids Tournament`,
-			};
-			saveMatchHistory(match);
+			winner = player2;
+			loser = player1;
+		}
+		console.log("winner is ", winner);
+		console.log("loser is ", loser);
+		alert(`Congratulations ${winner}, you have won the match!`);
+		// After player names are exhausted (moving to winners phase)
+		if (this.currentPlayerIndex >= playerNames.length) {
+			// Remove the loser from the winners array
+			const loserIndex = this.winners.indexOf(loser);
+			if (loserIndex !== -1) {
+				this.winners.splice(loserIndex, 1); // Remove the loser
+			}
+			else {
+				console.warn("Loser not found in winners array.");
+			}
+			// Rotate the winner to the end of the array
+			if (this.winners[0] === winner) {
+				// If the winner is already at the front, just move it to the end
+				const rotatedWinner = this.winners.shift(); // Remove the winner from the start
+				this.winners.push(rotatedWinner); // Push it to the end
+			}
+			else {
+				// If the winner is not at the front, just push it to the end
+				this.winners.push(winner);
+			}
+		}
+		else {
+			// During the initial phase, simply collect winners
+			this.winners.push(winner);
+		}
+		// Advance tournament state
+		this.currentPlayerIndex += 2;
+		this.currentTournamentPlay++;
+		if (this.currentTournamentPlay > this.tournamentNumberOfPlays) {
+			if (this.winners.length === 1) {
+				alert(`Tournament Winner: ${this.winners[0]}!`);
+			}
+			else {
+				alert("Tournament Over. No clear winner.");
+			}
+			this.tournamentOver = true;
+			console.log("tournament over!!!")
+			//this.isRunning = false;
 			this.cleanup();
 			document.getElementById('gameWin').style.display = 'flex';
+			return;
 		}
+		// Reset scores and prepare for the next match
+		this.clearObjects(this.asteroids);
+		this.clearObjects(this.sAsteroids);
+		this.clearObjects(this.AIShips);
+		this.clearObjects(this.powerups);
+		this.clearObjects(this.projectiles);
+		this.level = 0;
+		this.player1Lives = 5;
+		this.player2Lives = 5;
+		this.player1IsActive = true;
+		this.player2IsActive = true;
+		if (this.level < this.levels.length) {
+			this.spawnAsteroids(this.levels[this.level].asteroids, 'asteroid');
+			this.spawnAsteroids(this.levels[this.level].sAsteroids, 'sAsteroid');
+			this.spawnAIships(this.levels[this.level].AIShips);
+			if (this.gameType === "powered") {
+				this.spawnpowerups(this.levels[this.level].powerups);
+			}
+			this.shield1.visible = false;
+			this.shield1.spawnTime = 100;
+			this.shield1.lifetime = 80;
+			this.shield2.visible = false;
+			this.shield2.spawnTime = 100;
+			this.shield2.lifetime = 80;
+			this.player1VelocityX = 0;
+			this.player1VelocityY = 0;
+			this.player2VelocityX = 0;
+			this.player2VelocityY = 0;
+			this.player1.position.set(-20, 0, 5);
+			this.player2.position.set(20, 0, 5);
+			this.scene.add(this.player1);
+			this.scene.add(this.player2);
+			this.displayLevel();
+			this.displayLives1();
+			this.displayLives2();
+		}
+		// Prepare the next match
+		if (this.currentPlayerIndex < playerNames.length) {
+			player1 = playerNames[this.currentPlayerIndex - 1];
+			player2 = playerNames[this.currentPlayerIndex];
+		} else if (this.winners.length > 1) {
+			player1 = this.winners[0];
+			player2 = this.winners[1];
+		}
+		if (player1 && player2) {
+			alert(`Next Match: ${player1} vs ${player2}!`);
+		}
+		else {
+			console.error("Unable to determine next match players.");
+		}
+		this.unpaused = false;
 	}
 
 	playSound = (soundFilePath, volume) => {
@@ -1018,7 +1099,7 @@ class Game {
 		}
 	}
 
-	checkLives() { // NEED TO UPDATE LIVES AS PLAYERS HAVE INFINITE LIVES
+	checkLives() {
 		if (this.gameMode === '2' || this.gameMode === '3' || this.gameMode === '4' || this.gameMode === '5') {
 			if (this.player1Lives <= 0) {
 				this.gameOver();
@@ -1035,6 +1116,15 @@ class Game {
 			return 1;
 		}
 		else if (this.gameMode === '1' || this.gameMode === '6') {
+			if ((this.player1Lives <= 0 || this.player2Lives <= 0) && this.playerHasLost === false) {
+				this.playerHasLost = true;
+				if (this.player1Lives <= 0) {
+					this.player1Loser = true;
+				}
+				else {
+					this.player1Loser = false;
+				}
+			}
 			if (this.player1Lives <= 0 && this.player2Lives <= 0) {
 				this.gameOver();
 				return 0;

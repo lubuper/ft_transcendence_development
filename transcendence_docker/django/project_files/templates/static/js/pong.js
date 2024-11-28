@@ -2,7 +2,7 @@ import { saveMatchHistory } from './components/pages/Dashboard.js';
 
 //getter for the players name passed through localstorage
 function getTournamentData() {
-    return JSON.parse(localStorage.getItem('tournamentData'));
+	return JSON.parse(localStorage.getItem('tournamentData'));
 }
 
 class Game {
@@ -84,7 +84,7 @@ class Game {
 		this.tournamentPlayersNames = [];
 		this.tournamentNumberOfPlays = 1;
 		this.currentTournamentPlay = 1;
-		if (this.gameMode === '7' || this.gameMode === '8' || this.gameMode === '9') {
+		if (this.gameMode === '8' || this.gameMode === '9') {
 			if (this. gameMode === '7' || this.gameMode === '8') {
 				this.tournamentNumberOfPlays = 3;
 			}
@@ -645,85 +645,79 @@ class Game {
 		});
 	}
 	//tournament logic
-		tournamentHandler() {
-		if (this.tournamentOver) return;
-	
+	tournamentHandler() {
+		if (this.tournamentOver) {
+			return;	
+		}
 		const tournamentData = getTournamentData();
-		if (!tournamentData) return;
-	
-		const { playerNames } = tournamentData;
-		this.winners = this.winners || []; // Ensure this.winners is initialized
-	
+		if (!tournamentData) {
+			return;
+		}
+		const { playerNames } = tournamentData;	
 		let player1, player2;
-	
 		// Determine players for the match
 		if (this.currentPlayerIndex < playerNames.length) {
 			player1 = playerNames[this.currentPlayerIndex - 1];
 			player2 = playerNames[this.currentPlayerIndex];
-		} else if (this.winners.length > 1) {
+		}
+		else if (this.winners.length > 1) {
 			player1 = this.winners[0];
 			player2 = this.winners[1];
-		} else {
+		}
+		else {
 			console.error("Not enough players to continue.");
 			return;
 		}
-	
-		console.log("Match Between:", player1, "vs", player2);
-	
 		// Determine the winner and loser
 		const winner = this.scorePlayer1 > this.scorePlayer2 ? player1 : player2;
 		const loser = winner === player1 ? player2 : player1;
-		console.log("Winner:", winner);
-		console.log("Loser:", loser);
-	
+		alert(`Congratulations ${winner}, you have won the match!`);
 		// After player names are exhausted (moving to winners phase)
 		if (this.currentPlayerIndex >= playerNames.length) {
 			// Remove the loser from the winners array
 			const loserIndex = this.winners.indexOf(loser);
 			if (loserIndex !== -1) {
 				this.winners.splice(loserIndex, 1); // Remove the loser
-			} else {
+			}
+			else {
 				console.warn("Loser not found in winners array.");
 			}
-	
 			// Rotate the winner to the end of the array
 			if (this.winners[0] === winner) {
 				// If the winner is already at the front, just move it to the end
 				const rotatedWinner = this.winners.shift(); // Remove the winner from the start
 				this.winners.push(rotatedWinner); // Push it to the end
-			} else {
+			}
+			else {
 				// If the winner is not at the front, just push it to the end
 				this.winners.push(winner);
 			}
-		} else {
+		}
+		else {
 			// During the initial phase, simply collect winners
 			this.winners.push(winner);
 		}
-	
-		console.log("Updated Winners Array:", this.winners);
-	
 		// Advance tournament state
 		this.currentPlayerIndex += 2;
 		this.currentTournamentPlay++;
-	
 		if (this.currentTournamentPlay > this.tournamentNumberOfPlays) {
 			if (this.winners.length === 1) {
 				alert(`Tournament Winner: ${this.winners[0]}!`);
-			} else {
+			}
+			else {
 				alert("Tournament Over. No clear winner.");
 			}
 			this.tournamentOver = true;
+			this.isRunning = false;
 			this.cleanup();
 			document.getElementById('gameWin').style.display = 'flex';
 			return;
 		}
-	
 		// Reset scores and prepare for the next match
 		this.scorePlayer1 = 0;
 		this.scorePlayer2 = 0;
 		this.updateScore(this.scorePlayer1, this.scorePlayer2);
 		this.resetBall();
-	
 		// Prepare the next match
 		if (this.currentPlayerIndex < playerNames.length) {
 			player1 = playerNames[this.currentPlayerIndex - 1];
@@ -732,17 +726,15 @@ class Game {
 			player1 = this.winners[0];
 			player2 = this.winners[1];
 		}
-	
 		if (player1 && player2) {
 			alert(`Next Match: ${player1} vs ${player2}!`);
-		} else {
+		}
+		else {
 			console.error("Unable to determine next match players.");
 		}
-	
 		this.unpaused = false;
 	}
 	
-				
 	gameOver() {
 		if (this.gameMode === '6') {
 			this.tournamentHandler();
@@ -855,7 +847,7 @@ class Game {
 				this.ball.velocity.set(0.02, 0.02, 0);
 			else if (currentPos < 0)
 				this.ball.velocity.set(-0.02, 0.02, 0);
-		}, 1000);
+		}, 1500);
 	}
 
 	ultimateAI(difficulty) {
@@ -950,16 +942,18 @@ class Game {
 	}
 
 	playSound = (soundFilePath, volume) => {
-		const sound = new THREE.Audio(this.listener);
-		this.audioLoader.load(soundFilePath, (buffer) => {
-			sound.setBuffer(buffer);
-			sound.setVolume(volume); // Set volume; adjust as needed
-			sound.play();
-			sound.source.onended = () => {
-				sound.stop();
-				sound.disconnect();
-			};
-		});
+		if (this.audioLoader) {
+			const sound = new THREE.Audio(this.listener);
+			this.audioLoader.load(soundFilePath, (buffer) => {
+				sound.setBuffer(buffer);
+				sound.setVolume(volume); // Set volume; adjust as needed
+				sound.play();
+				sound.source.onended = () => {
+					sound.stop();
+					sound.disconnect();
+				};
+			});
+		}
 	};
 
 	createScoreboard() {
@@ -996,7 +990,7 @@ class Game {
 			this.scoreboard.player2[i].ball.visible = i < scorePlayer2;
 			this.scoreboard.player2[i].ring.visible = i < scorePlayer2;
 		}
-		this.playSound('/static/media/assets/sounds/fireball.mp3', 0.2);
+			this.playSound('/static/media/assets/sounds/fireball.mp3', 0.2);
 	}
 
 	animateRings() {
@@ -1027,7 +1021,6 @@ class Game {
 			this.ball.velocity.y *= -1;
 			this.playSound('/static/media/assets/sounds/laser0.mp3', 0.4);
 		}
-	
 		// Ball collision with players
 		// Player 1
 		const player1Bounds = {
@@ -1036,7 +1029,6 @@ class Game {
 			top: this.player1.position.y + this.geometry_player1.parameters.height * this.player1.scale.y / 2,
 			bottom: this.player1.position.y - this.geometry_player1.parameters.height * this.player1.scale.y / 2
 		};
-	
 		if (this.ball.position.x - this.ball.geometry.parameters.radius < player1Bounds.right &&
 			this.ball.position.x + this.ball.geometry.parameters.radius > player1Bounds.left &&
 			this.ball.position.y + this.ball.geometry.parameters.radius > player1Bounds.bottom &&
@@ -1062,7 +1054,6 @@ class Game {
 			top: this.player2.position.y + this.geometry_player2.parameters.height / 2,
 			bottom: this.player2.position.y - this.geometry_player2.parameters.height / 2
 		};
-	
 		if (this.ball.position.x - this.ball.geometry.parameters.radius < player2Bounds.right &&
 			this.ball.position.x + this.ball.geometry.parameters.radius > player2Bounds.left &&
 			this.ball.position.y + this.ball.geometry.parameters.radius > player2Bounds.bottom &&
@@ -1085,6 +1076,9 @@ class Game {
 	}
 
 	animate() {
+		if (!this.isRunning) {
+			return;
+		}
 		if (this.keysPressed[' ']) {
 			if (this.unpaused) {
 				this.unpaused = false;
@@ -1114,7 +1108,6 @@ class Game {
 			this.moon.rotation.z -= 0.001;
 			this.moon.rotation.y -= 0.001;
 			this.sun.rotation.x += 0.001;
-			
 			//this.controls.update();
 			this.checkBallOverHexagon();
 			TWEEN.update();
@@ -1157,7 +1150,6 @@ class Game {
 					.easing(TWEEN.Easing.Quadratic.Out)
 					.start();
 			}
-		
 			// movement in X axis powerup!
 			/* if (this.keysPressed['s'] && this.player1.position.x >= -this.geox / 2 + 0.1) {
 				this.player1.position.x -= 0.03;
