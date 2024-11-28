@@ -575,7 +575,7 @@ class Game {
 		console.log('count of match save on loss', count);
 		gameFinished = true;
 		this.cleanup();
-		navigate('/gameLoss')
+		navigate('/gamelost');
 	}
 
 	gameWin() {
@@ -600,7 +600,7 @@ class Game {
 		console.log('count of match save on win', count);
 		gameFinished = true;
 		this.cleanup();
-		navigate('/gameWon')
+		navigate('/gamewon');
 	}
 
 	HexagonColorChange(hexagon) {
