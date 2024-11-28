@@ -25,6 +25,7 @@ const colorNames = [
 
 export function saveMatchHistory(match) {
 
+	let count = 0;
 	console.log('a info que chega:', match);
 	return fetch('/api/save-match-history/', {
 		method: 'POST',
@@ -41,6 +42,8 @@ export function saveMatchHistory(match) {
 		return response.json(); // Parse the JSON response
 	})
 	.then(data => {
+		count++;
+		console.log('count of match save on win', count);
 		console.log('Match history saved successfully:', data);
 	})
 	.catch(error => {

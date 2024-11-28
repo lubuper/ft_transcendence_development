@@ -2,6 +2,7 @@ import { navigate } from '../../helpers/App.js';
 let selectedGameType = 'Pong';
 let selectedGameID = null;
 let otherPlayer = null;
+let senderPlayer = null;
 
 const base = `
 			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative">
@@ -47,6 +48,7 @@ export default function RemotePlay() {
 	const $games = document.createElement('div');
 	getDataRemote().then(dataRemote => {
 		console.log("dataRemote: ", dataRemote)
+
 	$games.innerHTML = `
 		<div class="container vh-100 d-flex flex-column align-items-center justify-content-start pt-3">
 			<!-- Top Row for Game Mode and Game Type Cards -->
@@ -138,7 +140,6 @@ export default function RemotePlay() {
 		</div>
 	`;
 
-
 	$games.addEventListener('change', (event) => {
 		if (event.target.name === 'gameType') {
 			event.preventDefault();
@@ -175,6 +176,7 @@ export default function RemotePlay() {
 
 		if (response.ok) {
 			selectedGameID = result.game_id;
+			senderPlayer = dataRemote.username;
 			otherPlayer = username;
 			returnedMessage.innerHTML = '<p class="text-success">Game invitation sent successfully!</p>';
 			setTimeout(() => {
@@ -212,6 +214,7 @@ export default function RemotePlay() {
 					console.log('Game accepted. Redirecting to remote play...');
 					selectedGameID = result.game_id;
 					otherPlayer = remote_game_invitations.sender__user__username;
+					senderPlayer = otherPlayer;
 					navigate('/pongremote');
 				} else {
 					setTimeout(() => {
@@ -272,6 +275,10 @@ export default function RemotePlay() {
 
 export function getSelectedGameID() {
 	return selectedGameID;
+}
+
+export function getSenderPlayer() {
+	return senderPlayer;
 }
 
 export function getOtherPlayer() {

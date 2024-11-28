@@ -4,7 +4,7 @@ import Footer from '../components/Footer.js';
 import Home from '../components/pages/Home.js';
 import CreateAccount from '../components/pages/CreateAccount.js';
 import Login from '../components/pages/Login.js';
-import DashBoard from '../components/pages/Dashboard.js';
+import DashBoard, {saveMatchHistory} from '../components/pages/Dashboard.js';
 import ErrorPage from '../components/pages/ErrorPage.js';
 import AboutUs from '../components/pages/AboutUs.js';
 import Asteroids from '../asteroids.js';
@@ -26,6 +26,8 @@ const $dynamic = document.getElementById('content-dynamic');
 $root.appendChild(Header());
 $dynamic.appendChild(Home());
 $root.appendChild(Footer());
+
+let gameName = null;
 
 const routes = {
 	'/': Home,
@@ -76,12 +78,28 @@ export function navigate(path) {
 			if (page instanceof HTMLElement) {
 				$dynamic.appendChild(page);
 			}
-			if (path === '/asteroids' || path === '/pong') {
+			if (path === '/asteroids' || path === '/pong' || path === '/pongremote') {
 				currentGameI = page;
 				gameIsActive = true;
+				if (path === '/asteroids'){
+					gameName = 'Asteroids';
+				} else if (path === '/pong'){
+					gameName = 'Pong';
+				} else if (path === '/pongremote'){
+					gameName = 'Pong Remote';
+				}
+
 			} else {
 				if (gameIsActive && currentGameI && typeof currentGameI.cleanup === 'function') {
-					currentGameI.cleanup(); // Call cleanup when leaving the game page
+					currentGameI.cleanup();
+					if (gameName === 'Pong Remote') {
+						const match = {
+							result: `loss`,
+							score: `abandoned the game`,
+							game: gameName,
+						};
+						saveMatchHistory(match);
+					}
 				}
 				gameIsActive = false; // Reset the flag
 				currentGameI = null;

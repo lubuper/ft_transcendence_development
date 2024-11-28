@@ -67,14 +67,14 @@ class GameConsumer(AsyncWebsocketConsumer):
                 self.connected_players[self.game_id].remove(self.channel_name)
 
                 # Notify the remaining players
-                if len(self.connected_players[self.game_id]) == 1:
-                    await self.channel_layer.group_send(
-                        self.room_group_name,
-                        {
-                            'type': 'player_left',
-                            'message': 'A player has abandoned the game.',
-                        }
-                    )
+                if close_code != 4000 and len(self.connected_players[self.game_id]) == 1:
+                                await self.channel_layer.group_send(
+                                    self.room_group_name,
+                                    {
+                                        'type': 'player_left',
+                                        'message': 'A player has abandoned the game.',
+                                    }
+                                )
 
                 # Clean up the room if empty
                 if not self.connected_players[self.game_id]:

@@ -1,8 +1,11 @@
 import { saveMatchHistory } from './components/pages/Dashboard.js';
-import {getOtherPlayer, getSelectedGameID} from "./components/pages/RemotePlay.js";
+import {getOtherPlayer, getSelectedGameID, getSenderPlayer} from "./components/pages/RemotePlay.js";
+import {navigate} from "./helpers/App.js";
 
 let thisUser = null;
 let ballController = null;
+let gameAbandoned = false;
+let gameFinished = false;
 
 function getCSRFToken() {
 	const name = 'csrftoken';
@@ -171,7 +174,6 @@ class Game {
 	}
 
 	cleanup() {
-		console.log('clean up called');
 		cancelAnimationFrame(this.animationFrameID);
 		this.cleanUpScore();
 		this.cleanUpHexagons();
@@ -221,6 +223,7 @@ class Game {
 		delete this.loader;
 		this.scene.clear();
 		THREE.Cache.clear();
+		this.sendDisconnect();
 	}
 
 	createHexagon(size, opac) {
@@ -560,31 +563,44 @@ class Game {
 	}
 
 	gameOver() {
-		console.log('game over called');
+		let count = 0;
 		this.isRunning = false;
-		console.log('isRunning?', this.isRunning);
 		const match = {
-			result: `loss`,
+			result: `Loss`,
 			score: `${this.scorePlayer1}-${this.scorePlayer2}`,
 			game: `Pong`,
 		};
 		saveMatchHistory(match);
+		count++;
+		console.log('count of match save on loss', count);
+		gameFinished = true;
 		this.cleanup();
-		document.getElementById('gameOver').style.display = 'flex';
+		navigate('/gameLoss')
 	}
 
 	gameWin() {
-		console.log('game win called');
+		let count = 0;
 		this.isRunning = false;
-		console.log('isRunning?', this.isRunning);
-		const match = {
-			result: `win`,
-			score: `${this.scorePlayer1}-${this.scorePlayer2}`,
-			game: `Pong`,
-		};
+		let match = null;
+		if (gameAbandoned === true) {
+			match = {
+				result: `Win`,
+				score: `The other play abandoned the game`,
+				game: `Pong Remote`,
+			};
+		} else {
+			match = {
+				result: `Win`,
+				score: `${this.scorePlayer1}-${this.scorePlayer2}`,
+				game: `Pong Remote`,
+			};
+		}
 		saveMatchHistory(match);
+		count++;
+		console.log('count of match save on win', count);
+		gameFinished = true;
 		this.cleanup();
-		document.getElementById('gameWin').style.display = 'flex';
+		navigate('/gameWon')
 	}
 
 	HexagonColorChange(hexagon) {
@@ -621,6 +637,10 @@ class Game {
 			else if (currentPos < 0)
 				this.ball.velocity.set(-0.02, 0.02, 0);
 		}, 1000);
+		this.sendBallMove({
+			velocity: { x: -this.ball.velocity.x, y: this.ball.velocity.y},
+			position: { x: -this.ball.position.x, y: this.ball.position.y },
+		});
 	}
 
 	updatePlayer2Move(moveData) {
@@ -783,6 +803,10 @@ class Game {
 				this.ball.velocity.y += 0.02;
 			}
 		}
+		this.sendBallMove({
+			velocity: { x: -this.ball.velocity.x, y: this.ball.velocity.y},
+			position: { x: -this.ball.position.x, y: this.ball.position.y },
+		});
 	}
 
 	animate() {
@@ -853,8 +877,15 @@ class Game {
 			this.cameratoggle = (this.cameratoggle + 1) % 3;
 			this.keysPressed['c'] = false;
 		}
-		//this.gameControls();
-		this.ball.position.add(this.ball.velocity);
+		if (thisUser === ballController) {
+			this.sendBallMove({
+				velocity: { x: -this.ball.velocity.x, y: this.ball.velocity.y},
+				position: { x: -this.ball.position.x, y: this.ball.position.y },
+			});
+			this.ball.position.add(this.ball.velocity); //mandar AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+		} else {
+			this.ball.position.add(this.ball.velocity);
+		}
 		// Check for scoring
 		if (this.scorePlayer2 >= 5)
 			this.gameOver();
@@ -864,15 +895,21 @@ class Game {
 			this.scorePlayer1++;
 			this.shake = 0.05;
 			this.updateScore(this.scorePlayer1, this.scorePlayer2);
-			this.resetBall();
+			if (thisUser === ballController) {
+				this.resetBall();
+			}
 		}
 		else if (this.ball.position.x - this.ball.geometry.parameters.radius < (-this.geox / 2 )) {
 			this.scorePlayer2++;
 			this.shake = 0.05;
 			this.updateScore(this.scorePlayer1, this.scorePlayer2);
-			this.resetBall();
+			if (thisUser === ballController) {
+				this.resetBall();
+			}
 		}
-		this.ballCollisions();
+		if (thisUser === ballController) {
+			this.ballCollisions();
+		}
 		if (this.cameratoggle == 0)
 			this.renderer.render(this.scene,this.camerap1);
 		else if (this.cameratoggle == 1)
@@ -891,18 +928,18 @@ export default function PongRemote() {
 	gameWebsocket.onmessage = function (event) {
 		const data = JSON.parse(event.data);
 
-		console.log('data::::::', data.action);
 		if (data.action === 'waiting') {
-			ballController = thisUser;
 			alert('waiting for the other player!');
 		} else if (data.action === 'start_game') {
+			ballController = getSenderPlayer();
 			game.fetchShipAndColorRemote().then(() => {
 				game.init();
 			});
 		} else if (data.action === 'player_left') {
-			console.log('nao passa aqui??::::::', data.action);
 			// Show an alert when a player leaves
 			alert(data.message);
+			gameAbandoned = true;
+			game.gameWin();
 			// Return to waiting state
 		} else if (data.action === 'player_move') {
 			// Player 2 receives moves and updates accordingly
@@ -911,20 +948,22 @@ export default function PongRemote() {
 				// Player 1's move (shouldn't be applied here)
 				return;
 			} else {
-				console.log('receive this', moveData);
 				// Update Player 2's position locally
 				game.updatePlayer2Move(moveData);
 			}
 		} else if (data.action === 'update_ball') {
-			const ballState = data.ball_state;
-			game.ball.position.x = ballState.position.x;
-			game.ball.position.y = ballState.position.y;
-			game.ball.velocity.x = ballState.velocity.x;
-			game.ball.velocity.y = ballState.velocity.y;
+			const moveData = data.ball_state;
+			if (thisUser === ballController) {
+				return;
+			} else {
+				game.ball.position.x = moveData.position.x;
+				game.ball.position.y = moveData.position.y;
+				game.ball.velocity.x = moveData.velocity.x;
+				game.ball.velocity.y = moveData.velocity.y;
+			}
 		}
 
 		game.sendPlayerMove = (moveData) => {
-			console.log('send this', moveData);
 			gameWebsocket.send(JSON.stringify({
 				action: 'player_move',
 				player: thisUser,
@@ -932,34 +971,23 @@ export default function PongRemote() {
 			}));
 		};
 
-		game.updateBall = function () {
-			if (!ballController) return;
-
-			this.ballCollisions(); // Update ball's position and velocity
-
-			// Send ball state to the server
+		game.sendBallMove = (moveBallData) => {
 			gameWebsocket.send(JSON.stringify({
 				action: 'update_ball',
-				ball_state: {
-					position: {
-						x: this.ball.position.x,
-						y: this.ball.position.y,
-					},
-					velocity: {
-						x: this.ball.velocity.x,
-						y: this.ball.velocity.y,
-					},
-				},
+				player: ballController,
+				ball_state: moveBallData, // Example: { direction: 'left', position: { x, y } }
 			}));
 		};
 
-// Call updateBall() on each game loop tick
-		function gameLoop() {
-			game.updateBall();
-			requestAnimationFrame(gameLoop);
+		game.sendDisconnect = () => {
+			console.log('to disconnect, is game finish?', gameFinished);
+			if (gameFinished === true) {
+				gameWebsocket.close(4000, "Game finished");
+			} else {
+				gameWebsocket.close(1000, "Player left the page");
+			}
 		}
-		gameLoop();
-	}
 
+	}
 	return game;
 }

@@ -55,9 +55,9 @@ def save_user_profile(sender, instance, **kwargs):
 class MatchHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
-    score = models.CharField(max_length=10)
-    result = models.CharField(max_length=10)  # Win, Lose, or Draw
-    game = models.CharField(max_length=10)
+    score = models.CharField(max_length=255)
+    result = models.CharField(max_length=255)  # Win, Lose, or Draw
+    game = models.CharField(max_length=255)
 
     def __str__(self):
         return f'{self.user.username} - {self.result} at {self.timestamp}'
