@@ -749,7 +749,7 @@ class Game {
 			};
 			saveMatchHistory(match);
 			this.cleanup();
-			document.getElementById('gameOver').style.display = 'flex';
+			navigate('/gamelost');
 		}
 	}
 
@@ -766,7 +766,7 @@ class Game {
 			};
 			saveMatchHistory(match);
 			this.cleanup();
-			document.getElementById('gameWin').style.display = 'flex';
+			navigate('/gamewin');
 		}
 	}
 	
