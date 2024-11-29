@@ -1,7 +1,7 @@
 export default function GameWon() {
 	const $gameWon = document.createElement('gamewon');
 	$gameWon.innerHTML = `
-		<div id="gameWin" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); color: white; justify-content: center; align-items: center; text-align: center; font-size: 2em; z-index: 1000;">
+		<div id="gameWin" class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative">
 			<div>
 				<h2>Congratulations player 1!</h2>
 				<p>You have won!</p>

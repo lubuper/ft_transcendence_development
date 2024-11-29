@@ -158,7 +158,7 @@ export default function DashBoard() {
 									${matchHistory.match_history.map(match => `
         								<p>
            									${match.game}: ${match.score} ->
-            								<span style="color: ${match.result === 'win' ? 'green' : 'red'};">
+            								<span style="color: ${match.result === 'Win' ? 'green' : 'red'};">
                 								${match.result}
            									</span>
             								at ${new Date(match.timestamp).toLocaleString('en-GB', {
@@ -366,7 +366,7 @@ export default function DashBoard() {
 		const stats = { wins: 0, total: 0 };
 		matchHistory.forEach(match => {
 			if (match.game === gameName) {
-				if (match.result === "win") {
+				if (match.result === "Win") {
 					stats.wins++;
 				}
 				stats.total++;

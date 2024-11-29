@@ -1,7 +1,7 @@
 export default function GameLost() {
 	const $gameLost = document.createElement('gamelost');
 	$gameLost.innerHTML = `
-		<div id="gameWin" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); color: white; justify-content: center; align-items: center; text-align: center; font-size: 2em; z-index: 1000;">
+		<div id="gameWin" class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative">
 			<div>
 				<h2>Game Over player 1!</h2>
 				<p>You'll get them next time!</p>

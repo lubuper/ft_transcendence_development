@@ -743,7 +743,7 @@ class Game {
 		else {
 			this.isRunning = false;
 			const match = {
-				result: `loss`,
+				result: `Loss`,
 				score: `${this.scorePlayer1}-${this.scorePlayer2}`,
 				game: `Pong`,
 			};
@@ -760,7 +760,7 @@ class Game {
 		else {
 			this.isRunning = false;
 			const match = {
-				result: `win`,
+				result: `Win`,
 				score: `${this.scorePlayer1}-${this.scorePlayer2}`,
 				game: `Pong`,
 			};
