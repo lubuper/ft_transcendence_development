@@ -282,7 +282,6 @@ class Game {
 				game: `Asteroids`,
 			};
 			saveMatchHistory(match);
-			this.cleanup();
 			navigate('/gamelost');
 		}
 	}
@@ -300,8 +299,7 @@ class Game {
 				game: `Asteroids`,
 			};
 			saveMatchHistory(match);
-			this.cleanup();
-			navigate('/gamewin');
+			navigate('/gamewon');
 		}
 	}
 
@@ -844,10 +842,7 @@ class Game {
 				alert("Tournament Over. No clear winner.");
 			}
 			this.tournamentOver = true;
-			console.log("tournament over!!!")
-			//this.isRunning = false;
-			this.cleanup();
-			document.getElementById('gameWin').style.display = 'flex';
+			navigate('/tournamentover');
 			return;
 		}
 		// Reset scores and prepare for the next match
@@ -895,7 +890,7 @@ class Game {
 			player2 = this.winners[1];
 		}
 		if (player1 && player2) {
-			alert(`Next Match: ${player1} vs ${player2}!`);
+			alert(`Next Match: ${player1} vs ${player2}! Press 'T' to return to the game`);
 		}
 		else {
 			console.error("Unable to determine next match players.");

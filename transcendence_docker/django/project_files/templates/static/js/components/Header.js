@@ -7,6 +7,7 @@ export default function Header() {
 	fetch('/current-user/')
 		.then(async (response) => {
 			const user = await response.json();
+			localStorage.setItem('localUser', user.username);
 			const base = `
 				<nav class="navbar navbar-expand-lg d-flex justify-content-between" style="background: transparent;">
 					<h1 class="fw-bold text-center text-white display-6 ms-3" data-path="/">ft_transcendence</h1>

@@ -710,8 +710,7 @@ class Game {
 			}
 			this.tournamentOver = true;
 			this.isRunning = false;
-			this.cleanup();
-			document.getElementById('gameWin').style.display = 'flex';
+			navigate('/tournamentover');
 			return;
 		}
 		// Reset scores and prepare for the next match
@@ -728,7 +727,7 @@ class Game {
 			player2 = this.winners[1];
 		}
 		if (player1 && player2) {
-			alert(`Next Match: ${player1} vs ${player2}!`);
+			alert(`Next Match: ${player1} vs ${player2}! Press 'space' to return to the game`);
 		}
 		else {
 			console.error("Unable to determine next match players.");
@@ -748,8 +747,8 @@ class Game {
 				game: `Pong`,
 			};
 			saveMatchHistory(match);
-			this.cleanup();
-			navigate('/gamelost');
+			const username = localStorage.getItem('localUser');
+			navigate('/gamelost', username);
 		}
 	}
 
@@ -765,8 +764,8 @@ class Game {
 				game: `Pong`,
 			};
 			saveMatchHistory(match);
-			this.cleanup();
-			navigate('/gamewin');
+			const username = localStorage.getItem('localUser');
+			navigate('/gamewon', username);
 		}
 	}
 	
