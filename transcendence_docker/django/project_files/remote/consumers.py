@@ -93,7 +93,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                 self.room_group_name,
                 {
                     'type': 'player_move',
-                    'player': data.get('player'),  # Include the player ID
+                    'player': data.get('player'),
                     'move_data': data.get('move_data'),
                 }
             )
@@ -106,6 +106,16 @@ class GameConsumer(AsyncWebsocketConsumer):
                         'type': 'update_ball',
                         'ball_state': data.get('ball_state'),
                     }
+                )
+
+        if action == 'update_scores':
+                await self.channel_layer.group_send(
+                     self.room_group_name,
+                     {
+                          'type': 'update_scores',
+                          'player': data.get('player'),
+                          'score': data.get('score'),
+                     }
                 )
 
 
@@ -169,3 +179,10 @@ class GameConsumer(AsyncWebsocketConsumer):
             'action': 'player_left',
             'message': event['message'],
         }))
+
+    async def game_finish(self, event):
+            # Notify all players that a player has left
+            await self.send(text_data=json.dumps({
+                'action': 'game_finish',
+                'message': event['message'],
+            }))

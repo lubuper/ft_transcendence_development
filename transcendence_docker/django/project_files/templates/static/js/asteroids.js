@@ -277,7 +277,7 @@ class Game {
 			this.GameIsRunning = false;
 			for (let i = 0; i < 1000; i++) {}
 			const match = {
-				result: `loss`,
+				result: `Loss`,
 				score: `Level ${this.level}`,
 				game: `Asteroids`,
 			};
@@ -295,7 +295,7 @@ class Game {
 			this.GameIsRunning = false;
 			for (let i = 0; i < 1000; i++) {}
 			const match = {
-				result: `win`,
+				result: `Win`,
 				score: `Level ${this.level}`,
 				game: `Asteroids`,
 			};
