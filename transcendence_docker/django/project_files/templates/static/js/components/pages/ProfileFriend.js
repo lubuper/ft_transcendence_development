@@ -23,8 +23,8 @@ export default function ProfileFriend() {
                 throw new Error('Network response was not ok');
             }
             const userFriend = await response.json();
-            const pongRank = calculateRankedStats2(userFriend.match_history, "Pong")
-            const astRank = calculateRankedStats2(userFriend.match_history, "Asteroids")
+            const pongRank = calculateRankedStats2(userFriend.match_history, "Pong Remote")
+            const astRank = calculateRankedStats2(userFriend.match_history, "Asteroids Remote")
             $ProfileFriendForm.innerHTML = `
 			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative">
                 <div class="card bg-dark text-white mb-3" style="width: 400px;">
