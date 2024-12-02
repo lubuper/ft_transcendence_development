@@ -55,9 +55,9 @@ def save_user_profile(sender, instance, **kwargs):
 class MatchHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
-    score = models.CharField(max_length=255)
-    result = models.CharField(max_length=255)  # Win, Lose, or Draw
-    game = models.CharField(max_length=255)
+    score = models.CharField(max_length=255) # number-number (on single games) / username of the winner (om tournaments)
+    result = models.CharField(max_length=255)  # Win, Lose, or Draw (on single games) / Winner (on tournaments)
+    game = models.CharField(max_length=255) # Pong, Asteroids, Pong Remote, Asteroids Remote, Pong Tournament, Asteroids Tournament
 
     def __str__(self):
         return f'{self.user.username} - {self.result} at {self.timestamp}'

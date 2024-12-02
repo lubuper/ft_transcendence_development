@@ -836,6 +836,12 @@ class Game {
 		this.currentTournamentPlay++;
 		if (this.currentTournamentPlay > this.tournamentNumberOfPlays) {
 			if (this.winners.length === 1) {
+				const match = {
+					result: `Winner`,
+					score: `${this.winners[0]}`,
+					game: `Asteroids Tournament`,
+				};
+				saveMatchHistory(match);
 				alert(`Tournament Winner: ${this.winners[0]}!`);
 			}
 			else {

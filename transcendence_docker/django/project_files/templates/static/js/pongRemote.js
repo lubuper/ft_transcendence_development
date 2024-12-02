@@ -674,7 +674,6 @@ class Game {
 	}
 
 	updateScoreOtherPlayer(scoreData) {
-		console.log('user que fez o ponto', scoreData);
 		if (scoreData.score === thisUser) {
 			this.scorePlayer1++;
 			this.shake = 0.05;
@@ -893,15 +892,7 @@ class Game {
 			this.cameratoggle = (this.cameratoggle + 1) % 3;
 			this.keysPressed['c'] = false;
 		}
-		if (thisUser === ballController) {
-			this.sendBallMove({
-				velocity: { x: -this.ball.velocity.x, y: this.ball.velocity.y},
-				position: { x: -this.ball.position.x, y: this.ball.position.y },
-			});
-			this.ball.position.add(this.ball.velocity);
-		} else {
-			this.ball.position.add(this.ball.velocity);
-		}
+		this.ball.position.add(this.ball.velocity);
 		// Check for scoring
 		if (this.scorePlayer2 >= 5)
 			this.gameOver();
@@ -913,7 +904,6 @@ class Game {
 				this.shake = 0.05;
 				this.updateScore(this.scorePlayer1, this.scorePlayer2);
 				this.resetBall();
-				console.log('user mandado', thisUser);
 				this.sendScore({
 					score: thisUser,
 				});
@@ -923,7 +913,6 @@ class Game {
 				this.shake = 0.05;
 				this.updateScore(this.scorePlayer1, this.scorePlayer2);
 				this.resetBall();
-				console.log('user mandado', getOtherPlayer());
 				this.sendScore({
 					score: getOtherPlayer(),
 				});

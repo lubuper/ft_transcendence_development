@@ -25,8 +25,6 @@ const colorNames = [
 
 export function saveMatchHistory(match) {
 
-	let count = 0;
-	console.log('a info que chega:', match);
 	return fetch('/api/save-match-history/', {
 		method: 'POST',
 		headers: {
@@ -42,8 +40,6 @@ export function saveMatchHistory(match) {
 		return response.json(); // Parse the JSON response
 	})
 	.then(data => {
-		count++;
-		console.log('count of match save on win', count);
 		console.log('Match history saved successfully:', data);
 	})
 	.catch(error => {
@@ -132,19 +128,6 @@ export default function DashBoard() {
 								</div>
 							</div>
 						</div>
-						<div class="card bg-dark text-white mb-3">
-							<div class="card-header">
-								<button class="btn btn-link text-white" type="button" data-bs-toggle="collapse" data-bs-target="#tournamentsCollapse" aria-expanded="false" aria-controls="tournamentsCollapse">
-									Tournaments
-								</button>
-							</div>
-							<div id="tournamentsCollapse" class="collapse">
-								<ul class="list-group list-group-flush">
-									<li class="list-group-item bg-dark text-white">Tournament 1</li>
-									<li class="list-group-item bg-dark text-white">Tournament 2</li>
-								</ul>
-							</div>
-						</div>
 					</div>
 					<div class="col-md-6">
 						<div class="card bg-dark text-white mb-3">
@@ -155,13 +138,15 @@ export default function DashBoard() {
 							</div>
 							<div id="matchHistoryCollapse" class="collapse">
 								<div class="card-body">
-									${matchHistory.match_history.map(match => `
-        								<p>
-           									${match.game}: ${match.score} ->
-            								<span style="color: ${match.result === 'Win' ? 'green' : 'red'};">
-                								${match.result}
-           									</span>
-            								at ${new Date(match.timestamp).toLocaleString('en-GB', {
+									${matchHistory.match_history
+										.filter(match => !match.game.includes('Tournament'))
+										.map(match => `
+										<p>
+												${match.game}: ${match.score} ->
+											<span style="color: ${match.result === 'Win' ? 'green' : 'red'};">
+												${match.result}
+											</span>
+											at ${new Date(match.timestamp).toLocaleString('en-GB', {
 												day: '2-digit',
 												month: '2-digit',
 												year: 'numeric',
@@ -169,10 +154,40 @@ export default function DashBoard() {
 												minute: '2-digit',
 												hour12: true
 											})}
-        								</p>
-    								`).join('')}
+										</p>
+									`).join('')}
 								</div>
 							</div>
+							<div class="card bg-dark text-white mb-3">
+							<div class="card-header">
+								<button class="btn btn-link text-white" type="button" data-bs-toggle="collapse" data-bs-target="#tournamentsCollapse" aria-expanded="false" aria-controls="tournamentsCollapse">
+									Tournaments
+								</button>
+							</div>
+							<div id="tournamentsCollapse" class="collapse">
+								<div class="card-body">
+									${matchHistory.match_history
+										.filter(match => match.game.includes('Tournament'))
+										.map(match => `
+										<p>
+												${match.game} ->
+											<span style="color: ${match.result === 'Winner' ? 'green' : 'red'};">
+												${match.result}
+											</span>
+											: ${match.score} 
+											at ${new Date(match.timestamp).toLocaleString('en-GB', {
+												day: '2-digit',
+												month: '2-digit',
+												year: 'numeric',
+												hour: '2-digit',
+												minute: '2-digit',
+												hour12: true
+											})}
+										</p>
+									`).join('')}
+								</div>
+							</div>
+						</div>
 						</div>
 					</div>
 					<div class="col-md-3 friends-column">
