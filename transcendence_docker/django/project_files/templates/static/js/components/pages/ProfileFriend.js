@@ -1,5 +1,17 @@
 import { currentFriend } from './Dashboard.js';
 
+function getCSRFToken() {
+	const name = 'csrftoken';
+	const cookies = document.cookie.split(';');
+	for (let cookie of cookies) {
+		const trimmedCookie = cookie.trim();
+		if (trimmedCookie.startsWith(name + '=')) {
+			return decodeURIComponent(trimmedCookie.substring(name.length + 1));
+		}
+	}
+	return null;
+}
+
 console.log('friend que chega na pagina', currentFriend);
 export default function ProfileFriend() {
     const $ProfileFriendForm = document.createElement('profileFriend');
@@ -30,29 +42,57 @@ export default function ProfileFriend() {
                 <div class="card bg-dark text-white mb-3" style="width: 400px;">
                 <div class="card-body text-center">
                 <img id="avatar" src="${userFriend.profile_picture}"
-                     class="rounded-circle mb-3" 
-                     alt="Avatar" 
+                     class="rounded-circle mb-3"
+                     alt="Avatar"
                      style="width: 100px; height: 100px;">
                 <h5 class="card-title">${currentFriend}</h5>
                 <p class="card-text">
-                    <img src="/static/media/rank/${pongRank.rank}.png" 
-                     alt="${pongRank.rank}" 
+                    <img src="/static/media/rank/${pongRank.rank}.png"
+                     alt="${pongRank.rank}"
                      style="width: 64px; height: 64px; margin-right: 2px;">
                     ${pongRank.result}
                 </p>
                 <p class="card-text">
-                    <img src="/static/media/rank/${astRank.rank}.png" 
-                     alt="${astRank.rank}" 
+                    <img src="/static/media/rank/${astRank.rank}.png"
+                     alt="${astRank.rank}"
                      style="width: 64px; height: 64px; margin-right: 2px;">
                     ${astRank.result}
                 </p>
                 </div>
                 </div>
                 <button class="btn btn-danger btn-lg text-white shadow-lg mt-3 custom-button">Block</button>
-                <button class="btn btn-danger btn-lg text-white shadow-lg mt-3 custom-button">Remove Friend</button>
+                <button id="RemoveFriend-${currentFriend}" class="btn btn-danger btn-lg text-white shadow-lg mt-3 custom-button">Remove Friend</button>
                 <button class="btn btn-purple btn-lg text-white shadow-lg mt-3 custom-button" onclick="window.history.back()">Go Back To Dashboard</button>
+                <div class="card-body" id="friend-request-message"></div>
             </div>
 	        `;
+
+            document.getElementById(`RemoveFriend-${currentFriend}`).addEventListener('click', async function() {
+                const response = await fetch('/remove_friend/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken() // Ensure CSRF token is sent
+                    },
+                    body: JSON.stringify({
+                        'username': currentFriend // Send the username in the request body
+                    }),
+                })
+                const result = await response.json();
+                const friendRejectMessage = document.getElementById('friend-request-message');
+
+                if (response.ok) {
+                    friendRejectMessage.innerHTML = '<p class="text-success">Friend removed successfully!</p>';
+                    setTimeout(() => {
+                        friendRejectMessage.innerHTML = '<p </p>';
+                    }, 1000);
+                } else {
+                    friendRejectMessage.innerHTML = `<p class="text-danger">Failed to remove friend! ${result.message} </p>`;
+                    setTimeout(() => {
+                        friendRejectMessage.innerHTML = '<p </p>';
+                    }, 1000);
+                }
+            });
 
             function calculateRankedStats2(matchHistory, gameName) {
                 const stats = { wins: 0, total: 0 };
