@@ -79,8 +79,8 @@ export default function DashBoard() {
 	getMatchHistory().then(matchHistory => {
 		console.log("matchHistory: ", matchHistory)
 
-		const pongRank = calculateRankedStats(matchHistory.match_history, "Pong")
-		const astRank = calculateRankedStats(matchHistory.match_history, "Asteroids")
+		const pongRank = calculateRankedStats(matchHistory.match_history, "Pong Remote")
+		const astRank = calculateRankedStats(matchHistory.match_history, "Asteroids Remote")
 		localStorage.setItem('selectedAvatarId', matchHistory.game_customization[0].ship);
 		localStorage.setItem('selectedColorId', matchHistory.game_customization[0].color);
 	$dashboard.innerHTML = `
@@ -97,14 +97,14 @@ export default function DashBoard() {
 										alt="${pongRank.rank}"
 										style="width: 64px; height: 64px; margin-right: 2px;">
 									${pongRank.result}
-									<span class="tooltiptext">The game ranking starts after 5 matches, and there are 5 of them. Good luck!</span>
+									<span class="tooltiptext">The game ranking starts after 5 remote matches, Good luck!</span>
 								</p>
 								<p class="card-text">
 									<img src="/static/media/rank/${astRank.rank}.png"
 										alt="${astRank.rank}"
 										style="width: 64px; height: 64px; margin-right: 2px;">
 									${astRank.result}
-									<span class="tooltiptext">The game ranking starts after 5 matches, and there are 5 of them. Good luck!</span>
+									<span class="tooltiptext">The game ranking starts after 5 remote matches, Good luck!</span>
 								</p>
 							</div>
 						</div>
@@ -158,7 +158,8 @@ export default function DashBoard() {
 									`).join('')}
 								</div>
 							</div>
-							<div class="card bg-dark text-white mb-3">
+						</div>
+						<div class="card bg-dark text-white mb-3">
 							<div class="card-header">
 								<button class="btn btn-link text-white" type="button" data-bs-toggle="collapse" data-bs-target="#tournamentsCollapse" aria-expanded="false" aria-controls="tournamentsCollapse">
 									Tournaments
@@ -187,7 +188,6 @@ export default function DashBoard() {
 									`).join('')}
 								</div>
 							</div>
-						</div>
 						</div>
 					</div>
 					<div class="col-md-3 friends-column">

@@ -892,7 +892,15 @@ class Game {
 			this.cameratoggle = (this.cameratoggle + 1) % 3;
 			this.keysPressed['c'] = false;
 		}
-		this.ball.position.add(this.ball.velocity);
+		if (thisUser === ballController) {
+			this.sendBallMove({
+				velocity: { x: -this.ball.velocity.x, y: this.ball.velocity.y},
+				position: { x: -this.ball.position.x, y: this.ball.position.y },
+			});
+			this.ball.position.add(this.ball.velocity);
+		} else {
+			this.ball.position.add(this.ball.velocity);
+		}
 		// Check for scoring
 		if (this.scorePlayer2 >= 5)
 			this.gameOver();

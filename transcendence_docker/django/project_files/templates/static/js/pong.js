@@ -1,6 +1,8 @@
 import { saveMatchHistory } from './components/pages/Dashboard.js';
 import { navigate } from './helpers/App.js';
 
+let gameName = null;
+
 //getter for the players name passed through localstorage
 function getTournamentData() {
 	return JSON.parse(localStorage.getItem('tournamentData'));
@@ -750,7 +752,7 @@ class Game {
 			const match = {
 				result: `Loss`,
 				score: `${this.scorePlayer1}-${this.scorePlayer2}`,
-				game: `Pong`,
+				game: `Pong ${gameName}`,
 			};
 			saveMatchHistory(match);
 			const username = localStorage.getItem('localUser');
@@ -767,7 +769,7 @@ class Game {
 			const match = {
 				result: `Win`,
 				score: `${this.scorePlayer1}-${this.scorePlayer2}`,
-				game: `Pong`,
+				game: `Pong ${gameName}`,
 			};
 			saveMatchHistory(match);
 			const username = localStorage.getItem('localUser');
@@ -1225,6 +1227,12 @@ class Game {
 };
 
 export default function Pong(gameMode, gameType) {
+		if (gameMode === '1') {
+			gameName = 'Player vs Player';
+		}
+		else {
+			gameName = 'Play vs AI';
+		}
 		const game = new Game(gameMode, gameType);
 		game.fetchShipAndColor().then(() => {
 			game.init();

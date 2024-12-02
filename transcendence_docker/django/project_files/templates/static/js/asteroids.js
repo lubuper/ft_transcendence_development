@@ -1,6 +1,8 @@
 import { saveMatchHistory } from './components/pages/Dashboard.js';
 import { navigate } from './helpers/App.js';
 
+let gameName = null;
+
 function getTournamentData() {
 	return JSON.parse(localStorage.getItem('tournamentData'));
 }
@@ -279,7 +281,7 @@ class Game {
 			const match = {
 				result: `Loss`,
 				score: `Level ${this.level}`,
-				game: `Asteroids`,
+				game: `Asteroids ${gameName}`,
 			};
 			saveMatchHistory(match);
 			navigate('/gamelost');
@@ -296,7 +298,7 @@ class Game {
 			const match = {
 				result: `Win`,
 				score: `Level ${this.level}`,
-				game: `Asteroids`,
+				game: `Asteroids ${gameName}`,
 			};
 			saveMatchHistory(match);
 			navigate('/gamewon');
@@ -1724,6 +1726,12 @@ class Game {
 }
 
 export default function Asteroids(gameMode, gameType) {
+	if (gameMode === '1') {
+		gameName = 'Player vs Player';
+	}
+	else {
+		gameName = 'Play vs AI';
+	}
 	const game = new Game(gameMode, gameType);
 	game.fetchShipAndColor().then(() => {
 		game.init();
