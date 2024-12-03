@@ -407,7 +407,6 @@ class Game {
 		this.player2.position.set((this.geox / 2) - 0.1, -0.2, 0);
 	}
 
-
 	generatePowerup() {
 		const powerupTypes = ['paddleIncrease', 'ballSpeedUp', 'invertSpeed', 'protectiveBarrier', 'extralife'];
 		const type = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
@@ -745,6 +744,12 @@ class Game {
 	
 	gameOver() {
 		if (this.gameMode === '6') {
+			if (this.player1 && this.player2) {
+				this.player1.position.set((-this.geox / 2) + 0.1, 0, 0);
+				this.ship1.position.set(-2.7, 0, 0);
+				this.player2.position.set((this.geox / 2) - 0.1, 0, 0);
+				this.ship2.position.set(2.7, 0, 0);
+			}
 			this.tournamentHandler();
 		}
 		else {
