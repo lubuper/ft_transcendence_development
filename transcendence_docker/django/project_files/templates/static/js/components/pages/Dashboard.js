@@ -1,7 +1,6 @@
 import { navigate } from '../../helpers/App.js';
 import { setupChat, Initialize, displayMessages, toggleBlockStatus } from './Client.js';
 
-
 const avatarPaths = [
 	'/static/media/assets/ships/splash/1.png',
 	'/static/media/assets/ships/splash/7.png',
@@ -115,21 +114,73 @@ export default function DashBoard() {
 									${avatarPaths.map((path, index) =>
 										`<img src="${path}" data-ship-id="${index + 1}" class="avatar-option rounded-circle m-1 ${(index + 1).toString() === localStorage.getItem('selectedAvatarId') ? 'selected-color' : ''}" alt="Avatar" style="width: 50px; height: 50px; cursor: pointer;">`
 									).join('')}
-									</div>
+								</div>
 							</div>
 						</div>
 						<div class="card bg-dark text-white mb-3">
 							<div class="card-header">Select Color</div>
 							<div class="card-body">
 								<div class="d-flex flex-wrap">
-									 ${colorNames.map((names) =>
+									${colorNames.map((names) =>
 										`<img src="/static/media/assets/color/${names}.png" data-color-id="#${names}" class="color-option rounded-circle m-1 ${`#${names}` === localStorage.getItem('selectedColorId') ? 'selected-color' : ''}" alt="Color" style="width: 50px; height: 50px; cursor: pointer;">`
-									 ).join('')}
+									).join('')}
 								</div>
 							</div>
 						</div>
 					</div>
 					<div class="col-md-6">
+						<div class="card bg-dark text-white mb-3">
+							<div class="card-header">
+								<button class="btn btn-link text-white" type="button" data-bs-toggle="collapse" data-bs-target="#pongStatsCollapse" aria-expanded="false" aria-controls="pongStatsCollapse">
+									Pong Game Statistics
+								</button>
+							</div>
+							<div id="pongStatsCollapse" class="collapse">
+								<div class="card-body">
+									<div class="row">
+										<div class="col-md-12 text-center mb-3">
+											<span class="badge bg-success">Games Won</span>
+											<span class="badge bg-danger">Games Lost</span>
+										</div>
+										<div class="col-md-4">
+											<canvas id="pongRemoteStatsChart" width="200" height="200"></canvas> <!-- Canvas for Pong Remote Chart -->
+										</div>
+										<div class="col-md-4">
+											<canvas id="pongAIStatsChart" width="200" height="200"></canvas> <!-- Canvas for Pong AI Chart -->
+										</div>
+										<div class="col-md-4">
+											<canvas id="pongLocalStatsChart" width="200" height="200"></canvas> <!-- Canvas for Pong Local Chart -->
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="card bg-dark text-white mb-3">
+							<div class="card-header">
+								<button class="btn btn-link text-white" type="button" data-bs-toggle="collapse" data-bs-target="#asteroidsStatsCollapse" aria-expanded="false" aria-controls="asteroidsStatsCollapse">
+									Asteroids Game Statistics
+								</button>
+							</div>
+							<div id="asteroidsStatsCollapse" class="collapse">
+								<div class="card-body">
+									<div class="row">
+										<div class="col-md-12 text-center mb-3">
+											<span class="badge bg-success">Games Won</span>
+											<span class="badge bg-danger">Games Lost</span>
+										</div>
+										<div class="col-md-4">
+											<canvas id="asteroidsRemoteStatsChart" width="200" height="200"></canvas> <!-- Canvas for Asteroids Remote Chart -->
+										</div>
+										<div class="col-md-4">
+											<canvas id="asteroidsAIStatsChart" width="200" height="200"></canvas> <!-- Canvas for Asteroids AI Chart -->
+										</div>
+										<div class="col-md-4">
+											<canvas id="asteroidsLocalStatsChart" width="200" height="200"></canvas> <!-- Canvas for Asteroids Local Chart -->
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
 						<div class="card bg-dark text-white mb-3">
 							<div class="card-header">
 								<button class="btn btn-link text-white" type="button" data-bs-toggle="collapse" data-bs-target="#matchHistoryCollapse" aria-expanded="false" aria-controls="matchHistoryCollapse">
@@ -142,7 +193,7 @@ export default function DashBoard() {
 										.filter(match => !match.game.includes('Tournament'))
 										.map(match => `
 										<p>
-												${match.game}: ${match.score} ->
+											${match.game}: ${match.score} ->
 											<span style="color: ${match.result === 'Win' ? 'green' : 'red'};">
 												${match.result}
 											</span>
@@ -171,7 +222,7 @@ export default function DashBoard() {
 										.filter(match => match.game.includes('Tournament'))
 										.map(match => `
 										<p>
-												${match.game} ->
+											${match.game} ->
 											<span style="color: ${match.result === 'Winner' ? 'green' : 'red'};">
 												${match.result}
 											</span>
@@ -199,60 +250,59 @@ export default function DashBoard() {
 							</form>
 							<div class="card-header">Friends: ${matchHistory.friends_count}</div>
 							<div class="card-body" id="friends-list">
-							${matchHistory.friends.map(friend => `
-							<p>
-      							${friend.username ? friend.username : 'You currently have no friends.'}
-      							${friend ? `
-      								<img src="/static/media/icons/${friend.status ? 'online' : 'offline'}.png"
-      							       class="profile-icon ml-2"
-      							       alt="Profile-friend-status"
-      							       style="width: 20px; height: 20px; pointer-events: none;"
-      							       id="friend-status-${friend.username}"
-									   data-status="${friend.status === true ? 'online' : friend.status}"
-									   >
-									<img src="/static/media/icons/block-icon.png"
-										class="block-icon ml-2"
-    									alt="Block"
-    									style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);"
-    									data-friend="${friend.username}"
-    									title="Block/Unblock ${friend.username}">
-      								<img src="/static/media/icons/chat-icon.png"
-      							       class="chat-icon ml-2"
-      							       alt="Chat"
-      							       style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);"
-      							       data-friend="${friend.username}"
-									   user="${matchHistory.username}"
-      							       title="Chat with ${friend.username}">
-									<img src="/static/media/icons/chat-icon2.png"
-      							       class="chat-icon2 ml-2 display-none"
-      							       alt="Chat"
-      							       style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);"
-      							       data-friend="${friend.username}"
-									   user="${matchHistory.username}"
-      							       title="Chat with ${friend.username}">
-									<img src="/static/media/icons/profile.png"
-      							       class="profile-icon ml-2"
-      							       alt="Profile-friend"
-      							       style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);"
-      							       data-friend="${friend.username}"
-									   user="${matchHistory.username}"
-      							       id="Profile-id-${friend.username}">
-      							` : ''}
-    						</p>
-						`).join('')}
+								${matchHistory.friends.map(friend => `
+								<p>
+									${friend.username ? friend.username : 'You currently have no friends.'}
+									${friend ? `
+										<img src="/static/media/icons/${friend.status ? 'online' : 'offline'}.png"
+											class="profile-icon ml-2"
+											alt="Profile-friend-status"
+											style="width: 20px; height: 20px; pointer-events: none;"
+											id="friend-status-${friend.username}"
+											data-status="${friend.status === true ? 'online' : friend.status}">
+										<img src="/static/media/icons/block-icon.png"
+											class="block-icon ml-2"
+											alt="Block"
+											style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);"
+											data-friend="${friend.username}"
+											title="Block/Unblock ${friend.username}">
+										<img src="/static/media/icons/chat-icon.png"
+											class="chat-icon ml-2"
+											alt="Chat"
+											style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);"
+											data-friend="${friend.username}"
+											user="${matchHistory.username}"
+											title="Chat with ${friend.username}">
+										<img src="/static/media/icons/chat-icon2.png"
+											class="chat-icon2 ml-2 display-none"
+											alt="Chat"
+											style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);"
+											data-friend="${friend.username}"
+											user="${matchHistory.username}"
+											title="Chat with ${friend.username}">
+										<img src="/static/media/icons/profile.png"
+											class="profile-icon ml-2"
+											alt="Profile-friend"
+											style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);"
+											data-friend="${friend.username}"
+											user="${matchHistory.username}"
+											id="Profile-id-${friend.username}">
+									` : ''}
+								</p>
+								`).join('')}
 							</div>
 							<form id="friend-requests">
 								<div class="card-header">Friend Requests:</div>
 								<div class="card-body">
-								${matchHistory.friend_requests.length > 0 ?
-									matchHistory.friend_requests.map(friend_request => `
-										<p>${friend_request}
-										<button id="AcceptFriendRequest-${friend_request}" type="button" class="btn btn-success btn-sm ml-2">✔️</button>
-            							<button id="RejectFriendRequest-${friend_request}" type="button" class="btn btn-danger btn-sm ml-2">X</button>
-            							</p>
-									`).join('') :
-									'<p>You currently have no friend requests.</p>'
-								}
+									${matchHistory.friend_requests.length > 0 ?
+										matchHistory.friend_requests.map(friend_request => `
+											<p>${friend_request}
+											<button id="AcceptFriendRequest-${friend_request}" type="button" class="btn btn-success btn-sm ml-2">✔️</button>
+											<button id="RejectFriendRequest-${friend_request}" type="button" class="btn btn-danger btn-sm ml-2">X</button>
+											</p>
+										`).join('') :
+										'<p>You currently have no friend requests.</p>'
+									}
 								</div>
 								<div class="card-body" id="friend-request-message"></div>
 							</form>
@@ -263,6 +313,95 @@ export default function DashBoard() {
 			</div>
 		</div>
 	`;
+	
+	const pongRemoteGamesPlayed = matchHistory.match_history.filter(match => match.game === "Pong Remote").length;
+	const pongRemoteGamesWon = matchHistory.match_history.filter(match => match.game === "Pong Remote" && match.result === 'Win').length;
+	const pongRemoteGamesLost = pongRemoteGamesPlayed - pongRemoteGamesWon;
+
+	const pongAIGamesPlayed = matchHistory.match_history.filter(match => match.game === "Pong Play vs AI").length;
+	const pongAIGamesWon = matchHistory.match_history.filter(match => match.game === "Pong Play vs AI" && match.result === 'Win').length;
+	const pongAIGamesLost = pongAIGamesPlayed - pongAIGamesWon;
+
+	const pongLocalGamesPlayed = matchHistory.match_history.filter(match => match.game === "Pong Player vs Player").length;
+	const pongLocalGamesWon = matchHistory.match_history.filter(match => match.game === "Pong Player vs Player" && match.result === 'Win').length;
+	const pongLocalGamesLost = pongLocalGamesPlayed - pongLocalGamesWon;
+
+	const asteroidsRemoteGamesPlayed = matchHistory.match_history.filter(match => match.game === "Asteroids Remote").length;
+	const asteroidsRemoteGamesWon = matchHistory.match_history.filter(match => match.game === "Asteroids Remote" && match.result === 'Win').length;
+	const asteroidsRemoteGamesLost = asteroidsRemoteGamesPlayed - asteroidsRemoteGamesWon;
+
+	const asteroidsAIGamesPlayed = matchHistory.match_history.filter(match => match.game === "Asteroids Play vs AI").length;
+	const asteroidsAIGamesWon = matchHistory.match_history.filter(match => match.game === "Asteroids Play vs AI" && match.result === 'Win').length;
+	const asteroidsAIGamesLost = asteroidsAIGamesPlayed - asteroidsAIGamesWon;
+
+	const asteroidsLocalGamesPlayed = matchHistory.match_history.filter(match => match.game === "Asteroids Player vs Player").length;
+	const asteroidsLocalGamesWon = matchHistory.match_history.filter(match => match.game === "Asteroids Player vs Player" && match.result === 'Win').length;
+	const asteroidsLocalGamesLost = asteroidsLocalGamesPlayed - asteroidsLocalGamesWon;
+
+	function createPieChart(ctx, label, data) {
+		const totalGames = data.reduce((a, b) => a + b, 0);
+		new Chart(ctx, {
+			type: 'doughnut',
+			data: {
+				labels: ['Games Won', 'Games Lost'],
+				datasets: [
+					{
+						label: label,
+						data: data,
+						backgroundColor: ['#28a745', '#dc3545'],
+						borderColor: ['#28a745', '#dc3545'],
+						borderWidth: 1
+					}
+				]
+			},
+			options: {
+				responsive: true,
+				cutout: '80%',
+				plugins: {
+					legend: {
+						display: false
+					},
+					tooltip: {
+						callbacks: {
+							label: function (context) {
+								const label = context.label || '';
+								const value = context.raw || 0;
+								const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+								const percentage = ((value / total) * 100).toFixed(2);
+								return `${label}: ${value} (${percentage}%)`;
+							}
+						}
+					}
+				}
+			},
+			plugins: [
+				{
+					id: 'centerText',
+					beforeDraw(chart) {
+						const { width } = chart;
+						const { height } = chart;
+						const ctx = chart.ctx;
+						ctx.save();
+						ctx.font = '14px Arial';
+						ctx.textAlign = 'center';
+						ctx.textBaseline = 'middle';
+						ctx.fillStyle = '#666';
+						ctx.fillText('Total Games Played', width / 2, height / 2 - 10);
+						ctx.font = 'bold 20px Arial';
+						ctx.fillText(totalGames, width / 2, height / 2 + 15);
+						ctx.restore();
+					}
+				}
+			]
+		});
+	}
+	
+	createPieChart(document.getElementById('pongRemoteStatsChart').getContext('2d'), 'Pong Remote Game Statistics', [pongRemoteGamesWon, pongRemoteGamesLost]);
+	createPieChart(document.getElementById('pongAIStatsChart').getContext('2d'), 'Pong AI Game Statistics', [pongAIGamesWon, pongAIGamesLost]);
+	createPieChart(document.getElementById('pongLocalStatsChart').getContext('2d'), 'Pong Local Game Statistics', [pongLocalGamesWon, pongLocalGamesLost]);
+	createPieChart(document.getElementById('asteroidsRemoteStatsChart').getContext('2d'), 'Asteroids Remote Game Statistics', [asteroidsRemoteGamesWon, asteroidsRemoteGamesLost]);
+	createPieChart(document.getElementById('asteroidsAIStatsChart').getContext('2d'), 'Asteroids AI Game Statistics', [asteroidsAIGamesWon, asteroidsAIGamesLost]);
+	createPieChart(document.getElementById('asteroidsLocalStatsChart').getContext('2d'), 'Asteroids Local Game Statistics', [asteroidsLocalGamesWon, asteroidsLocalGamesLost]);
 
 	document.querySelectorAll('.block-icon').forEach(icon => {
 		icon.addEventListener('click', event => {

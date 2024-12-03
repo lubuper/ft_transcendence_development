@@ -50,6 +50,8 @@ class Game {
 		];
 		this.nextLevelTimer = 0;
 		this.player1Lives = 5;
+		this.player1Loser = true;
+		this.playerHasLost = false;
 		if (this.gameMode === '1' || this.gameMode === '6') {
 			this.player2;
 			this.player2Lives = 5;
@@ -61,8 +63,6 @@ class Game {
 			this.player2IsActive = true;
 			this.lives2 = [];
 			this.ship2Number = 8;  // Player 2 ship - change here 
-			this.playerHasLost = false;
-			this.player1Loser;
 			this.winners = [];
 			this.currentPlayerIndex = 1;
 		}
@@ -276,13 +276,23 @@ class Game {
 			this.tournamentHandler();
 		}
 		else {
+			let match;
 			this.GameIsRunning = false;
 			for (let i = 0; i < 1000; i++) {}
-			const match = {
-				result: `Loss`,
-				score: `Level ${this.level}`,
-				game: `Asteroids ${gameName}`,
-			};
+			if (this.player1Loser === true) {
+				match = {
+					result: `Loss`,
+					score: `Level ${this.level}`,
+					game: `Asteroids ${gameName}`,
+				};
+			}
+			else {
+				match = {
+					result: `Win`,
+					score: `Level ${this.level}`,
+					game: `Asteroids ${gameName}`,
+				};
+			}
 			saveMatchHistory(match);
 			navigate('/gamelost');
 		}
