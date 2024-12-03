@@ -893,11 +893,11 @@ class Game {
 			this.keysPressed['c'] = false;
 		}
 		if (thisUser === ballController) {
+			this.ball.position.add(this.ball.velocity);
 			this.sendBallMove({
 				velocity: { x: -this.ball.velocity.x, y: this.ball.velocity.y},
 				position: { x: -this.ball.position.x, y: this.ball.position.y },
 			});
-			this.ball.position.add(this.ball.velocity);
 		} else {
 			this.ball.position.add(this.ball.velocity);
 		}

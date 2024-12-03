@@ -762,6 +762,10 @@ class Game {
 
 	gameWin() {
 		if (this.gameMode === '6') {
+			if (this.player1 && this.player2) {
+				this.player1.position.set((-this.geox / 2) + 0.1, 0.2, 0);
+				this.player2.position.set((this.geox / 2) - 0.1, -0.2, 0);
+			}
 			this.tournamentHandler();
 		}
 		else {
