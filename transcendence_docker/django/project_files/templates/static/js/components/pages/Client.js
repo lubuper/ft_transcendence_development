@@ -231,29 +231,53 @@ export function toggleBlockStatus(friendName) {
         // Unblock user
         blockedUsers.splice(index, 1);
         console.log(`Unblocked ${friendName}`);
-        saveBlockedUsers(); // Save updated list
+        saveBlockedUsers();
         showChatIcon(friendName);
     } else {
         // Block user
         blockedUsers.push(friendName);
         console.log(`Blocked ${friendName}`);
-        saveBlockedUsers(); // Save updated list
+        saveBlockedUsers();
         hideChatIcon(friendName);
+
+        // Close any active chat for the blocked user
         closeChatBox(friendName);
+        stopWebSocket(friendName);
+    }
+}
+
+function stopWebSocket(friendName) {
+    const chatKey = `${currentFriend}-${friendName}`;
+    if (chatSockets[chatKey]) {
+        chatSockets[chatKey].close();
+        delete chatSockets[chatKey];
+        console.log(`Stopped WebSocket for ${friendName}`);
     }
 }
 
 function hideChatIcon(friendName) {
     const chatIcon = document.querySelector(`.chat-icon[data-friend="${friendName}"]`);
+    const chatIcon2 = document.querySelector(`.chat-icon2[data-friend="${friendName}"]`);
     if (chatIcon) {
         chatIcon.style.display = 'none';
+    }
+    if (chatIcon2) {
+        chatIcon2.style.display = 'none';
     }
 }
 
 function showChatIcon(friendName) {
     const chatIcon = document.querySelector(`.chat-icon[data-friend="${friendName}"]`);
-    if (chatIcon) {
-        chatIcon.style.display = 'block';
+    const chatIcon2 = document.querySelector(`.chat-icon2[data-friend="${friendName}"]`);
+    const blockIcon = document.querySelector(`.block-icon[data-friend="${friendName}"]`);
+
+    if (chatIcon && blockIcon) {
+        chatIcon.style.display = 'inline'; // Correctly show the chat icon inline
+        blockIcon.parentNode.insertBefore(chatIcon, blockIcon.nextSibling); // Ensure correct position
+    }
+
+    if (chatIcon2) {
+        chatIcon2.style.display = 'none';
     }
 }
 
