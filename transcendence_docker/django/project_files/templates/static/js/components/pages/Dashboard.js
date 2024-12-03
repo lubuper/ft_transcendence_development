@@ -1,5 +1,5 @@
 import { navigate } from '../../helpers/App.js';
-import { setupChat, Initialize, displayMessages} from './Client.js';
+import { setupChat, Initialize, displayMessages, toggleBlockStatus } from './Client.js';
 
 
 const avatarPaths = [
@@ -210,6 +210,12 @@ export default function DashBoard() {
       							       id="friend-status-${friend.username}"
 									   data-status="${friend.status === true ? 'online' : friend.status}"
 									   >
+									<img src="/static/media/icons/block-icon.png"
+										class="block-icon ml-2"
+    									alt="Block"
+    									style="width: 20px; height: 20px; cursor: pointer; filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);"
+    									data-friend="${friend.username}"
+    									title="Block/Unblock ${friend.username}">
       								<img src="/static/media/icons/chat-icon.png"
       							       class="chat-icon ml-2"
       							       alt="Chat"
@@ -257,6 +263,13 @@ export default function DashBoard() {
 			</div>
 		</div>
 	`;
+
+	document.querySelectorAll('.block-icon').forEach(icon => {
+		icon.addEventListener('click', event => {
+			const friendName = event.currentTarget.getAttribute('data-friend'); // Get the friend's name from the block icon
+			toggleBlockStatus(friendName, matchHistory.username); // Pass friendName and username to toggleBlockStatus
+		});
+	});
 
 	matchHistory.friends.map((friend, index) => {
 		Initialize(friend.username, matchHistory.username); // Initialize chat functionality for the friend
@@ -321,6 +334,8 @@ export default function DashBoard() {
 				</div>
 			</div>
 		`;
+
+		//AQUI
 	
 		document.getElementsByClassName('friends-column')[0].appendChild(chatBox);
 		currentChatBox = chatBox;
