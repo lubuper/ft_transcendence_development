@@ -97,7 +97,7 @@ export function navigate(path) {
 					if (gameName === 'Pong Remote' && getGameFinished() === false) {
 						const match = {
 							result: `Loss`,
-							score: `Abandoned the game`,
+							score: `Forfeit`,
 							game: gameName,
 						};
 						saveMatchHistory(match);

@@ -588,7 +588,7 @@ class Game {
 		if (gameAbandoned === true) {
 			match = {
 				result: `Win`,
-				score: `The other play abandoned the game`,
+				score: `Forfeit`,
 				game: `Pong Remote`,
 			};
 		} else {
