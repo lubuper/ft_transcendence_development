@@ -87,6 +87,18 @@ class Game {
 		this.tournamentPlayersNames = [];
 		this.tournamentNumberOfPlays = 1;
 		this.currentTournamentPlay = 1;
+		if (this.gameMode === '2') {
+			this.aiCalcPos = 1.5;
+		}
+		else if (this.gameMode === '3') {
+			this.aiCalcPos = 1.3;
+		}
+		else if (this.gameMode === '4') {
+			this.aiCalcPos = 1;
+		}
+		else {
+			this.aiCalcPos = 0.5;
+		}
 		if (this.gameMode === '8' || this.gameMode === '9') {
 			if (this. gameMode === '7' || this.gameMode === '8') {
 				this.tournamentNumberOfPlays = 3;
@@ -869,7 +881,7 @@ class Game {
 
 	ultimateAI(difficulty) {
 		//calculus
-		if (this.ball.velocity.x > 0 && this.ball.position.x > 0.5 && this.aiCalculusFlag === false) {
+		if (this.ball.velocity.x > 0 && this.ball.position.x > this.aiCalcPos && this.aiCalculusFlag === false) {
 			let difficulty_i = parseInt(difficulty, 10);
 			let ballX = this.ball.position.x;
 			let ballY = this.ball.position.y;
@@ -891,7 +903,7 @@ class Game {
 			this.aiMoveFlag = Math.max(this.minY, Math.min(ballY, this.maxY));
 			//difficulty adjustment
 			if (difficulty_i >= 2 && difficulty_i <= 4) {
-				const randomOffset = (Math.random() - 0.5) * (5.1 - difficulty_i);
+				const randomOffset = (Math.random() - 0.5) * (4.1 - difficulty_i);
 				if (randomOffset < 0) {
 					this.aiMoveFlag += randomOffset;
 				}
