@@ -38,74 +38,47 @@ export default function ProfileFriend() {
             const pongRank = calculateRankedStats2(userFriend.match_history, "Pong Remote")
             const astRank = calculateRankedStats2(userFriend.match_history, "Asteroids Remote")
             $ProfileFriendForm.innerHTML = `
-			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative">
-                <div class="card bg-dark text-white mb-3" style="width: 400px;">
-                <div class="card-body text-center">
-                <img id="avatar" src="${userFriend.profile_picture}"
-                     class="rounded-circle mb-3"
-                     alt="Avatar"
-                     style="width: 100px; height: 100px;">
-                <h5 class="card-title">${currentFriend}</h5>
-                <p class="card-text">
-                    <img src="/static/media/rank/${pongRank.rank}.png"
-                     alt="${pongRank.rank}"
-                     style="width: 64px; height: 64px; margin-right: 2px;">
-                    ${pongRank.result}
-                </p>
-                <p class="card-text">
-                    <img src="/static/media/rank/${astRank.rank}.png"
-                     alt="${astRank.rank}"
-                     style="width: 64px; height: 64px; margin-right: 2px;">
-                    ${astRank.result}
-                </p>
-                </div>
-                </div>
-                <div class="card bg-dark text-white mb-3">
-				<div class="card-header">
-					<button class="btn btn-link text-white" type="button" data-bs-toggle="collapse" data-bs-target="#matchHistoryCollapse" aria-expanded="false" aria-controls="matchHistoryCollapse">
-							Match History
-					</button>
-					</div>
-						<div id="matchHistoryCollapse" class="collapse">
-							<div class="card-body">
-								${userFriend.match_history
-                                .filter(match => !match.game.includes('Tournament'))
-                                .map(match => `
-								<p>
-									${match.game}: ${match.score} ->
-								    <span style="color: ${match.result === 'Win' ? 'green' : 'red'};">
-										${match.result}
-									</span>
-								at ${new Date(match.timestamp).toLocaleString('en-GB', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    hour12: true
-                                })}
+            <div class="vh-100 d-flex align-items-center justify-content-start position-relative">
+			<div class="container mt-3 col-md-3">
+					<div class="card bg-dark text-white mb-3">
+							<div class="card-body text-center">
+								<img id="avatar" src="${userFriend.profile_picture}"
+                                    class="rounded-circle mb-3"
+                                    alt="Avatar"
+                                    style="width: 100px; height: 100px;">
+								<h5 class="card-title">${currentFriend}</h5>
+								<p class="card-text">
+									<img src="/static/media/rank/${pongRank.rank}.png"
+										alt="${pongRank.rank}"
+										style="width: 64px; height: 64px; margin-right: 2px;">
+									${pongRank.result}
+									<span class="tooltiptext">The game ranking starts after 5 remote matches, Good luck!</span>
 								</p>
-									`).join('')}
-								</div>
+								<p class="card-text">
+									<img src="/static/media/rank/${astRank.rank}.png"
+										alt="${astRank.rank}"
+										style="width: 64px; height: 64px; margin-right: 2px;">
+									${astRank.result}
+									<span class="tooltiptext">The game ranking starts after 5 remote matches, Good luck!</span>
+								</p>
 							</div>
 						</div>
 						<div class="card bg-dark text-white mb-3">
 							<div class="card-header">
-								<button class="btn btn-link text-white" type="button" data-bs-toggle="collapse" data-bs-target="#tournamentsCollapse" aria-expanded="false" aria-controls="tournamentsCollapse">
-									Tournaments
+								<button class="btn btn-link text-white" type="button" data-bs-toggle="collapse" data-bs-target="#matchHistoryCollapse" aria-expanded="false" aria-controls="matchHistoryCollapse">
+									Match History
 								</button>
 							</div>
-							<div id="tournamentsCollapse" class="collapse">
+							<div id="matchHistoryCollapse" class="collapse">
 								<div class="card-body">
 									${userFriend.match_history
-                                    .filter(match => match.game.includes('Tournament'))
-                                    .map(match => `
+                                        .filter(match => !match.game.includes('Tournament'))
+                                        .map(match => `
 										<p>
-											${match.game} ->
-											<span style="color: ${match.result === 'Winner' ? 'green' : 'red'};">
+												${match.game}: ${match.score} ->
+											<span style="color: ${match.result === 'Win' ? 'green' : 'red'};">
 												${match.result}
 											</span>
-											: ${match.score} 
 											at ${new Date(match.timestamp).toLocaleString('en-GB', {
                                                 day: '2-digit',
                                                 month: '2-digit',
@@ -119,11 +92,12 @@ export default function ProfileFriend() {
 								</div>
 							</div>
 						</div>
-                <button class="btn btn-danger btn-lg text-white shadow-lg mt-3 custom-button">Block</button>
-                <button id="RemoveFriend-${currentFriend}" class="btn btn-danger btn-lg text-white shadow-lg mt-3 custom-button">Remove Friend</button>
-                <button class="btn btn-purple btn-lg text-white shadow-lg mt-3 custom-button" onclick="window.history.back()">Go Back To Dashboard</button>
-                <div class="card-body" id="friend-request-message"></div>
-            </div>
+					<button class="btn btn-danger btn-lg text-white shadow-lg mt-3 custom-button w-100">Block</button>
+                    <button id="RemoveFriend-${currentFriend}" class="btn btn-danger btn-lg text-white shadow-lg mt-3 custom-button w-100">Remove Friend</button>
+                    <div class="card-body" id="friend-request-message"></div>
+                    <button class="btn btn-purple btn-lg text-white shadow-lg mt-3 custom-button w-100" onclick="window.history.back()">Go Back To Dashboard</button>
+			</div>
+		</div>
 	        `;
 
             document.getElementById(`RemoveFriend-${currentFriend}`).addEventListener('click', async function() {
