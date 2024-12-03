@@ -13,6 +13,11 @@ const avatarPaths = [
 	'/static/media/assets/ships/splash/8.png'
 ];
 
+let selectedGameType = 'Pong';
+let selectedGameID = null;
+let otherPlayer = null;
+let senderPlayer = null;
+
 export let currentFriend = '';
 
 const colorNames = [
@@ -459,6 +464,7 @@ export default function DashBoard() {
 			<div class="chat-box">
 				<div class="chat-header">
 					<span>${shortName} Live-Chat</span>
+					<button class="invite-btn">Invite Game</button>
 					<div>
 						<button class="minimize-btn">-</button>
 						<button class="close-btn">&times;</button>
@@ -486,6 +492,31 @@ export default function DashBoard() {
 		chatBox.querySelector('.close-btn').addEventListener('click', () => {
 			chatBox.remove();
 			currentChatBox = null;
+		});
+
+		chatBox.querySelector('.invite-btn').addEventListener('click', async function() {
+			event.preventDefault();
+	
+			const response = await fetch('/send-game-invitation/', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded', // or 'application/json'
+					'X-CSRFToken': getCSRFToken(), // Make sure you include your CSRF token
+				},
+				body: JSON.stringify({
+					'username': friendName,
+					'game_name': selectedGameType
+				})
+			})
+			const result = await response.json();
+	
+			if (response.ok) {
+				selectedGameID = result.game_id;
+				senderPlayer = userName;
+				otherPlayer = friendName;
+				
+				navigate('/pongremote');
+			} 
 		});
 	
 		// Minimize/maximize functionality for the chat box
