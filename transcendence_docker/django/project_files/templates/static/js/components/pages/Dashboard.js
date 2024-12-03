@@ -264,6 +264,13 @@ export default function DashBoard() {
 		</div>
 	`;
 
+	document.querySelectorAll('.block-icon').forEach(icon => {
+		icon.addEventListener('click', event => {
+			const friendName = event.currentTarget.getAttribute('data-friend'); // Get the friend's name from the block icon
+			toggleBlockStatus(friendName, matchHistory.username); // Pass friendName and username to toggleBlockStatus
+		});
+	});
+
 	matchHistory.friends.map((friend, index) => {
 		Initialize(friend.username, matchHistory.username); // Initialize chat functionality for the friend
 	})
@@ -328,14 +335,7 @@ export default function DashBoard() {
 			</div>
 		`;
 
-
-		document.querySelectorAll('.block-icon').forEach(icon => {
-            icon.addEventListener('click', event => {
-                const friendName = event.currentTarget.getAttribute('data-friend');
-                toggleBlockStatus(friendName);
-            });
-        });
-
+		//AQUI
 	
 		document.getElementsByClassName('friends-column')[0].appendChild(chatBox);
 		currentChatBox = chatBox;

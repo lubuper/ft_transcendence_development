@@ -224,7 +224,7 @@ function formatTimestamp(timestamp) {
     return `${hours}:${minutes}:${seconds}`;
 }
 
-export function toggleBlockStatus(friendName) {
+export function toggleBlockStatus(friendName, userName) {
     const index = blockedUsers.indexOf(friendName);
 
     if (index !== -1) {
@@ -242,12 +242,12 @@ export function toggleBlockStatus(friendName) {
 
         // Close any active chat for the blocked user
         closeChatBox(friendName);
-        stopWebSocket(friendName);
+        stopWebSocket(friendName, userName);
     }
 }
 
-function stopWebSocket(friendName) {
-    const chatKey = `${currentFriend}-${friendName}`;
+function stopWebSocket(friendName, userName) {
+    const chatKey = `${userName}-${friendName}`;
     if (chatSockets[chatKey]) {
         chatSockets[chatKey].close();
         delete chatSockets[chatKey];
