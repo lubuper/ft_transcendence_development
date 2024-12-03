@@ -1,4 +1,5 @@
 import { currentFriend } from './Dashboard.js';
+import {navigate} from "../../helpers/App.js";
 
 function getCSRFToken() {
 	const name = 'csrftoken';
@@ -92,7 +93,6 @@ export default function ProfileFriend() {
 								</div>
 							</div>
 						</div>
-					<button class="btn btn-danger btn-lg text-white shadow-lg mt-3 custom-button w-100">Block</button>
                     <button id="RemoveFriend-${currentFriend}" class="btn btn-danger btn-lg text-white shadow-lg mt-3 custom-button w-100">Remove Friend</button>
                     <div class="card-body" id="friend-request-message"></div>
                     <button class="btn btn-purple btn-lg text-white shadow-lg mt-3 custom-button w-100" onclick="window.history.back()">Go Back To Dashboard</button>
@@ -118,6 +118,7 @@ export default function ProfileFriend() {
                     friendRejectMessage.innerHTML = '<p class="text-success">Friend removed successfully!</p>';
                     setTimeout(() => {
                         friendRejectMessage.innerHTML = '<p </p>';
+                        navigate('/dashboard');
                     }, 1000);
                 } else {
                     friendRejectMessage.innerHTML = `<p class="text-danger">Failed to remove friend! ${result.message} </p>`;
