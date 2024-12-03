@@ -941,7 +941,7 @@ class Game {
 
 export default function PongRemote() {
 	const gameId = getSelectedGameID();
-	const gameWebsocket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/`);
+	const gameWebsocket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/?purpose=join`);
 
 	const game = new Game();
 	gameWebsocket.onmessage = function (event) {
@@ -955,11 +955,12 @@ export default function PongRemote() {
 				game.init();
 			});
 		} else if (data.action === 'player_left') {
-			// Show an alert when a player leaves
 			alert(data.message);
 			gameAbandoned = true;
 			game.gameWin();
-			// Return to waiting state
+		} else if (data.action === 'player_reject') {
+			alert(data.message);
+			navigate('/');
 		} else if (data.action === 'player_move') {
 			const moveData = data.move_data;
 			if (data.player === thisUser) {

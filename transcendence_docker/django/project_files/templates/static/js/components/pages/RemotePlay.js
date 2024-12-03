@@ -239,13 +239,23 @@ export default function RemotePlay() {
 				const result = await response.json();
 
 				if (response.ok) {
-					setTimeout(() => {
-						console.log('passou aqui 3', result);
-						navigate('/');
-					}, 1000);
+					const gameRejectWebsocket = new WebSocket(`ws://${window.location.host}/ws/game/${result.game_id}/?purpose=reject`);
+					gameRejectWebsocket.onopen = function () {
+						console.log(`WebSocket connected for rejection`);
+						gameRejectWebsocket.close(1001, "Player rejected the game");
+					};
+					gameRejectWebsocket.onclose = function (event) {
+						if (event.code === 1001) {
+							console.log(`Game socket closed with rejection for game ID: ${result.game_id}`);
+						} else {
+							console.log(`Game socket closed with code: ${event.code}`);
+						}
+						delete gameRejectWebsocket[result.game_id];
+					};
+					navigate('/');
 				} else {
 					setTimeout(() => {
-						console.log('passou aqui 4', result);
+						console.log('some error happened', result);
 					}, 1000);
 				}
 			});
