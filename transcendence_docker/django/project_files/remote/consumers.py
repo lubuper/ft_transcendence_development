@@ -83,13 +83,13 @@ class GameConsumer(AsyncWebsocketConsumer):
                 self.connected_players[self.game_id].remove(self.channel_name)
 
                 # Notify the remaining player
-                if close_code == 1001:  # Player rejected the game
+                if close_code != 1000 or close_code != 1001:
                     await self.channel_layer.group_send(
-                        self.room_group_name,
-                        {
-                            'type': 'player_reject',
-                            'message': 'The other player rejected the game.',
-                        }
+                         self.room_group_name,
+                         {
+                              'type': 'player_left',
+                              'message': 'A player close the game.',
+                         }
                     )
                 elif close_code == 1000 and len(self.connected_players[self.game_id]) == 1:
                     await self.channel_layer.group_send(
@@ -99,16 +99,21 @@ class GameConsumer(AsyncWebsocketConsumer):
                             'message': 'A player has abandoned the game.',
                         }
                     )
+                elif close_code == 1001:
+                    await self.channel_layer.group_send(
+                        self.room_group_name,
+                        {
+                            'type': 'player_reject',
+                            'message': 'The other player rejected the game.',
+                        }
+                    )
 
                 # Clean up the room if empty
                 if not self.connected_players[self.game_id]:
                     del self.connected_players[self.game_id]
-                    if self.game_id in self.game_state:
-                        del self.game_state[self.game_id]
 
         # Leave the channel group
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-
 
     async def receive(self, text_data):
         data = json.loads(text_data)
@@ -126,25 +131,24 @@ class GameConsumer(AsyncWebsocketConsumer):
             )
 
         if action == 'update_ball':
-                # Broadcast ball state to all clients
-                await self.channel_layer.group_send(
-                    self.room_group_name,
-                    {
-                        'type': 'update_ball',
-                        'ball_state': data.get('ball_state'),
-                    }
-                )
+            # Broadcast ball state to all clients
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'update_ball',
+                    'ball_state': data.get('ball_state'),
+                }
+            )
 
         if action == 'update_scores':
-                await self.channel_layer.group_send(
-                     self.room_group_name,
-                     {
-                          'type': 'update_scores',
-                          'player': data.get('player'),
-                          'score': data.get('score'),
-                     }
-                )
-
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'update_scores',
+                    'player': data.get('player'),
+                    'score': data.get('score'),
+                }
+            )
 
     async def player_move(self, event):
         # Send the move to WebSocket clients
@@ -208,7 +212,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         }))
 
     async def game_finish(self, event):
-            await self.send(text_data=json.dumps({
-                'action': 'game_finish',
-                'message': event['message'],
-            }))
+        await self.send(text_data=json.dumps({
+            'action': 'game_finish',
+            'message': event['message'],
+        }))

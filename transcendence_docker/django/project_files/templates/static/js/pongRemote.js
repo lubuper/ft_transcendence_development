@@ -175,6 +175,8 @@ class Game {
 
 	cleanup() {
 		//this.sendDisconnect();
+		thisUser = null;
+		ballController = null;
 		cancelAnimationFrame(this.animationFrameID);
 		this.cleanUpScore();
 		this.cleanUpHexagons();
@@ -950,6 +952,10 @@ export default function PongRemote() {
 		if (data.action === 'waiting') {
 			alert('waiting for the other player!');
 		} else if (data.action === 'start_game') {
+			thisUser = null;
+			ballController = null;
+			gameAbandoned = false;
+			gameFinished = false;
 			ballController = getSenderPlayer();
 			game.fetchShipAndColorRemote().then(() => {
 				game.init();

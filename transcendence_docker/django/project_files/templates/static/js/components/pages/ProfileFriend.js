@@ -60,6 +60,65 @@ export default function ProfileFriend() {
                 </p>
                 </div>
                 </div>
+                <div class="card bg-dark text-white mb-3">
+				<div class="card-header">
+					<button class="btn btn-link text-white" type="button" data-bs-toggle="collapse" data-bs-target="#matchHistoryCollapse" aria-expanded="false" aria-controls="matchHistoryCollapse">
+							Match History
+					</button>
+					</div>
+						<div id="matchHistoryCollapse" class="collapse">
+							<div class="card-body">
+								${userFriend.match_history
+                                .filter(match => !match.game.includes('Tournament'))
+                                .map(match => `
+								<p>
+									${match.game}: ${match.score} ->
+								    <span style="color: ${match.result === 'Win' ? 'green' : 'red'};">
+										${match.result}
+									</span>
+								at ${new Date(match.timestamp).toLocaleString('en-GB', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: true
+                                })}
+								</p>
+									`).join('')}
+								</div>
+							</div>
+						</div>
+						<div class="card bg-dark text-white mb-3">
+							<div class="card-header">
+								<button class="btn btn-link text-white" type="button" data-bs-toggle="collapse" data-bs-target="#tournamentsCollapse" aria-expanded="false" aria-controls="tournamentsCollapse">
+									Tournaments
+								</button>
+							</div>
+							<div id="tournamentsCollapse" class="collapse">
+								<div class="card-body">
+									${userFriend.match_history
+                                    .filter(match => match.game.includes('Tournament'))
+                                    .map(match => `
+										<p>
+											${match.game} ->
+											<span style="color: ${match.result === 'Winner' ? 'green' : 'red'};">
+												${match.result}
+											</span>
+											: ${match.score} 
+											at ${new Date(match.timestamp).toLocaleString('en-GB', {
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                hour12: true
+                                            })}
+										</p>
+									`).join('')}
+								</div>
+							</div>
+						</div>
                 <button class="btn btn-danger btn-lg text-white shadow-lg mt-3 custom-button">Block</button>
                 <button id="RemoveFriend-${currentFriend}" class="btn btn-danger btn-lg text-white shadow-lg mt-3 custom-button">Remove Friend</button>
                 <button class="btn btn-purple btn-lg text-white shadow-lg mt-3 custom-button" onclick="window.history.back()">Go Back To Dashboard</button>
