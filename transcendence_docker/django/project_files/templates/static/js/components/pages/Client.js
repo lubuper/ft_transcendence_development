@@ -1,7 +1,18 @@
 const messageCache = {};   
 const chatSockets = {}; // Track active WebSocket connections
+const blockedUsers = []; // Array to store blocked users
+
+function saveBlockedUsers() {
+    localStorage.setItem('blockedUsers', JSON.stringify(blockedUsers));
+}
 
 export function Initialize(friendName, userName) {
+
+    if (blockedUsers.includes(friendName)) {
+        console.log(`${friendName} is blocked.`);
+        return;
+    }
+
     const chatKey = `${userName}-${friendName}`;
     const chat = document.getElementsByClassName('chat-popup')
     
@@ -211,4 +222,44 @@ function formatTimestamp(timestamp) {
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const seconds = String(date.getSeconds()).padStart(2, '0');
     return `${hours}:${minutes}:${seconds}`;
+}
+
+export function toggleBlockStatus(friendName) {
+    const index = blockedUsers.indexOf(friendName);
+
+    if (index !== -1) {
+        // Unblock user
+        blockedUsers.splice(index, 1);
+        console.log(`Unblocked ${friendName}`);
+        saveBlockedUsers(); // Save updated list
+        showChatIcon(friendName);
+    } else {
+        // Block user
+        blockedUsers.push(friendName);
+        console.log(`Blocked ${friendName}`);
+        saveBlockedUsers(); // Save updated list
+        hideChatIcon(friendName);
+        closeChatBox(friendName);
+    }
+}
+
+function hideChatIcon(friendName) {
+    const chatIcon = document.querySelector(`.chat-icon[data-friend="${friendName}"]`);
+    if (chatIcon) {
+        chatIcon.style.display = 'none';
+    }
+}
+
+function showChatIcon(friendName) {
+    const chatIcon = document.querySelector(`.chat-icon[data-friend="${friendName}"]`);
+    if (chatIcon) {
+        chatIcon.style.display = 'block';
+    }
+}
+
+function closeChatBox(friendName) {
+    const chatBox = document.getElementById(`chat-box-${friendName}`);
+    if (chatBox) {
+        chatBox.remove();
+    }
 }
