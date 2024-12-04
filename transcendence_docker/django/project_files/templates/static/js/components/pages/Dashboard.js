@@ -1,5 +1,6 @@
 import { navigate } from '../../helpers/App.js';
 import { setupChat, Initialize, displayMessages, toggleBlockStatus } from './Client.js';
+import { selectedGameType, setGameVariables } from './RemotePlay.js';
 
 const avatarPaths = [
 	'/static/media/assets/ships/splash/1.png',
@@ -459,6 +460,10 @@ export default function DashBoard() {
 			<div class="chat-box">
 				<div class="chat-header">
 					<span>${shortName} Live-Chat</span>
+					<img src="/static/media/icons/pongIcon.png" class="invite-btn" 
+					title="Invite to a Pong game"
+                     style="width: 20px; height: 20px; cursor: pointer; 
+                            filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);">
 					<div>
 						<button class="minimize-btn">-</button>
 						<button class="close-btn">&times;</button>
@@ -473,8 +478,6 @@ export default function DashBoard() {
 				</div>
 			</div>
 		`;
-
-		//AQUI
 	
 		document.getElementsByClassName('friends-column')[0].appendChild(chatBox);
 		currentChatBox = chatBox;
@@ -486,6 +489,29 @@ export default function DashBoard() {
 		chatBox.querySelector('.close-btn').addEventListener('click', () => {
 			chatBox.remove();
 			currentChatBox = null;
+		});
+
+		chatBox.querySelector('.invite-btn').addEventListener('click', async function() {
+			event.preventDefault();
+			
+			console.log('Inviting friend:', friendName);
+			const response = await fetch('/send-game-invitation/', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded', // or 'application/json'
+					'X-CSRFToken': getCSRFToken(), // Make sure you include your CSRF token
+				},
+				body: JSON.stringify({
+					'username': friendName,
+					'game_name': selectedGameType
+				})
+			})
+			const result = await response.json();
+	
+			if (response.ok) {
+				setGameVariables(result.game_id, userName, friendName);
+				navigate('/pongremote');
+			} 
 		});
 	
 		// Minimize/maximize functionality for the chat box
