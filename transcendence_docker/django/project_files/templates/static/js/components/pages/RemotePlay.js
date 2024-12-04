@@ -1,8 +1,8 @@
 import { navigate } from '../../helpers/App.js';
-let selectedGameType = 'Pong';
-let selectedGameID = null;
-let otherPlayer = null;
-let senderPlayer = null;
+export let selectedGameType = 'Pong';
+export let selectedGameID = null;
+export let otherPlayer = null;
+export let senderPlayer = null;
 
 const base = `
 			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative">
@@ -294,3 +294,9 @@ export function getSenderPlayer() {
 export function getOtherPlayer() {
 	return otherPlayer;
 }
+
+export const setGameVariables = (gameID, sender, other) => {
+	selectedGameID = gameID;
+	senderPlayer = sender;
+	otherPlayer = other;
+  };

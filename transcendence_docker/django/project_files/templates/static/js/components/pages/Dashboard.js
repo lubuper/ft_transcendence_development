@@ -1,5 +1,6 @@
 import { navigate } from '../../helpers/App.js';
 import { setupChat, Initialize, displayMessages, toggleBlockStatus } from './Client.js';
+import { selectedGameType, setGameVariables } from './RemotePlay.js';
 
 const avatarPaths = [
 	'/static/media/assets/ships/splash/1.png',
@@ -12,11 +13,6 @@ const avatarPaths = [
 	'/static/media/assets/ships/splash/9.png',
 	'/static/media/assets/ships/splash/8.png'
 ];
-
-let selectedGameType = 'Pong';
-let selectedGameID = null;
-let otherPlayer = null;
-let senderPlayer = null;
 
 export let currentFriend = '';
 
@@ -479,8 +475,6 @@ export default function DashBoard() {
 				</div>
 			</div>
 		`;
-
-		//AQUI
 	
 		document.getElementsByClassName('friends-column')[0].appendChild(chatBox);
 		currentChatBox = chatBox;
@@ -512,10 +506,7 @@ export default function DashBoard() {
 			const result = await response.json();
 	
 			if (response.ok) {
-				selectedGameID = result.game_id;
-				senderPlayer = userName;
-				otherPlayer = friendName;
-				
+				setGameVariables(result.game_id, userName, friendName);
 				navigate('/pongremote');
 			} 
 		});
