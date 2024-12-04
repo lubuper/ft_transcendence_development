@@ -10,6 +10,7 @@ import AboutUs from '../components/pages/AboutUs.js';
 import Asteroids from '../asteroids.js';
 import Pong from '../pong.js';
 import PongRemote, {getGameFinished} from '../pongRemote.js';
+import AsteroidsRemote from '../asteroidsRemote.js'
 import Profile from "../components/pages/Profile.js";
 import ProfileFriend from "../components/pages/ProfileFriend.js";
 import LocalPlay, { getSelectedGameMode, getSelectedGameType } from '../components/pages/LocalPlay.js';
@@ -44,6 +45,7 @@ const routes = {
 	'/profile': Profile,
 	'/profileFriend': ProfileFriend,
 	'/pongremote' : PongRemote,
+	'/asteroidsremote' : AsteroidsRemote,
 	'/gamelost' : GameLost,
 	'/gamewon' : GameWon,
 	'/tournamentover' : TournamentOver

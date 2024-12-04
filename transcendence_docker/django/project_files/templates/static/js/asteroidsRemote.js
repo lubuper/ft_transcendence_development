@@ -2,7 +2,22 @@ import { saveMatchHistory } from './components/pages/Dashboard.js';
 import {getOtherPlayer, getSelectedGameID, getSenderPlayer} from "./components/pages/RemotePlay.js";
 import {navigate} from "./helpers/App.js";
 
-let gameName = null;
+let thisUser = null;
+let gameHost = null;
+let gameAbandoned = false;
+let gameFinished = false;
+
+function getCSRFToken() {
+	const name = 'csrftoken';
+	const cookies = document.cookie.split(';');
+	for (let cookie of cookies) {
+		const trimmedCookie = cookie.trim();
+		if (trimmedCookie.startsWith(name + '=')) {
+			return decodeURIComponent(trimmedCookie.substring(name.length + 1));
+		}
+	}
+	return null;
+}
 
 class Level {
 	constructor(number, asteroids, sAsteroids, AIShips) {
@@ -89,17 +104,27 @@ class Game {
 		this.animationFrameID;
 		this.animate = this.animate.bind(this);
 	}
-	async fetchShipAndColor() {
+	async fetchShipAndColorRemote() {
+		const otherPlayer = getOtherPlayer();
 		try {
-			const response = await fetch('/api/get-ship-and-color/');
+			const response = await fetch('/api/get-ship-and-color-remote/', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': getCSRFToken() // Ensure CSRF token is sent
+				},
+				body: JSON.stringify({
+					'username_guest': otherPlayer // Send the username in the request body
+				}),
+			})
 			if (!response.ok) {
 				throw new Error('Failed to fetch ship and color');
 			}
-
 			const data = await response.json();
-			this.ship1Number = data.ship;
-			if (this.ship1Number === 8)
-				this.ship2Number = 9;
+			this.ship1Number = data.ship_player_one;
+			this.ship2Number = data.ship_player_two;
+			this.hexagoncolor = data.color;
+			thisUser = data.username;
 		} catch (error) {
 			console.error('Error fetching ship and color:', error);
 		}
@@ -137,6 +162,8 @@ class Game {
 	}
 
 	cleanup() {
+		thisUser = null;
+		gameHost = null;
 		this.GameIsRunning = false;
 		cancelAnimationFrame(this.animationFrameID);
 		delete this.level;
@@ -230,10 +257,14 @@ class Game {
 		delete this.audioLoader;
 		delete this.loader;
 		THREE.Cache.clear();
+		if (gameFinished === false) {
+			this.sendDisconnect();
+		}
 	}
 
 	gameOver() {
-		// REMOTE: this.sendDisconnect();
+		gameFinished = true;
+		this.sendDisconnect();
 		this.GameIsRunning = false;
 		for (let i = 0; i < 1000; i++) {}
 		const match = {
@@ -242,19 +273,32 @@ class Game {
 			game: `Asteroids ${gameName}`,
 		};
 		saveMatchHistory(match);
+		this.cleanup();
 		navigate('/gamelost');
 	}
 
 	gameWin() {
-		// REMOTE: this.sendDisconnect();
+		gameFinished = true;
+		this.sendDisconnect();
 		this.GameIsRunning = false;
-		for (let i = 0; i < 1000; i++) {}
-		const match = {
-			result: `Win`,
-			score: `Level ${this.level}`,
-			game: `Asteroids ${gameName}`,
+		let match = null;
+		if (gameAbandoned === true) {
+			for (let i = 0; i < 1000; i++) {}
+				match = {
+					result: `Win`,
+					score: `Forfeit`,
+					game: `Asteroids Remote`,
+			};
+		}
+		else {
+			match = {
+				result: `Win`,
+				score: `Level ${this.level}`,
+				game: `Asteroids Remote`,
 		};
+		}
 		saveMatchHistory(match);
+		this.cleanup();
 		navigate('/gamewon');
 	}
 
@@ -1318,7 +1362,7 @@ class Game {
 						asteroid.size -= 1;
 						for (let k = 0; k < 3; k++) {
 							const newAsteroid = this.spawnAsteroid('asteroid', asteroid.position, asteroid.size);
-							newAsteroid.size = asteroid.size; // Set the size of the new asteroids
+							newAsteroid.size = asteroid.size;
 							this.asteroids.push(newAsteroid);
 						}
 					}
@@ -1385,10 +1429,105 @@ class Game {
 	}
 }
 
-export default function Asteroids() {
+export default function AsteroidsRemote() {
+	const gameId = getSelectedGameID();
+	const gameWebsocket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/?purpose=join`);
+
 	const game = new Game();
-	game.fetchShipAndColor().then(() => {
-		game.init();
-	});
+	gameWebsocket.onmessage = function (event) {
+		const data = JSON.parse(event.data);
+
+		if (data.action === 'waiting') {
+			alert('waiting for the other player!');
+		} else if (data.action === 'start_game') {
+			thisUser = null;
+			gameHost = null;
+			gameAbandoned = false;
+			gameFinished = false;
+			gameHost = getSenderPlayer();
+			game.fetchShipAndColorRemote().then(() => {
+				game.init();
+			});
+		} else if (data.action === 'player_left') {
+			alert(data.message);
+			gameAbandoned = true;
+			game.gameWin();
+		} else if (data.action === 'player_reject') {
+			alert(data.message);
+			navigate('/');
+		} else if (data.action === 'player_move') {
+			const moveData = data.move_data;
+			if (data.player === thisUser) {
+				return;
+			} else {
+				// Update Player 2's position locally
+				game.updatePlayer2Move(moveData);
+			}
+		} else if (data.action === 'update_ball') {
+			const ballData = data.ball_state;
+			if (thisUser === gameHost) {
+				return;
+			} else {
+				game.ball.position.x = ballData.position.x;
+				game.ball.position.y = ballData.position.y;
+				game.ball.velocity.x = ballData.velocity.x;
+				game.ball.velocity.y = ballData.velocity.y;
+			}
+		} else if (data.action === 'update_scores') {
+			const scoreData = data.score;
+			if (data.player === thisUser) {
+				return;
+			} else {
+				// Update Player 2's position locally
+				game.updateScoreOtherPlayer(scoreData);
+			}
+		}
+
+		game.sendPlayerMove = (moveData) => {
+			gameWebsocket.send(JSON.stringify({
+				action: 'player_move',
+				player: thisUser,
+				move_data: moveData,
+			}));
+		};
+
+		game.sendScore = (scoreData) => {
+			gameWebsocket.send(JSON.stringify({
+				action: 'update_scores',
+				player: gameHost,
+				score: scoreData,
+			}));
+		};
+
+		game.sendBallMove = (moveBallData) => {
+			gameWebsocket.send(JSON.stringify({
+				action: 'update_ball',
+				player: gameHost,
+				ball_state: moveBallData,
+			}));
+		};
+
+		game.sendDisconnect = () => {
+			console.log('to disconnect, is game finish?', gameFinished);
+			if (gameFinished === true) {
+				console.log('to disconnect, entrou aqui', gameFinished);
+				gameWebsocket.onclose = function () {
+					console.log(`Chat socket closed for ${gameId}`);
+					delete gameWebsocket[gameId];
+				};
+			} else {
+				gameWebsocket.close(1000, "Player left the page");
+				gameWebsocket.onclose = function () {
+					console.log(`Chat socket closed for left ${gameId}`);
+					delete gameWebsocket[gameId];
+				};
+			}
+		}
+
+	}
 	return game;
+}
+
+export function getGameFinished() {
+	return gameFinished;
 }
