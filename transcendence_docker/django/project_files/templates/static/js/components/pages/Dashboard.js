@@ -496,7 +496,8 @@ export default function DashBoard() {
 
 		chatBox.querySelector('.invite-btn').addEventListener('click', async function() {
 			event.preventDefault();
-	
+			
+			console.log('Inviting friend:', friendName);
 			const response = await fetch('/send-game-invitation/', {
 				method: 'POST',
 				headers: {
