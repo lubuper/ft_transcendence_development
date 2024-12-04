@@ -155,7 +155,6 @@ class Game {
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
 		document.body.appendChild(this.renderer.domElement);
 		this.GameIsRunning = true;
-		this.createPauseCube();
 		setTimeout(() => {
 			this.animate();
 		}, 1000);

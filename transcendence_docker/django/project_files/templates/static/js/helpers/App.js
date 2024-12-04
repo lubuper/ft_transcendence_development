@@ -82,7 +82,7 @@ export function navigate(path) {
 			if (page instanceof HTMLElement) {
 				$dynamic.appendChild(page);
 			}
-			if (path === '/asteroids' || path === '/pong' || path === '/pongremote') {
+			if (path === '/asteroids' || path === '/pong' || path === '/pongremote' || path === '/asteroidsremote') {
 				currentGameI = page;
 				gameIsActive = true;
 				if (path === '/asteroids'){
@@ -91,12 +91,21 @@ export function navigate(path) {
 					gameName = 'Pong';
 				} else if (path === '/pongremote'){
 					gameName = 'Pong Remote';
+				} else if (path === '/asteroidsremote'){
+					gameName = 'Asteroids Remote';
 				}
-
 			} else {
 				if (gameIsActive && currentGameI && typeof currentGameI.cleanup === 'function') {
 					currentGameI.cleanup();
 					if (gameName === 'Pong Remote' && getGameFinished() === false) {
+						const match = {
+							result: `Loss`,
+							score: `Forfeit`,
+							game: gameName,
+						};
+						saveMatchHistory(match);
+					}
+					else if (gameName === 'Asteroids Remote') { // && getGameFinished() === false) {
 						const match = {
 							result: `Loss`,
 							score: `Forfeit`,
