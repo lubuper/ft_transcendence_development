@@ -182,7 +182,12 @@ export default function RemotePlay() {
 			setTimeout(() => {
 				returnedMessage.innerHTML = '<p </p>';
 			}, 2000);
-			navigate('/pongremote');
+			if (selectedGameType === 'Pong') {
+				navigate('/pongremote');
+			}
+			else if (selectedGameType === 'Asteroids') {
+				navigate('/asteroidsremote');
+			}
 		} else {
 			returnedMessage.innerHTML = `<p class="text-danger">Failed to send game invitation! ${result.message} </p>`;
 			setTimeout(() => {
@@ -215,7 +220,12 @@ export default function RemotePlay() {
 					selectedGameID = result.game_id;
 					otherPlayer = remote_game_invitations.sender__user__username;
 					senderPlayer = otherPlayer;
-					navigate('/pongremote');
+					if (selectedGameType === 'Pong') {
+						navigate('/pongremote');
+					}
+					else if (selectedGameType === 'Asteroids') {
+						navigate('/asteroidsremote');
+					}
 				} else {
 					setTimeout(() => {
 						console.log('passou aqui 2', result);
