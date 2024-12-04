@@ -460,7 +460,10 @@ export default function DashBoard() {
 			<div class="chat-box">
 				<div class="chat-header">
 					<span>${shortName} Live-Chat</span>
-					<button class="invite-btn">Invite Game</button>
+					<img src="/static/media/icons/pongIcon.png" class="invite-btn" 
+					title="Invite to a Pong game"
+                     style="width: 20px; height: 20px; cursor: pointer; 
+                            filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);">
 					<div>
 						<button class="minimize-btn">-</button>
 						<button class="close-btn">&times;</button>
