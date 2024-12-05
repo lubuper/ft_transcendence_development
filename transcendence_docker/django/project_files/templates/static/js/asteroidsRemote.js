@@ -1098,8 +1098,8 @@ class Game {
 		if (moveData.rotation === 'right') {
 			this.player2.rotation.z -= 0.05;
 		}
-		if (moveData.thruster) {
-		const directionX = Math.sin(this.player2.rotation.z);
+		if (moveData.thruster === 'on') {
+			const directionX = Math.sin(this.player2.rotation.z);
 			const directionY = -Math.cos(this.player2.rotation.z);
 			this.player2VelocityX += directionX * 0.02;
 			this.player2VelocityY += directionY * 0.02;
@@ -1248,6 +1248,10 @@ class Game {
 					this.player1VelocityX *= normalizationFactor;
 					this.player1VelocityY *= normalizationFactor;
 				}
+				this.sendPlayerMove({
+					thruster: 'on',
+					amount: { x: this.player1VelocityX, y: this.player1VelocityY},
+				})
 			}
 			if (this.keysPressed['e'] && this.shield1.lifetime > 0) {
 				this.shield1.lifetime--;
@@ -1373,22 +1377,28 @@ class Game {
 			}
 			this.checkBoundaries(collisionBox);
 		});
-		this.asteroids.forEach(sphere => {
-			sphere.position.x += sphere.velocity.x;
-			sphere.position.y += sphere.velocity.y;
-			sphere.rotation.x += sphere.rotationSpeed.x;
-			sphere.rotation.y += sphere.rotationSpeed.y;
-			sphere.rotation.z += sphere.rotationSpeed.z;
-			this.checkBoundaries(sphere);
-		});
-		this.sAsteroids.forEach(sphere => {
-			sphere.position.x += sphere.velocity.x;
-			sphere.position.y += sphere.velocity.y;
-			sphere.rotation.x += sphere.rotationSpeed.x;
-			sphere.rotation.y += sphere.rotationSpeed.y;
-			sphere.rotation.z += sphere.rotationSpeed.z;
-			this.checkBoundaries(sphere);
-		});
+		if (thisUser === gameHost) { //testing
+			this.asteroids.forEach(sphere => {
+				sphere.position.x += sphere.velocity.x;
+				sphere.position.y += sphere.velocity.y;
+				sphere.rotation.x += sphere.rotationSpeed.x;
+				sphere.rotation.y += sphere.rotationSpeed.y;
+				sphere.rotation.z += sphere.rotationSpeed.z;
+				this.checkBoundaries(sphere);
+			});
+			this.sAsteroids.forEach(sphere => {
+				sphere.position.x += sphere.velocity.x;
+				sphere.position.y += sphere.velocity.y;
+				sphere.rotation.x += sphere.rotationSpeed.x;
+				sphere.rotation.y += sphere.rotationSpeed.y;
+				sphere.rotation.z += sphere.rotationSpeed.z;
+				this.checkBoundaries(sphere);
+			});
+			this.sendAsteroidsMove({
+				position: {x: sphere.position.x, y: sphere.position.y},
+				rotation: {x: sphere.rotation.x, y: sphere.rotation.y, z: sphere.rotation.z},
+			});
+		}
 		if (this.explosionGroup.length > 0)
 			this.updateExplosion();
 		// projectilewise code
@@ -1547,11 +1557,11 @@ export default function AsteroidsRemote() {
 			}));
 		};
 
-		game.sendBallMove = (moveBallData) => {
+		game.sendAsteroidsMove = (moveAsteroidsData) => {
 			gameWebsocket.send(JSON.stringify({
-				action: 'update_ball',
+				action: 'update_asteroids',
 				player: gameHost,
-				ball_state: moveBallData,
+				asteroids_state: moveAsteroidsData,
 			}));
 		};
 

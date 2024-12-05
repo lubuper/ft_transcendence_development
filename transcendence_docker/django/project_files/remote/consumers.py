@@ -158,11 +158,11 @@ class GamePongConsumer(AsyncWebsocketConsumer):
             'move_data': event['move_data'],
         }))
 
-    async def update_ball(self, event):
-        # Send ball state to WebSocket clients
+    async def update_asteroids(self, event):
+        # Send asteroids state to WebSocket clients
         await self.send(text_data=json.dumps({
-            'action': 'update_ball',
-            'ball_state': event['ball_state'],
+            'action': 'update_asteroids',
+            'asteroids_state': event['asteroids_state'],
         }))
 
     async def notify_players(self):
@@ -312,13 +312,13 @@ class GameAsteroidsConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-        if action == 'update_ball':
-            # Broadcast ball state to all clients
+        if action == 'update_asteroids':
+            # Broadcast asteroids state to all clients
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
-                    'type': 'update_ball',
-                    'ball_state': data.get('ball_state'),
+                    'type': 'update_asteroids',
+                    'asteroids_state': data.get('asteroids_state'),
                 }
             )
 
@@ -340,11 +340,11 @@ class GameAsteroidsConsumer(AsyncWebsocketConsumer):
             'move_data': event['move_data'],
         }))
 
-    async def update_ball(self, event):
-        # Send ball state to WebSocket clients
+    async def update_asteroids(self, event):
+        # Send asteroids state to WebSocket clients
         await self.send(text_data=json.dumps({
-            'action': 'update_ball',
-            'ball_state': event['ball_state'],
+            'action': 'update_asteroids',
+            'asteroids_state': event['asteroids_state'],
         }))
 
     async def notify_players(self):
