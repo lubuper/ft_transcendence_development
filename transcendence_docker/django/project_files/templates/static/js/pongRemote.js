@@ -667,7 +667,7 @@ class Game {
 					.start();
 			}
 		}
-		if (!moveData.direction === 'right' && moveData.direction === 'left') {
+		if (!moveData.direction === 'right' && !moveData.direction === 'left') {
 			const tweenBack = new TWEEN.Tween(this.ship2.rotation)
 				.to({ z: THREE.Math.degToRad(-0) }, 400)
 				.easing(TWEEN.Easing.Quadratic.Out)

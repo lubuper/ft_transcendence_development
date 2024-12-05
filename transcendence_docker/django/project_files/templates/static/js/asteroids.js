@@ -1230,6 +1230,10 @@ class Game {
 			}
 			if (this.lvlCompleteScreen) {
 				this.lvlCompleteScreen.material.opacity = 0;
+				this.nextLevelTimer = 0;
+			}
+			else {
+				console.log("cannot find lvlCompleteScreen");
 			}
 			this.displayLevel();
 		}
@@ -1258,6 +1262,7 @@ class Game {
 			}
 			this.nextLevelTimer++;
 			if (this.nextLevelTimer === 200) {
+				this.lvlCompleteScreen.material.opacity = 0;
 				this.levelUp();
 			}
 		}
