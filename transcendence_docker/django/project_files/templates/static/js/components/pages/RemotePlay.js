@@ -4,6 +4,27 @@ export let selectedGameID = null;
 export let otherPlayer = null;
 export let senderPlayer = null;
 
+export async function sendInvitation(sender, receiver, gameName) {
+	const response = await fetch('/send-game-invitation/', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'X-CSRFToken': getCSRFToken(),
+		},
+		body: JSON.stringify({
+			'username': receiver,
+			'game_name': gameName
+		})
+	})
+	if (response.ok) {
+		const resultGame = await response.json();
+		selectedGameID = resultGame.game_id;
+		senderPlayer = sender;
+		otherPlayer = receiver;
+		return resultGame;
+	}
+}
+
 const base = `
 			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative">
                 <div class="card bg-dark text-white mb-3" style="width: 400px;">
@@ -161,23 +182,9 @@ export default function RemotePlay() {
 			return;
 		}
 
-		const response = await fetch('/send-game-invitation/', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded', // or 'application/json'
-				'X-CSRFToken': getCSRFToken(), // Make sure you include your CSRF token
-			},
-			body: JSON.stringify({
-				'username': username,
-				'game_name': selectedGameType
-			})
-		})
-		const result = await response.json();
+		const result = await sendInvitation(dataRemote.username, username, selectedGameType);
 
-		if (response.ok) {
-			selectedGameID = result.game_id;
-			senderPlayer = dataRemote.username;
-			otherPlayer = username;
+		if (result.message === "Game invitation sent successfully!") {
 			returnedMessage.innerHTML = '<p class="text-success">Game invitation sent successfully!</p>';
 			setTimeout(() => {
 				returnedMessage.innerHTML = '<p </p>';
@@ -216,7 +223,7 @@ export default function RemotePlay() {
 				const result = await response.json();
 
 				if (response.ok) {
-					console.log('Game accepted. Redirecting to remote play...');
+					console.log('game id', result.game_id);
 					selectedGameID = result.game_id;
 					otherPlayer = remote_game_invitations.sender__user__username;
 					senderPlayer = otherPlayer;
@@ -249,7 +256,7 @@ export default function RemotePlay() {
 				const result = await response.json();
 
 				if (response.ok) {
-					const gameRejectWebsocket = new WebSocket(`ws://${window.location.host}/ws/game/${result.game_id}/?purpose=reject`);
+					const gameRejectWebsocket = new WebSocket(`ws://${window.location.host}/ws/pong/${result.game_id}/?purpose=reject`);
 					gameRejectWebsocket.onopen = function () {
 						console.log(`WebSocket connected for rejection`);
 						gameRejectWebsocket.close(1001, "Player rejected the game");
@@ -305,8 +312,8 @@ export function getOtherPlayer() {
 	return otherPlayer;
 }
 
-export const setGameVariables = (gameID, sender, other) => {
-	selectedGameID = gameID;
-	senderPlayer = sender;
-	otherPlayer = other;
-  };
+// export const setGameVariables = (gameID, sender, other) => {
+// 	selectedGameID = gameID;
+// 	senderPlayer = sender;
+// 	otherPlayer = other;
+//   };

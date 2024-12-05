@@ -1,6 +1,7 @@
 import { navigate } from '../../helpers/App.js';
 import { setupChat, Initialize, displayMessages, toggleBlockStatus } from './Client.js';
-import { selectedGameType, setGameVariables } from './RemotePlay.js';
+import {selectedGameType, sendInvitation} from "./RemotePlay.js";
+//import {selectedGameType, sendInvitation, setGameVariables} from './RemotePlay.js';
 
 const avatarPaths = [
 	'/static/media/assets/ships/splash/1.png',
@@ -493,23 +494,10 @@ export default function DashBoard() {
 
 		chatBox.querySelector('.invite-btn').addEventListener('click', async function() {
 			event.preventDefault();
-			
-			console.log('Inviting friend:', friendName);
-			const response = await fetch('/send-game-invitation/', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded', // or 'application/json'
-					'X-CSRFToken': getCSRFToken(), // Make sure you include your CSRF token
-				},
-				body: JSON.stringify({
-					'username': friendName,
-					'game_name': selectedGameType
-				})
-			})
-			const result = await response.json();
-	
-			if (response.ok) {
-				setGameVariables(result.game_id, userName, friendName);
+
+			const result = await sendInvitation(userName, friendName, 'Pong');
+
+			if (result.message === "Game invitation sent successfully!") {
 				navigate('/pongremote');
 			} 
 		});

@@ -6,6 +6,7 @@ let thisUser = null;
 let ballController = null;
 let gameAbandoned = false;
 let gameFinished = false;
+let isWaiting = false;
 
 function getCSRFToken() {
 	const name = 'csrftoken';
@@ -175,8 +176,15 @@ class Game {
 
 	cleanup() {
 		//this.sendDisconnect();
+		if (gameFinished === false) {
+			this.sendDisconnect();
+		}
 		thisUser = null;
 		ballController = null;
+		if (isWaiting === true) {
+			isWaiting = false;
+			return;
+		}
 		cancelAnimationFrame(this.animationFrameID);
 		this.cleanUpScore();
 		this.cleanUpHexagons();
@@ -226,9 +234,6 @@ class Game {
 		delete this.loader;
 		this.scene.clear();
 		THREE.Cache.clear();
-		if (gameFinished === false) {
-			this.sendDisconnect();
-		}
 	}
 
 	createHexagon(size, opac) {
@@ -943,15 +948,18 @@ class Game {
 
 export default function PongRemote() {
 	const gameId = getSelectedGameID();
-	const gameWebsocket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/?purpose=join`);
+	console.log('game id quando chega', gameId);
+	const gameWebsocket = new WebSocket(`ws://${window.location.host}/ws/pong/${gameId}/?purpose=join`);
 
 	const game = new Game();
 	gameWebsocket.onmessage = function (event) {
 		const data = JSON.parse(event.data);
 
 		if (data.action === 'waiting') {
+			isWaiting = true;
 			alert('waiting for the other player!');
 		} else if (data.action === 'start_game') {
+			isWaiting = false;
 			thisUser = null;
 			ballController = null;
 			gameAbandoned = false;

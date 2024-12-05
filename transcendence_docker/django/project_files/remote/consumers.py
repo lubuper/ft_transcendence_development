@@ -35,7 +35,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			'sender': sender
 		}))
 
-class GameConsumer(AsyncWebsocketConsumer):
+class GamePongConsumer(AsyncWebsocketConsumer):
     # Store connected players for each game
     connected_players = {}
 
