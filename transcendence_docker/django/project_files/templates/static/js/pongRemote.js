@@ -3,8 +3,6 @@ import {
 	getOtherPlayer,
 	getSelectedGameID,
 	getSenderPlayer,
-	selectedGameType,
-	sendInvitation
 } from "./components/pages/RemotePlay.js";
 import {navigate} from "./helpers/App.js";
 
@@ -405,13 +403,13 @@ class Game {
 		const material_player1 = new THREE.MeshStandardMaterial({ map: this.loader.load('/static/media/assets/metal.png'), side: THREE.DoubleSide, transparent: true, opacity: 0.3 });
 		this.player1 = new THREE.Mesh(this.geometry_player1, material_player1);
 		this.scene.add(this.player1);
-		this.player1.position.set((-this.geox / 2) + 0.1, 0.2, 0);
+		this.player1.position.set((-this.geox / 2) + 0.1, 0, 0);
 
 		this.geometry_player2 = new THREE.BoxGeometry(0.01, 0.5, 0.1);
 		const material_player2 = new THREE.MeshStandardMaterial({ map: this.loader.load('/static/media/assets/metal.png'), side: THREE.DoubleSide, transparent: true, opacity: 0.3 });
 		this.player2 = new THREE.Mesh(this.geometry_player2, material_player2);
 		this.scene.add(this.player2);
-		this.player2.position.set((this.geox / 2) - 0.1, -0.2, 0);
+		this.player2.position.set((this.geox / 2) - 0.1, 0, 0);
 	}
 
 	createBarrier(player) {
@@ -570,7 +568,7 @@ class Game {
 			let trymesh = new THREE.MeshStandardMaterial({ map: texture });
 			this.fbxloader.load(ship1Mesh, (ship) => {
 				let scaleValue = this.adjustShipScale(ship1Number);
-				ship.position.set(-2.7, 0.2, 0);
+				ship.position.set(-2.7, this.player1.position.y, this.player1.z);
 				ship.scale.set(scaleValue, scaleValue, scaleValue);
 				ship.rotation.x = -Math.PI / 2;
 				ship.rotation.y = 3 * Math.PI / 2;
