@@ -162,6 +162,15 @@ class Game {
 	}
 
 	cleanup() {
+		if (gameFinished === false) {
+			this.sendDisconnect();
+		}
+		if (isWaiting === true) {
+			const result = finishInvitation(getSenderPlayer(), getOtherPlayer(), getSelectedGameID());
+			console.log(result);
+			isWaiting = false;
+			return;
+		}
 		thisUser = null;
 		gameHost = null;
 		this.GameIsRunning = false;
@@ -257,9 +266,6 @@ class Game {
 		delete this.audioLoader;
 		delete this.loader;
 		THREE.Cache.clear();
-		if (gameFinished === false) {
-			this.sendDisconnect();
-		}
 	}
 
 	gameOver() {

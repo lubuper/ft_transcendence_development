@@ -569,7 +569,7 @@ class Game {
 			let trymesh = new THREE.MeshStandardMaterial({ map: texture });
 			this.fbxloader.load(ship1Mesh, (ship) => {
 				let scaleValue = this.adjustShipScale(ship1Number);
-				ship.position.set(-2.7, this.player1.position.y, this.player1.z);
+				ship.position.set(-2.7, this.player1.position.y, this.player1.position.z);
 				ship.scale.set(scaleValue, scaleValue, scaleValue);
 				ship.rotation.x = -Math.PI / 2;
 				ship.rotation.y = 3 * Math.PI / 2;
