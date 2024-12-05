@@ -139,10 +139,10 @@ class Game {
 		this.createBall();
 		this.createPlayers();
 		this.createModels(this.ship1Number, this.ship2Number);
-		this.camerap1.position.set(this.player1.position.x - 2, this.player1.position.y, this.player1.position.z - 1);
+		this.camerap1.position.set(this.player1.position.x - 2, this.player1.position.y + 0.2, this.player1.position.z - 1);
 		this.camerap1.lookAt(this.initialpos);
 		this.camerap1.rotation.z = 4.891;
-		this.camerap2.position.set(this.player2.position.x + 2, this.player2.position.y, this.player2.position.z - 1);
+		this.camerap2.position.set(this.player2.position.x + 2, this.player2.position.y - 0.2, this.player2.position.z - 1);
 		this.camerap2.lookAt(this.initialpos);
 		this.camerap2.rotation.z = 1.75;
 		this.cameratop3.position.set(0, 0, this.player1.position.z - 7);
