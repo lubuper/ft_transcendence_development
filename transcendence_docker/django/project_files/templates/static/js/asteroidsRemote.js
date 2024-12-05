@@ -6,6 +6,7 @@ let thisUser = null;
 let gameHost = null;
 let gameAbandoned = false;
 let gameFinished = false;
+let isWaiting = false;
 
 function getCSRFToken() {
 	const name = 'csrftoken';
@@ -1084,6 +1085,38 @@ class Game {
 		this.explosionGroup.push(explosion);
 	}
 
+	updatePlayer2Move(moveData) {
+		if (moveData.rotation === 'left') {
+			this.player2.rotation.z += 0.05;
+		}
+		if (moveData.rotation === 'right') {
+			this.player2.rotation.z -= 0.05;
+		}
+		if (moveData.thruster) {
+		const directionX = Math.sin(this.player2.rotation.z);
+			const directionY = -Math.cos(this.player2.rotation.z);
+			this.player2VelocityX += directionX * 0.02;
+			this.player2VelocityY += directionY * 0.02;
+			const speed = Math.sqrt(this.player2VelocityX * this.player2VelocityX + this.player2VelocityY * this.player2VelocityY);
+			if (speed > this.maxSpeed) {
+				const normalizationFactor = this.maxSpeed / speed;
+				this.player2VelocityX *= normalizationFactor;
+				this.player2VelocityY *= normalizationFactor;
+			}
+		}
+	}
+
+	updateScoreOtherPlayer(scoreData) {
+		if (scoreData.score === thisUser) {
+			//this.lives1
+			//this.updateLives thingy
+		}
+		else {
+			//this.lives2
+			//this.updateLives thingy
+		}
+	}
+
 	animate() {
 		if (this.GameIsRunning === false) {
 			cancelAnimationFrame(this.animate);
@@ -1104,7 +1137,7 @@ class Game {
 			}
 		}
 		if (this.player2IsActive) { // REMOTE: player2 position
-			if (this.keysPressed['j']) {
+			/* if (this.keysPressed['j']) {
 				this.player2.rotation.z += 0.05;
 			}
 			else if (this.keysPressed['l']) {
@@ -1121,7 +1154,7 @@ class Game {
 					this.player2VelocityX *= normalizationFactor;
 					this.player2VelocityY *= normalizationFactor;
 				}
-			}
+			} */
 			if (this.keysPressed['o'] && this.shield2.lifetime > 0) {
 				this.shield2.lifetime--;
 			}
@@ -1186,9 +1219,17 @@ class Game {
 		if (this.player1IsActive) {  // REMOTE: player1 position
 			if (this.keysPressed['a']) {
 				this.player1.rotation.z += 0.05;
+				this.sendPlayerMove({
+					rotation: 'left',
+					amount: { z: this.player1.rotation.z}, 
+				});
 			}
 			else if (this.keysPressed['d']) {
 				this.player1.rotation.z -= 0.05;
+				this.sendPlayerMove({
+					rotation: 'right',
+					amount: { z: this.player1.rotation.z}, 
+				});
 			}
 			if (this.keysPressed['w']) {
 				const directionX = Math.sin(this.player1.rotation.z);
@@ -1430,15 +1471,17 @@ class Game {
 
 export default function AsteroidsRemote() {
 	const gameId = getSelectedGameID();
-	const gameWebsocket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/?purpose=join`);
+	const gameWebsocket = new WebSocket(`ws://${window.location.host}/ws/asteroids/${gameId}/?purpose=join`);
 
 	const game = new Game();
 	gameWebsocket.onmessage = function (event) {
 		const data = JSON.parse(event.data);
 
 		if (data.action === 'waiting') {
+			isWaiting = true;
 			alert('waiting for the other player!');
 		} else if (data.action === 'start_game') {
+			isWaiting = false;
 			thisUser = null;
 			gameHost = null;
 			gameAbandoned = false;

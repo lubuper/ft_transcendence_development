@@ -227,10 +227,11 @@ export default function RemotePlay() {
 					selectedGameID = result.game_id;
 					otherPlayer = remote_game_invitations.sender__user__username;
 					senderPlayer = otherPlayer;
-					if (selectedGameType === 'Pong') {
+					let gameNameExtracted = selectedGameID.match(/[a-zA-Z]+/)[0];
+					if (gameNameExtracted === 'Pong') {
 						navigate('/pongremote');
 					}
-					else if (selectedGameType === 'Asteroids') {
+					else if (gameNameExtracted === 'Asteroids') {
 						navigate('/asteroidsremote');
 					}
 				} else {
@@ -256,7 +257,15 @@ export default function RemotePlay() {
 				const result = await response.json();
 
 				if (response.ok) {
-					const gameRejectWebsocket = new WebSocket(`ws://${window.location.host}/ws/pong/${result.game_id}/?purpose=reject`);
+					let gamePath;
+					let gameNameExtracted = result.game_id.match(/[a-zA-Z]+/)[0];
+					if (gameNameExtracted === 'Pong') {
+						gamePath = 'pong';
+					}
+					else if (gameNameExtracted === 'Asteroids') {
+						gamePath = 'asteroids'
+					}
+					const gameRejectWebsocket = new WebSocket(`ws://${window.location.host}/ws/${gamePath}/${result.game_id}/?purpose=reject`);
 					gameRejectWebsocket.onopen = function () {
 						console.log(`WebSocket connected for rejection`);
 						gameRejectWebsocket.close(1001, "Player rejected the game");
