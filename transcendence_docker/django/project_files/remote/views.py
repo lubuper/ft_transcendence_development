@@ -105,3 +105,34 @@ def reject_game_invitation(request):
             return JsonResponse({'error': 'Game invitation not found'}, status=404)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@csrf_exempt
+def finish_game_invitation(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        username = data.get('username')
+        game_id = data.get('game_id')
+
+        try:
+            receiver = Profile.objects.get(user__username=username)  # Sender of the invitation
+            sender = request.user.profile  # Current user (receiver)
+
+            # Attempt to get the existing game invitation
+            game_invitation = GameInvitation.objects.get(
+                sender=sender,
+                receiver=receiver,
+                game_id=game_id,
+                status='sent'
+            )
+
+            # Update the GameInvitation model to set status to 'rejected'
+            game_invitation.status = 'finish'
+            game_invitation.save()
+
+            return JsonResponse({'message': f'Game invitation finish successfully!', 'game_id': game_invitation.game_id }, status=200)
+        except Profile.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        except GameInvitation.DoesNotExist:
+            return JsonResponse({'error': 'Game invitation not found'}, status=404)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)

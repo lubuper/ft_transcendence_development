@@ -1,5 +1,11 @@
 import { saveMatchHistory } from './components/pages/Dashboard.js';
-import {getOtherPlayer, getSelectedGameID, getSenderPlayer} from "./components/pages/RemotePlay.js";
+import {
+	getOtherPlayer,
+	getSelectedGameID,
+	getSenderPlayer,
+	selectedGameType,
+	sendInvitation
+} from "./components/pages/RemotePlay.js";
 import {navigate} from "./helpers/App.js";
 
 let thisUser = null;
@@ -20,6 +26,24 @@ function getCSRFToken() {
 	return null;
 }
 
+async function finishInvitation(sender, receiver, gameName) {
+	const response = await fetch('/finish-game-invitation/', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-CSRFToken': getCSRFToken() // Ensure CSRF token is sent
+		},
+		body: JSON.stringify({
+			'username': receiver,
+			'game_id': gameName
+		}),
+	})
+
+	if (response.ok) {
+		const resultGame = await response.json();
+		return (resultGame);
+	}
+}
 
 class Game {
 	constructor() {
@@ -182,6 +206,8 @@ class Game {
 		thisUser = null;
 		ballController = null;
 		if (isWaiting === true) {
+			const result = finishInvitation(getSenderPlayer(), getOtherPlayer(), getSelectedGameID());
+			console.log(result);
 			isWaiting = false;
 			return;
 		}
@@ -948,7 +974,6 @@ class Game {
 
 export default function PongRemote() {
 	const gameId = getSelectedGameID();
-	console.log('game id quando chega', gameId);
 	const gameWebsocket = new WebSocket(`ws://${window.location.host}/ws/pong/${gameId}/?purpose=join`);
 
 	const game = new Game();
@@ -980,7 +1005,6 @@ export default function PongRemote() {
 			if (data.player === thisUser) {
 				return;
 			} else {
-				// Update Player 2's position locally
 				game.updatePlayer2Move(moveData);
 			}
 		} else if (data.action === 'update_ball') {
@@ -998,7 +1022,6 @@ export default function PongRemote() {
 			if (data.player === thisUser) {
 				return;
 			} else {
-				// Update Player 2's position locally
 				game.updateScoreOtherPlayer(scoreData);
 			}
 		}
