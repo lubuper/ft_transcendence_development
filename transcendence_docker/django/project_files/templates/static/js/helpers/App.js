@@ -9,7 +9,7 @@ import ErrorPage from '../components/pages/ErrorPage.js';
 import AboutUs from '../components/pages/AboutUs.js';
 import Asteroids from '../asteroids.js';
 import Pong from '../pong.js';
-import PongRemote, {getGameFinished} from '../pongRemote.js';
+import PongRemote, {getGameFinished, getMidGame} from '../pongRemote.js';
 import AsteroidsRemote from '../asteroidsRemote.js'
 import Profile from "../components/pages/Profile.js";
 import ProfileFriend from "../components/pages/ProfileFriend.js";
@@ -97,7 +97,7 @@ export function navigate(path) {
 			} else {
 				if (gameIsActive && currentGameI && typeof currentGameI.cleanup === 'function') {
 					currentGameI.cleanup();
-					if (gameName === 'Pong Remote' && getGameFinished() === false) {
+					if (gameName === 'Pong Remote' && getGameFinished() === false && getMidGame() === true) {
 						const match = {
 							result: `Loss`,
 							score: `Forfeit`,

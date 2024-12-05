@@ -11,6 +11,7 @@ let ballController = null;
 let gameAbandoned = false;
 let gameFinished = false;
 let isWaiting = false;
+let midGame = false;
 
 function getCSRFToken() {
 	const name = 'csrftoken';
@@ -598,6 +599,7 @@ class Game {
 
 	gameOver() {
 		gameFinished = true;
+		midGame = false;
 		this.sendDisconnect();
 		this.isRunning = false;
 		const match = {
@@ -613,6 +615,7 @@ class Game {
 
 	gameWin() {
 		gameFinished = true;
+		midGame = false;
 		this.sendDisconnect();
 		this.isRunning = false;
 		let match = null;
@@ -980,9 +983,11 @@ export default function PongRemote() {
 
 		if (data.action === 'waiting') {
 			isWaiting = true;
+			midGame = false;
 			alert('waiting for the other player!');
 		} else if (data.action === 'start_game') {
 			isWaiting = false;
+			midGame = true;
 			thisUser = null;
 			ballController = null;
 			gameAbandoned = false;
@@ -1071,4 +1076,8 @@ export default function PongRemote() {
 
 export function getGameFinished() {
 	return gameFinished;
+}
+
+export function getMidGame() {
+	return midGame;
 }
