@@ -158,12 +158,12 @@ class GamePongConsumer(AsyncWebsocketConsumer):
             'move_data': event['move_data'],
         }))
 
-    async def update_asteroids(self, event):
-        # Send asteroids state to WebSocket clients
-        await self.send(text_data=json.dumps({
-            'action': 'update_asteroids',
-            'asteroids_state': event['asteroids_state'],
-        }))
+    async def update_ball(self, event):
+            # Send ball state to WebSocket clients
+         await self.send(text_data=json.dumps({
+                'action': 'update_ball',
+                'ball_state': event['ball_state'],
+         }))
 
     async def notify_players(self):
         if len(self.connected_players[self.game_id]) == 2:
