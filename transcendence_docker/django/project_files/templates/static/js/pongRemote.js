@@ -13,6 +13,8 @@ let gameFinished = false;
 let isWaiting = false;
 let midGame = false;
 
+let waitingModal = document.createElement('div');
+
 function getCSRFToken() {
 	const name = 'csrftoken';
 	const cookies = document.cookie.split(';');
@@ -202,14 +204,17 @@ class Game {
 		if (gameFinished === false) {
 			this.sendDisconnect();
 		}
-		thisUser = null;
-		ballController = null;
 		if (isWaiting === true) {
+			if (thisUser === ballController) {
+				document.body.removeChild(waitingModal);
+			}
 			const result = finishInvitation(getSenderPlayer(), getOtherPlayer(), getSelectedGameID());
 			console.log(result);
 			isWaiting = false;
 			return;
 		}
+		thisUser = null;
+		ballController = null;
 		cancelAnimationFrame(this.animationFrameID);
 		this.cleanUpScore();
 		this.cleanUpHexagons();
@@ -976,6 +981,10 @@ class Game {
 export default function PongRemote() {
 	const gameId = getSelectedGameID();
 	const gameWebsocket = new WebSocket(`ws://${window.location.host}/ws/pong/${gameId}/?purpose=join`);
+	//let waitingModal = document.createElement('div');
+	waitingModal.innerHTML = `<div class="vh-100 d-flex flex-column align-items-center justify-content-center text-white">
+		<h5>Waiting for the other opponent...</h5>
+		</div>`;
 
 	const game = new Game();
 	gameWebsocket.onmessage = function (event) {
@@ -984,7 +993,7 @@ export default function PongRemote() {
 		if (data.action === 'waiting') {
 			isWaiting = true;
 			midGame = false;
-			alert('waiting for the other player!');
+			document.body.appendChild(waitingModal);
 		} else if (data.action === 'start_game') {
 			isWaiting = false;
 			midGame = true;
@@ -994,6 +1003,9 @@ export default function PongRemote() {
 			gameFinished = false;
 			ballController = getSenderPlayer();
 			game.fetchShipAndColorRemote().then(() => {
+				if (thisUser === ballController) {
+					document.body.removeChild(waitingModal);
+				}
 				game.init();
 			});
 		} else if (data.action === 'player_left') {
