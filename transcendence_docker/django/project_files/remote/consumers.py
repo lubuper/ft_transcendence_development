@@ -321,6 +321,16 @@ class GameAsteroidsConsumer(AsyncWebsocketConsumer):
                     'asteroids_state': data.get('asteroids_state'),
                 }
             )
+            
+        if action == 'update_sasteroids':
+            # Broadcast SPECIAL asteroids state to all clients
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'update_sasteroids',
+                    'sasteroids_state': data.get('sasteroids_state'),
+                }
+            )
 
         if action == 'update_scores':
             await self.channel_layer.group_send(

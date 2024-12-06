@@ -7,6 +7,8 @@ let gameHost = null;
 let gameAbandoned = false;
 let gameFinished = false;
 let isWaiting = false;
+let waitingModal = document.createElement('div');
+let midGame = false;
 
 function getCSRFToken() {
 	const name = 'csrftoken';
@@ -166,6 +168,9 @@ class Game {
 			this.sendDisconnect();
 		}
 		if (isWaiting === true) {
+			if (thisUser === gameHost) {
+				document.body.removeChild(waitingModal);
+			}
 			const result = finishInvitation(getSenderPlayer(), getOtherPlayer(), getSelectedGameID());
 			console.log(result);
 			isWaiting = false;
@@ -270,6 +275,7 @@ class Game {
 
 	gameOver() {
 		gameFinished = true;
+		midGame = false;
 		this.sendDisconnect();
 		this.GameIsRunning = false;
 		for (let i = 0; i < 1000; i++) {}
@@ -285,6 +291,7 @@ class Game {
 
 	gameWin() {
 		gameFinished = true;
+		midGame = false;
 		this.sendDisconnect();
 		this.GameIsRunning = false;
 		let match = null;
@@ -1385,6 +1392,10 @@ class Game {
 				sphere.rotation.y += sphere.rotationSpeed.y;
 				sphere.rotation.z += sphere.rotationSpeed.z;
 				this.checkBoundaries(sphere);
+				this.sendAsteroidsMove({
+					position: {x: sphere.position.x, y: sphere.position.y},
+					rotation: {x: sphere.rotation.x, y: sphere.rotation.y, z: sphere.rotation.z},
+				});
 			});
 			this.sAsteroids.forEach(sphere => {
 				sphere.position.x += sphere.velocity.x;
@@ -1393,10 +1404,10 @@ class Game {
 				sphere.rotation.y += sphere.rotationSpeed.y;
 				sphere.rotation.z += sphere.rotationSpeed.z;
 				this.checkBoundaries(sphere);
-			});
-			this.sendAsteroidsMove({
-				position: {x: sphere.position.x, y: sphere.position.y},
-				rotation: {x: sphere.rotation.x, y: sphere.rotation.y, z: sphere.rotation.z},
+				this.sendSAsteroidsMove({
+					position: {x: sphere.position.x, y: sphere.position.y},
+					rotation: {x: sphere.rotation.x, y: sphere.rotation.y, z: sphere.rotation.z},
+				});
 			});
 		}
 		if (this.explosionGroup.length > 0)
@@ -1488,22 +1499,29 @@ class Game {
 export default function AsteroidsRemote() {
 	const gameId = getSelectedGameID();
 	const gameWebsocket = new WebSocket(`ws://${window.location.host}/ws/asteroids/${gameId}/?purpose=join`);
-
+	waitingModal.innerHTML = `<div class="vh-100 d-flex flex-column align-items-center justify-content-center text-white">
+		<h5>Waiting for the other opponent...</h5>
+		</div>`;
 	const game = new Game();
 	gameWebsocket.onmessage = function (event) {
 		const data = JSON.parse(event.data);
 
 		if (data.action === 'waiting') {
 			isWaiting = true;
-			alert('waiting for the other player!');
+			midGame = false;
+			document.body.appendChild(waitingModal);
 		} else if (data.action === 'start_game') {
 			isWaiting = false;
+			midGame = true;
 			thisUser = null;
 			gameHost = null;
 			gameAbandoned = false;
 			gameFinished = false;
 			gameHost = getSenderPlayer();
 			game.fetchShipAndColorRemote().then(() => {
+				if (thisUser === gameHost) {
+					document.body.removeChild(waitingModal);
+				}
 				game.init();
 			});
 		} else if (data.action === 'player_left') {
@@ -1564,6 +1582,13 @@ export default function AsteroidsRemote() {
 				asteroids_state: moveAsteroidsData,
 			}));
 		};
+		game.sendSAsteroidsMove = (moveSAsteroidsData) => {
+			gameWebsocket.send(JSON.stringify({
+				action: 'update_sasteroids',
+				player: gameHost,
+				sasteroids_state: moveSAsteroidsData,
+			}));
+		};
 
 		game.sendDisconnect = () => {
 			console.log('to disconnect, is game finish?', gameFinished);
@@ -1588,4 +1613,8 @@ export default function AsteroidsRemote() {
 
 export function getGameFinished() {
 	return gameFinished;
+}
+
+export function getMidGame() {
+	return midGame;
 }

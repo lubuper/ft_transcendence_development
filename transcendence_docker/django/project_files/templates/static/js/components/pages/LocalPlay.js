@@ -122,8 +122,8 @@ export default function LocalPlay(navigate) {
 											<li><i class="fas fa-arrow-right"></i> Move right/bottom: L</li>
 											</ul>
 									</div>
-									<li><i class="fas fa-camera"></i> Cameras toggle: C</li>
-									<li><i class="fas fa-pause"></i> Pause: Spacebar</li>
+									<div><i class="fas fa-camera"></i> Cameras toggle: C</div>
+									<div><i class="fas fa-pause"></i> Pause: Spacebar</div>
 								</div>
 							</div>
 						</div>

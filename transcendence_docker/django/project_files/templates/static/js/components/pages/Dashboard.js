@@ -144,14 +144,17 @@ export default function DashBoard() {
 											<span class="badge bg-success">Games Won</span>
 											<span class="badge bg-danger">Games Lost</span>
 										</div>
-										<div class="col-md-4">
+										<div class="col-md-4 text-center">
 											<canvas id="pongRemoteStatsChart" width="200" height="200"></canvas> <!-- Canvas for Pong Remote Chart -->
+											<p>Remote Play</p>
 										</div>
-										<div class="col-md-4">
+										<div class="col-md-4 text-center">
 											<canvas id="pongAIStatsChart" width="200" height="200"></canvas> <!-- Canvas for Pong AI Chart -->
+											<p>Player vs AI</p>
 										</div>
-										<div class="col-md-4">
+										<div class="col-md-4 text-center">
 											<canvas id="pongLocalStatsChart" width="200" height="200"></canvas> <!-- Canvas for Pong Local Chart -->
+											<p>Local PvP</p>
 										</div>
 									</div>
 								</div>
@@ -170,14 +173,17 @@ export default function DashBoard() {
 											<span class="badge bg-success">Games Won</span>
 											<span class="badge bg-danger">Games Lost</span>
 										</div>
-										<div class="col-md-4">
+										<div class="col-md-4 text-center">
 											<canvas id="asteroidsRemoteStatsChart" width="200" height="200"></canvas> <!-- Canvas for Asteroids Remote Chart -->
+											<p>Remote Play</p>
 										</div>
-										<div class="col-md-4">
+										<div class="col-md-4 text-center">
 											<canvas id="asteroidsAIStatsChart" width="200" height="200"></canvas> <!-- Canvas for Asteroids AI Chart -->
+											<p>Player vs AI</p>
 										</div>
-										<div class="col-md-4">
+										<div class="col-md-4 text-center">
 											<canvas id="asteroidsLocalStatsChart" width="200" height="200"></canvas> <!-- Canvas for Asteroids Local Chart -->
+											<p>Local PvP</p>
 										</div>
 									</div>
 								</div>
