@@ -1,5 +1,5 @@
 const messageCache = {};   
-const chatSockets = {}; // Track active WebSocket connections
+export const chatSockets = {}; // Track active WebSocket connections
 const blockedUsers = []; // Array to store blocked users
 
 function saveBlockedUsers() {
@@ -88,6 +88,12 @@ export function setupChat(friendName, userName) {
 
         if (!messageCache[userName]) {
             messageCache[userName] = [];
+        }
+
+        if (data.type === "game_invitation") {
+            // Handle game invitation message
+            newMessage.classList.add('system-message'); // Use a different class for system messages
+            newMessage.textContent = `${data.sender} ${formattedTime}: ${data.message}`;
         }
 
         // Cache messages and update UI

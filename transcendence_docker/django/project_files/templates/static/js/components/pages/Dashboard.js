@@ -1,5 +1,5 @@
 import { navigate } from '../../helpers/App.js';
-import { setupChat, Initialize, displayMessages, toggleBlockStatus } from './Client.js';
+import { setupChat, Initialize, displayMessages, toggleBlockStatus, chatSockets} from './Client.js';
 import {selectedGameType, sendInvitation} from "./RemotePlay.js";
 //import {selectedGameType, sendInvitation, setGameVariables} from './RemotePlay.js';
 
@@ -504,8 +504,19 @@ export default function DashBoard() {
 			const result = await sendInvitation(userName, friendName, 'Pong');
 
 			if (result.message === "Game invitation sent successfully!") {
+				// Send a WebSocket message to notify the friend
+				const chatKey = `${userName}-${friendName}`;
+				const chatSocket = chatSockets[chatKey];
+		
+				if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+					chatSocket.send(JSON.stringify({
+						type: "game_invitation",
+						sender: userName,
+						message: `${userName} invited you to a Pong game!`
+					}));
+				}
 				navigate('/pongremote');
-			} 
+			}
 		});
 	
 		// Minimize/maximize functionality for the chat box
