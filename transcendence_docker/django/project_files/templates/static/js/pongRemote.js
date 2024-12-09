@@ -981,7 +981,6 @@ class Game {
 export default function PongRemote() {
 	const gameId = getSelectedGameID();
 	const gameWebsocket = new WebSocket(`ws://${window.location.host}/ws/pong/${gameId}/?purpose=join`);
-	//let waitingModal = document.createElement('div');
 	waitingModal.innerHTML = `<div class="vh-100 d-flex flex-column align-items-center justify-content-center text-white">
 		<h5>Waiting for the other opponent...</h5>
 		</div>`;

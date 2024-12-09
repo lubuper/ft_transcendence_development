@@ -319,10 +319,12 @@ def get_data_remote(request):
 			user = request.user
 			try:
 				remote_game_invitations = GameInvitation.objects.filter(receiver__user=request.user, status='sent').values('sender__user__username', 'game_id')
+				match_history = MatchHistory.objects.filter(user=request.user).values('timestamp', 'score', 'result', 'game')
 			except remote_game_invitations.DoesNotExist:
 				return JsonResponse({'error': 'Something went wrong'}, status=400)  # Return error as JSON
 			return JsonResponse({
 			'username': user.username,
+			'match_history': list(match_history),
 			'remote_game_invitations': list(remote_game_invitations)},
 			safe=False)
 	except Exception as e:

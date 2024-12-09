@@ -1,4 +1,5 @@
 import { navigate } from '../../helpers/App.js';
+import { calculateRankedStats } from './Dashboard.js';
 export let selectedGameType = 'Pong';
 export let selectedGameID = null;
 export let otherPlayer = null;
@@ -68,9 +69,23 @@ export async function getDataRemote() {
 export default function RemotePlay() {
 	const $games = document.createElement('div');
 	getDataRemote().then(dataRemote => {
-		console.log("dataRemote: ", dataRemote)
+		console.log("dataRemote: ", dataRemote);
 
-	$games.innerHTML = `
+		let currentGameRank = calculateRankedStats(dataRemote.match_history, "Pong Remote");
+	$games.addEventListener('change', (event) => {
+		if (event.target.name === 'gameType') {
+			event.preventDefault();
+			selectedGameType = document.querySelector('input[name="gameType"]:checked').value;
+			if (selectedGameType === 'Pong') {
+				currentGameRank = calculateRankedStats(dataRemote.match_history, "Pong Remote");
+			} else if (selectedGameType === 'Asteroids') {
+				currentGameRank = calculateRankedStats(dataRemote.match_history, "Asteroids Remote");
+			}
+			updateRankDisplay(currentGameRank);
+		}
+	});
+
+		$games.innerHTML = `
 		<div class="container vh-100 d-flex flex-column align-items-center justify-content-start pt-3">
 			<!-- Top Row for Game Mode and Game Type Cards -->
 			<div class="row w-100 mb-3">
@@ -96,14 +111,14 @@ export default function RemotePlay() {
 							<h5 class="card-title text-center">Invitations</h5>
 								<div class="card-body">
 								${dataRemote.remote_game_invitations.length > 0 ?
-										dataRemote.remote_game_invitations.map(remote_game_invitations => `
+			dataRemote.remote_game_invitations.map(remote_game_invitations => `
 										<p>${remote_game_invitations.sender__user__username} #${remote_game_invitations.game_id}
 										<button id="AcceptRequest-${remote_game_invitations.game_id}" value="${remote_game_invitations.game_id}" type="button" class="btn btn-success btn-sm ml-2">✔️</button>
             							<button id="RejectRequest-${remote_game_invitations.game_id}" value="${remote_game_invitations.game_id}" type="button" class="btn btn-danger btn-sm ml-2">X</button>
             							</p>
 									`).join('') :
-										'<p>You currently have no friend requests.</p>'
-								}
+			'<p>You currently have no game invitations.</p>'
+		}
 								</div>
 						</div>
 					</div>
@@ -111,7 +126,27 @@ export default function RemotePlay() {
 				</div>
 			<!-- Send invitation -->
 			<div class="row w-100 mb-3">
-				<div class="col-md-12">
+				<div class="col-md-6 d-flex align-items-stretch">
+					<div class="card bg-dark text-white w-100" style="border: 1px solid #343a40; opacity: 0.8;">
+						<div class="card-body">
+							<h5 class="card-title text-center">Play with a stranger</h5>
+								<div class="d-flex justify-content-center mt-4" id="currentGameRank">
+								<p class="card-text">
+									Your rank:
+									<img src="/static/media/rank/${currentGameRank.rank}.png" 
+										alt="${currentGameRank.rank}"
+										style="width: 64px; height: 64px; margin-right: 2px;">
+									${currentGameRank.rank}
+								</p>
+								</div>
+								<div class="d-flex justify-content-center mt-4">
+									<button class="btn btn-purple btn-lg mx-5 text-white shadow-lg" id="startRemoteGame">Start Game</button>
+								</div>
+								<div class="card-body" id="returned-message"></div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6 d-flex align-items-stretch">
 					<div class="card bg-dark text-white w-100" style="border: 1px solid #343a40; opacity: 0.8;">
 						<div class="card-body">
 							<h5 class="card-title text-center">Invite a Friend</h5>
@@ -128,7 +163,7 @@ export default function RemotePlay() {
 				</div>
 			</div>
 			<!-- Game Especifications -->
-			<div class="row w-100">
+			<div class="row w-100 mb-3">
 				<!-- Pong Section -->
 				<div class="col-md-6 text-center d-flex flex-column align-items-center">
 					<img src="/static/media/assets/pongsplash.png" alt="Pong Game" class="img-fluid mt-2" style="width: 100%; height: auto;">
@@ -138,6 +173,7 @@ export default function RemotePlay() {
 							<p class="card-text">
 								Move left/top: A<br>
 								Move right/bottom: D<br>
+								To change the camera: C<br>
 							</p>
 						</div>
 					</div>
@@ -160,13 +196,19 @@ export default function RemotePlay() {
 			</div>
 		</div>
 	`;
+	function updateRankDisplay(currentGameRank) {
+		const rankContainer = document.getElementById('currentGameRank');
 
-	$games.addEventListener('change', (event) => {
-		if (event.target.name === 'gameType') {
-			event.preventDefault();
-			selectedGameType = document.querySelector('input[name="gameType"]:checked').value;
-		}
-		});
+		rankContainer.innerHTML = `
+			<p class="card-text">
+				Your rank:
+				<img src="/static/media/rank/${currentGameRank.rank}.png" 
+					alt="${currentGameRank.rank}"
+					style="width: 64px; height: 64px; margin-right: 2px;">
+				${currentGameRank.rank}
+			</p>
+	`;
+	}
 
 	document.getElementById('startRemoteGame').addEventListener('click', async function() {
 		event.preventDefault();
@@ -320,9 +362,3 @@ export function getSenderPlayer() {
 export function getOtherPlayer() {
 	return otherPlayer;
 }
-
-// export const setGameVariables = (gameID, sender, other) => {
-// 	selectedGameID = gameID;
-// 	senderPlayer = sender;
-// 	otherPlayer = other;
-//   };

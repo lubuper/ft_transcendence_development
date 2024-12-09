@@ -1,4 +1,4 @@
-import { currentFriend } from './Dashboard.js';
+import {calculateRankedStats, currentFriend} from './Dashboard.js';
 import {navigate} from "../../helpers/App.js";
 
 function getCSRFToken() {
@@ -36,8 +36,8 @@ export default function ProfileFriend() {
                 throw new Error('Network response was not ok');
             }
             const userFriend = await response.json();
-            const pongRank = calculateRankedStats2(userFriend.match_history, "Pong Remote")
-            const astRank = calculateRankedStats2(userFriend.match_history, "Asteroids Remote")
+            const pongRank = calculateRankedStats(userFriend.match_history, "Pong Remote")
+            const astRank = calculateRankedStats(userFriend.match_history, "Asteroids Remote")
             $ProfileFriendForm.innerHTML = `
             <div class="vh-100 d-flex align-items-center justify-content-start position-relative">
 			<div class="container mt-3 col-md-3">
@@ -52,16 +52,14 @@ export default function ProfileFriend() {
 									<img src="/static/media/rank/${pongRank.rank}.png"
 										alt="${pongRank.rank}"
 										style="width: 64px; height: 64px; margin-right: 2px;">
-									${pongRank.result}
-									<span class="tooltiptext">The game ranking starts after 5 remote matches, Good luck!</span>
 								</p>
+								<p class="card-text">${pongRank.result}</p>
 								<p class="card-text">
 									<img src="/static/media/rank/${astRank.rank}.png"
 										alt="${astRank.rank}"
 										style="width: 64px; height: 64px; margin-right: 2px;">
-									${astRank.result}
-									<span class="tooltiptext">The game ranking starts after 5 remote matches, Good luck!</span>
 								</p>
+								<p class="card-text">${astRank.result}</p>
 							</div>
 						</div>
 						<div class="card bg-dark text-white mb-3">
@@ -127,45 +125,6 @@ export default function ProfileFriend() {
                     }, 1000);
                 }
             });
-
-            function calculateRankedStats2(matchHistory, gameName) {
-                const stats = { wins: 0, total: 0 };
-                matchHistory.forEach(match => {
-                    if (match.game === gameName) {
-                        if (match.result === "win") {
-                            stats.wins++;
-                        }
-                        stats.total++;
-                    }
-                });
-
-                let resultString;
-                let rank;
-
-                if (stats.total < 5) {
-                    resultString = `${gameName}: No rank ${stats.wins}/${stats.total}`;
-                    rank = "NoRank";
-                } else {
-                    const winPercentage = (stats.wins / stats.total) * 100;
-
-                    if (winPercentage <= 20) {
-                        rank = "Bronze";
-                    } else if (winPercentage <= 40) {
-                        rank = "Silver";
-                    } else if (winPercentage <= 60) {
-                        rank = "Gold";
-                    } else if (winPercentage <= 80) {
-                        rank = "Platinum";
-                    } else {
-                        rank = "Diamond";
-                    }
-                    resultString = `${gameName}: ${rank} ${stats.wins}/${stats.total}`;
-                }
-                return {
-                    result: resultString,
-                    rank: rank
-                };
-            }
 
         })
         .catch(error => {
