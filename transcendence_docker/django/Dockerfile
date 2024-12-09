@@ -2,8 +2,8 @@ FROM debian:bullseye
 
 RUN apt-get update && \
     apt upgrade -y && \
-    apt install -y python3-pip netcat && \
-    pip3 install django psycopg2-binary channels_redis
+    apt install -y python3-pip netcat iproute2 net-tools && \
+    pip3 install django psycopg2-binary channels_redis Pillow
 
 
 RUN django-admin startproject transcendence
@@ -12,20 +12,24 @@ WORKDIR /transcendence
 
 COPY project_files/. .
 
-RUN pip3 install Pillow
-RUN pip3 install -v channels==3.0.5
+#RUN pip3 install Pillow
+RUN pip3 install channels daphne
 
 #RUN python3 manage.py migrate
 
 COPY wait_for_db.sh .
+COPY cert_gen.sh .
 RUN chmod +x wait_for_db.sh
+RUN chmod +x cert_gen.sh
 
-EXPOSE 8000
+EXPOSE 8000 443
 
 #CMD ["tail", "-f", "/dev/null"]
 
+RUN python3 manage.py collectstatic --noinput
+
 ENTRYPOINT ["./wait_for_db.sh"]
-CMD ["python3", "manage.py", "runserver"]
+CMD ["sh", "-c", "./cert_gen.sh && python3 manage.py migrate && daphne -b 0.0.0.0 -p 8000 transcendence.asgi:application"]
 
 
 

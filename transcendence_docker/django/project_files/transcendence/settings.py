@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-oo@oma8qn$u6t@ws^%i576%p(7)@qj!ql0psqhq8fyqsta&(!9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [ '0.0.0.0', 'localhost', '10.11.11.1' ]
+ALLOWED_HOSTS = [ '0.0.0.0', 'localhost', '10.0.2.15' ]
 
 
 # Application definition
@@ -44,6 +44,9 @@ INSTALLED_APPS = [
 ]
 
 ASGI_APPLICATION = 'transcendence.asgi.application'
+
+CERT_PATH = '../../etc/certs/self_signed_cert.pem'
+KEY_PATH = '../../etc/certs/self_signed_key.pem'
 
 CHANNEL_LAYERS = {
     "default": {
@@ -188,6 +191,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "templates/static"]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

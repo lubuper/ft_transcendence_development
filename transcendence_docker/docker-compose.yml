@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5432:5432"
+    networks:
+      custom_network:
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
@@ -15,11 +17,25 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    networks:
+      custom_network:
+    environment:
+      HOST_IP: 10.0.2.15
+      DJANGO_SETTINGS_MODULE: transcendence.settings
     depends_on:
       - transcendence_db
-    command: ["sh", "-c", "./wait_for_db.sh && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"]
+    command: ["sh", "-c", "./wait_for_db.sh && ./cert_gen.sh && python3 manage.py migrate && daphne -b 0.0.0.0 -p 8000 transcendence.asgi:application"]
 
   redis:
     image: "redis:alpine"
     ports:
-      - "6370:6379"
+      - "6379:6379"
+    networks:
+      custom_network:
+
+networks:
+  custom_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.2.0/24
