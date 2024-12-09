@@ -676,6 +676,11 @@ class Game {
 				event.preventDefault();
 				if (!this.actionStates.projectile1.pressed && this.player1IsActive) {
 					this.shoot(this.shotType, true, this.player1);
+					this.sendPlayerShoot({
+						position: { x: projectile.position.x, y: projectile.position.y },
+						velocity: { x: projectile.velocity.x, y: projectile.velocity.y },
+						lifetime: projectile.lifetime,
+					});
 				}
 				this.actionStates.projectile1.pressed = true;
 			}
@@ -685,6 +690,9 @@ class Game {
 					this.playSound('/static/media/assets/sounds/shield.mp3', 0.4);
 				}
 				this.shield1.visible = true;
+				this.sendPlayerShield({
+					shieldlife: this.shield1.lifetime,
+				});
 				this.actionStates.shield1.pressed = true;
 			}
 			if (event.key === 'o' && this.player2IsActive && this.shield2.lifetime > 0) {
@@ -1262,6 +1270,9 @@ class Game {
 			}
 			if (this.keysPressed['e'] && this.shield1.lifetime > 0) {
 				this.shield1.lifetime--;
+				this.sendPlayerShield({
+					shieldlife: this.shield1.lifetime,
+				})
 			}
 			else if (this.shield1.lifetime === 0) {
 				this.shield1.visible = false;
@@ -1409,6 +1420,12 @@ class Game {
 					rotation: {x: sphere.rotation.x, y: sphere.rotation.y, z: sphere.rotation.z},
 				});
 			});
+			const projectilesData = this.projectiles.map(projectile => ({
+				position: { x: projectile.position.x, y: projectile.position.y },
+				velocity: { x: projectile.velocity.x, y: projectile.velocity.y },
+				lifetime: projectile.lifetime,
+			}));
+			this.sendPlayerShoot(projectilesData);
 		}
 		if (this.explosionGroup.length > 0)
 			this.updateExplosion();
@@ -1539,29 +1556,46 @@ export default function AsteroidsRemote() {
 				// Update Player 2's position locally
 				game.updatePlayer2Move(moveData);
 			}
-		} else if (data.action === 'update_ball') {
-			const ballData = data.ball_state;
-			if (thisUser === gameHost) {
-				return;
-			} else {
-				game.ball.position.x = ballData.position.x;
-				game.ball.position.y = ballData.position.y;
-				game.ball.velocity.x = ballData.velocity.x;
-				game.ball.velocity.y = ballData.velocity.y;
-			}
-		} else if (data.action === 'update_scores') {
-			const scoreData = data.score;
-			if (data.player === thisUser) {
-				return;
-			} else {
-				// Update Player 2's position locally
-				game.updateScoreOtherPlayer(scoreData);
-			}
-		}
-
+		} else if (data.action === 'update_asteroids') {
+            const asteroidsData = data.asteroids_state;
+            game.updateAsteroids(asteroidsData);
+        } else if (data.action === 'update_sasteroids') {
+            const sAsteroidsData = data.sasteroids_state;
+            game.updateSAsteroids(sAsteroidsData);
+        } else if (data.action === 'update_projectiles') {
+            const projectilesData = data.projectiles;
+            game.updateProjectiles(projectilesData);
+        } else if (data.action === 'update_shield') {
+            const shieldData = data.shield_state;
+            game.updateShield(shieldData);
+        } else if (data.action === 'update_scores') {
+            const scoreData = data.score;
+            if (data.player === thisUser) {
+                return;
+            } else {
+                game.updateScoreOtherPlayer(scoreData);
+            }
+        }
+	
 		game.sendPlayerMove = (moveData) => {
 			gameWebsocket.send(JSON.stringify({
 				action: 'player_move',
+				player: thisUser,
+				move_data: moveData,
+			}));
+		};
+
+		game.sendPlayerShoot = (projectilesData) => {
+			gameWebsocket.send(JSON.stringify({
+				action: 'update_projectiles',
+				player: thisUser,
+				projectiles: projectilesData,
+			}));
+		};
+
+		game.sendPlayerShield = (moveData) => {
+			gameWebsocket.send(JSON.stringify({
+				action: 'shield',
 				player: thisUser,
 				move_data: moveData,
 			}));
@@ -1607,7 +1641,7 @@ export default function AsteroidsRemote() {
 			}
 		}
 
-	}
+	};
 	return game;
 }
 
