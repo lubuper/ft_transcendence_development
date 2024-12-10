@@ -8,6 +8,7 @@ import {navigate} from "./helpers/App.js";
 
 let thisUser = null;
 let ballController = null;
+let ballSpector = null;
 let gameAbandoned = false;
 let gameFinished = false;
 let isWaiting = false;
@@ -25,6 +26,27 @@ function getCSRFToken() {
 		}
 	}
 	return null;
+}
+
+async function findReceiver(gameId) {
+	const response = await fetch('/find-receiver/', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-CSRFToken': getCSRFToken() // Ensure CSRF token is sent
+		},
+		body: JSON.stringify({
+			'game_id': gameId
+		}),
+	})
+
+	if (response.ok) {
+		const resultGame = await response.json();
+		return (resultGame);
+	}
+	else {
+		return ('null');
+	}
 }
 
 async function finishInvitation(sender, receiver, gameName) {
@@ -111,7 +133,14 @@ class Game {
 	}
 
 	async fetchShipAndColorRemote() {
-		const otherPlayer = getOtherPlayer();
+		//const otherPlayer = getOtherPlayer();
+		ballSpector = getOtherPlayer();
+		if (ballSpector === null) {
+			const result = findReceiver(getSelectedGameID());
+			console.log('resultado:', result);
+			ballSpector = result.receiver;
+			console.log('ballSpector:', ballSpector);
+		}
 		try {
 			const response = await fetch('/api/get-ship-and-color-remote/', {
 				method: 'POST',
@@ -120,7 +149,7 @@ class Game {
 					'X-CSRFToken': getCSRFToken() // Ensure CSRF token is sent
 				},
 				body: JSON.stringify({
-					'username_guest': otherPlayer // Send the username in the request body
+					'username_guest': ballSpector // Send the username in the request body
 				}),
 			})
 			if (!response.ok) {
@@ -208,7 +237,7 @@ class Game {
 			if (thisUser === ballController) {
 				document.body.removeChild(waitingModal);
 			}
-			const result = finishInvitation(getSenderPlayer(), getOtherPlayer(), getSelectedGameID());
+			const result = finishInvitation(ballController, ballSpector, getSelectedGameID());
 			console.log(result);
 			isWaiting = false;
 			return;
@@ -961,7 +990,7 @@ class Game {
 				this.updateScore(this.scorePlayer1, this.scorePlayer2);
 				this.resetBall();
 				this.sendScore({
-					score: getOtherPlayer(),
+					score: ballSpector,
 				});
 			}
 		}
@@ -998,6 +1027,7 @@ export default function PongRemote() {
 			midGame = true;
 			thisUser = null;
 			ballController = null;
+			ballSpector = null;
 			gameAbandoned = false;
 			gameFinished = false;
 			ballController = getSenderPlayer();

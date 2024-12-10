@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import GameInvitation
+from .models import GameInvitation, GameByRank
 from firstApp.models import Profile
 import json
 import random
@@ -134,5 +134,107 @@ def finish_game_invitation(request):
             return JsonResponse({'error': 'User not found'}, status=404)
         except GameInvitation.DoesNotExist:
             return JsonResponse({'error': 'Game invitation not found'}, status=404)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@csrf_exempt
+def start_game_by_rank(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            rank = data.get('rank')
+            game_name = data.get('game_name')
+
+            try:
+                currentUser = request.user.profile
+            except Profile.DoesNotExist:
+                return JsonResponse({'error': 'User profile not found'}, status=404)
+
+            second_rank = {
+                'NoRank': 'Bronze',
+                'Bronze': 'Silver',
+                'Silver': 'Gold',
+                'Gold': 'Platinum',
+                'Platinum': 'Gold',
+            }.get(rank, None)
+
+            if second_rank is None:
+                return JsonResponse({'error': 'Invalid rank provided'}, status=400)
+
+            game_by_rank = GameByRank.objects.filter(
+                game_name=game_name, rank=rank, status='sent'
+            ).order_by('created').first()
+
+            if game_by_rank:
+                game_by_rank.receiver = currentUser
+                game_by_rank.status = 'accepted'
+                game_by_rank.save()
+                sender_username = game_by_rank.sender.user.username
+                return JsonResponse({
+                    'message': 'Game invitation found successfully!',
+                    'game_id': game_by_rank.game_id,
+                    'sender': sender_username,
+                }, status=200)
+
+            game_by_rank = GameByRank.objects.filter(
+                game_name=game_name, rank=second_rank, status='sent'
+            ).order_by('created').first()
+
+            if game_by_rank:
+                game_by_rank.receiver = currentUser
+                game_by_rank.status = 'accepted'
+                game_by_rank.save()
+                sender_username = game_by_rank.sender.user.username
+                return JsonResponse({
+                    'message': 'Game invitation found successfully!',
+                    'game_id': game_by_rank.game_id,
+                    'sender': sender_username,
+                }, status=200)
+
+            random_number = random.randint(100, 999)
+            game_id = f"{game_name}{random_number}"
+            game_by_rank, created = GameByRank.objects.update_or_create(
+                sender=currentUser,
+                receiver=currentUser,
+                game_id=game_id,
+                defaults={
+                    'game_name': game_name,
+                    'rank': rank,
+                    'status': 'sent',
+                }
+            )
+            if created:
+                return JsonResponse({
+                    'message': 'Game created successfully!',
+                    'game_id': game_by_rank.game_id,
+                }, status=200)
+            else:
+                return JsonResponse({'error': 'Game could not be created!'}, status=400)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+@csrf_exempt
+def find_receiver(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        game_id = data.get('game_id')
+
+        try:
+            game_invitation = GameInvitation.objects.get(game_id=game_id)
+            receiver_username = Profile.objects.get(user=game_invitation.receiver)
+            return JsonResponse({'message': f'Receiver found', 'receiver': receiver_username.username }, status=200)
+        except game_invitation.DoesNotExist:
+            try:
+                game_by_rank = GameByRank.objects.get(game_id=game_id)
+                receiver_username = Profile.objects.get(user=game_invitation.receiver)
+                return JsonResponse({'message': f'Receiver found', 'receiver': receiver_username.username }, status=200)
+            except GameInvitation.DoesNotExist:
+                return JsonResponse({'error': 'No receiver found'}, status=404)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)

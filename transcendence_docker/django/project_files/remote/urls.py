@@ -6,4 +6,6 @@ urlpatterns = [
     path('accept-game-invitation/', views.accept_game_invitation, name='accept_game_invitation'),
     path('reject-game-invitation/', views.reject_game_invitation, name='reject_game_invitation'),
     path('finish-game-invitation/', views.finish_game_invitation, name='finish_game_invitation'),
+    path('start-game-by-rank/', views.start_game_by_rank, name='start_game_by_rank'),
+    path('find-receiver/', views.find_receiver, name='find_receiver'),
 ]

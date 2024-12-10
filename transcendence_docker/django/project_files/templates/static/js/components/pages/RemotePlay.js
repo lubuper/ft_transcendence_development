@@ -140,9 +140,9 @@ export default function RemotePlay() {
 								</p>
 								</div>
 								<div class="d-flex justify-content-center mt-4">
-									<button class="btn btn-purple btn-lg mx-5 text-white shadow-lg" id="startRemoteGame">Start Game</button>
+									<button class="btn btn-purple btn-lg mx-5 text-white shadow-lg" id="startGameByRank">Start Game</button>
 								</div>
-								<div class="card-body" id="returned-message"></div>
+								<div class="card-body" id="returned-message-by-rank"></div>
 						</div>
 					</div>
 				</div>
@@ -196,6 +196,7 @@ export default function RemotePlay() {
 			</div>
 		</div>
 	`;
+
 	function updateRankDisplay(currentGameRank) {
 		const rankContainer = document.getElementById('currentGameRank');
 
@@ -209,6 +210,56 @@ export default function RemotePlay() {
 			</p>
 	`;
 	}
+
+	document.getElementById('startGameByRank').addEventListener('click', async function() {
+			event.preventDefault();
+
+		const returnedMessageByRank = document.getElementById('returned-message-by-rank');
+		const response = await fetch('/start-game-by-rank/', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded', // or 'application/json'
+				'X-CSRFToken': getCSRFToken(), // Make sure you include your CSRF token
+			},
+			body: JSON.stringify({
+				'username': dataRemote.username,
+				'game_name': selectedGameType,
+				'rank': currentGameRank.rank
+			})
+		})
+		console.log('response:', response);
+		const result = await response.json();
+
+		console.log('result:', result);
+		if (response.ok) {
+				returnedMessageByRank.innerHTML = '<p class="text-success">Game invitation sent successfully!</p>';
+				setTimeout(() => {
+					returnedMessageByRank.innerHTML = '<p </p>';
+				}, 2000);
+				if (result.message === 'Game invitation find successfully!') {
+					console.log('aqui 1', result);
+					selectedGameID = result.game_id;
+					senderPlayer = result.sender;
+					otherPlayer = dataRemote.username;
+				} else if (result.message === 'Game created successfully!') {
+					console.log('aqui 2', result);
+					selectedGameID = result.game_id;
+					senderPlayer = dataRemote.username;
+					otherPlayer = null;
+				}
+				if (selectedGameType === 'Pong') {
+					navigate('/pongremote');
+				}
+				else if (selectedGameType === 'Asteroids') {
+					navigate('/asteroidsremote');
+				}
+		} else {
+				returnedMessageByRank.innerHTML = `<p class="text-danger">Failed to send game invitation! ${result.message} </p>`;
+				setTimeout(() => {
+					returnedMessageByRank.innerHTML = '<p </p>';
+				}, 2000);
+		}
+	});
 
 	document.getElementById('startRemoteGame').addEventListener('click', async function() {
 		event.preventDefault();
