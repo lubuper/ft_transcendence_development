@@ -7,6 +7,8 @@ services:
       - "5432:5432"
     networks:
       custom_network:
+    env_file:
+      - .env
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -19,6 +21,8 @@ services:
       - "8000:8000"
     networks:
       custom_network:
+    env_file:
+      - .env
     environment:
       HOST_IP: 10.0.2.15
       DJANGO_SETTINGS_MODULE: transcendence.settings
