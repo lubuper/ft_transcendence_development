@@ -17,3 +17,7 @@ END $$;
 
 -- Grant privileges to the user
 GRANT ALL PRIVILEGES ON DATABASE transcendence_db TO admin;
+
+
+/* NÃO ESTÁ A SER USADO, FOI SUBSTITUIDO PELO initdb.sh.
+Motivo: uso do .env file e das suas variáveis. */

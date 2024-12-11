@@ -7,9 +7,11 @@ services:
       - "5432:5432"
     networks:
       custom_network:
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
   web:
     build:
@@ -19,8 +21,12 @@ services:
       - "8000:8000"
     networks:
       custom_network:
+    env_file:
+      - .env
     environment:
       DJANGO_SETTINGS_MODULE: transcendence.settings
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD}
     depends_on:
       - transcendence_db
     command: ["sh", "-c", "python3 manage.py migrate && daphne -b 0.0.0.0 -p 8000 transcendence.asgi:application"]
