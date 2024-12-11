@@ -22,6 +22,8 @@ services:
     environment:
       HOST_IP: 10.0.2.15
       DJANGO_SETTINGS_MODULE: transcendence.settings
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD}
     depends_on:
       - transcendence_db
     command: ["sh", "-c", "./wait_for_db.sh && ./cert_gen.sh && python3 manage.py migrate && daphne -b 0.0.0.0 -p 8000 transcendence.asgi:application"]

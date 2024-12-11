@@ -15,8 +15,8 @@ python3 manage.py migrate
 python3 manage.py shell << END
 from django.contrib.auth import get_user_model
 User = get_user_model()
-username = 'admin'
-password = 'admin'
+username = os.getenv('DJANGO_SUPERUSER_USERNAME', 'admin')  # Default to 'admin' if not set
+password = os.getenv('DJANGO_SUPERUSER_PASSWORD', 'admin')  # Default to 'admin' if not set
 email = ''
 if not User.objects.filter(username=username).exists():
     User.objects.create_superuser(username=username, email=email, password=password)
