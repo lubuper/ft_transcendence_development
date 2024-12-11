@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-oo@oma8qn$u6t@ws^%i576%p(7)@qj!ql0psqhq8fyqsta&(!9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [ '0.0.0.0', 'localhost', '127.0.0.1' , '10.0.2.15' ]
+ALLOWED_HOSTS = [ '0.0.0.0', 'localhost', '127.0.0.1' , '10.11.12.6' ]
 
 
 # Application definition
@@ -56,6 +56,18 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+SECURE_SSL_REDIRECT = False  # Redirect HTTP to HTTPS
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Trust X-Forwarded-Proto header from NGINX
+
+# Ensure cookies are only sent over HTTPS
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+# HSTS settings (optional)
+SECURE_HSTS_SECONDS = 31536000  # 1 year in seconds
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
 
 
 MIDDLEWARE = [

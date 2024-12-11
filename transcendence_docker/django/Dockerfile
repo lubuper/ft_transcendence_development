@@ -18,9 +18,7 @@ RUN pip3 install channels daphne
 #RUN python3 manage.py migrate
 
 COPY wait_for_db.sh .
-COPY cert_gen.sh .
 RUN chmod +x wait_for_db.sh
-RUN chmod +x cert_gen.sh
 
 EXPOSE 8000 443
 
@@ -29,8 +27,6 @@ EXPOSE 8000 443
 RUN python3 manage.py collectstatic --noinput
 
 ENTRYPOINT ["./wait_for_db.sh"]
-CMD ["sh", "-c", "./cert_gen.sh && python3 manage.py migrate && daphne -b 0.0.0.0 -p 8000 transcendence.asgi:application"]
-
 
 
 

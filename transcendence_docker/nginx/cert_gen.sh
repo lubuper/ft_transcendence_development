@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Get the machine's IP address (assumes eth0 is the network interface)
-#IP_ADDRESS=$(hostname -I | awk '{print $1}')
-HOST_IP="10.0.2.15"
+HOST_IP=$(hostname -I | awk '{print $1}')
+#HOST_IP="10.11.12.6"
 echo "Host IP: $HOST_IP"
 
 # If you prefer to use a custom domain name instead of IP, you can define it manually

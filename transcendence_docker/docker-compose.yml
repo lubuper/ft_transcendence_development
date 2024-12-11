@@ -20,11 +20,22 @@ services:
     networks:
       custom_network:
     environment:
-      HOST_IP: 10.0.2.15
       DJANGO_SETTINGS_MODULE: transcendence.settings
     depends_on:
       - transcendence_db
-    command: ["sh", "-c", "./wait_for_db.sh && ./cert_gen.sh && python3 manage.py migrate && daphne -b 0.0.0.0 -p 8000 transcendence.asgi:application"]
+    command: ["sh", "-c", "python3 manage.py migrate && daphne -b 0.0.0.0 -p 8000 transcendence.asgi:application"]
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+      - "8443:443"
+    networks:
+      custom_network:
+    depends_on:
+      - transcendence_db
 
   redis:
     image: "redis:alpine"
@@ -36,6 +47,3 @@ services:
 networks:
   custom_network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 10.0.0.0/8
