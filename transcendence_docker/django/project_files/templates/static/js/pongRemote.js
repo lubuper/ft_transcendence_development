@@ -49,7 +49,7 @@ async function findReceiver(gameId) {
 	}
 }
 
-async function finishInvitation(sender, receiver, gameName) {
+async function finishInvitation(sender, receiver, gameId) {
 	const response = await fetch('/finish-game-invitation/', {
 		method: 'POST',
 		headers: {
@@ -58,7 +58,7 @@ async function finishInvitation(sender, receiver, gameName) {
 		},
 		body: JSON.stringify({
 			'username': receiver,
-			'game_id': gameName
+			'game_id': gameId
 		}),
 	})
 
@@ -133,14 +133,6 @@ class Game {
 	}
 
 	async fetchShipAndColorRemote() {
-		//const otherPlayer = getOtherPlayer();
-		ballSpector = getOtherPlayer();
-		if (ballSpector === null) {
-			const result = findReceiver(getSelectedGameID());
-			console.log('resultado:', result);
-			ballSpector = result.receiver;
-			console.log('ballSpector:', ballSpector);
-		}
 		try {
 			const response = await fetch('/api/get-ship-and-color-remote/', {
 				method: 'POST',
@@ -1015,7 +1007,7 @@ export default function PongRemote() {
 		</div>`;
 
 	const game = new Game();
-	gameWebsocket.onmessage = function (event) {
+	gameWebsocket.onmessage = async function (event) {
 		const data = JSON.parse(event.data);
 
 		if (data.action === 'waiting') {
@@ -1031,6 +1023,11 @@ export default function PongRemote() {
 			gameAbandoned = false;
 			gameFinished = false;
 			ballController = getSenderPlayer();
+			ballSpector = getOtherPlayer();
+			if (ballSpector === null) {
+				const result = await findReceiver(getSelectedGameID());
+				ballSpector = result.receiver;
+			}
 			game.fetchShipAndColorRemote().then(() => {
 				if (thisUser === ballController) {
 					document.body.removeChild(waitingModal);
@@ -1095,17 +1092,16 @@ export default function PongRemote() {
 		};
 
 		game.sendDisconnect = () => {
-			console.log('to disconnect, is game finish?', gameFinished);
 			if (gameFinished === true) {
-				console.log('to disconnect, entrou aqui', gameFinished);
+				gameWebsocket.close();
 				gameWebsocket.onclose = function () {
-					console.log(`Chat socket closed for ${gameId}`);
+					console.log(`game socket closed for ${gameId}`);
 					delete gameWebsocket[gameId];
 				};
 			} else {
 				gameWebsocket.close(1000, "Player left the page");
 				gameWebsocket.onclose = function () {
-					console.log(`Chat socket closed for left ${gameId}`);
+					console.log(`game socket closed for left ${gameId}`);
 					delete gameWebsocket[gameId];
 				};
 			}

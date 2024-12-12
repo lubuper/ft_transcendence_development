@@ -113,6 +113,12 @@ def finish_game_invitation(request):
         username = data.get('username')
         game_id = data.get('game_id')
 
+        game_by_rank = GameByRank.objects.get(game_id=game_id)
+        if game_by_rank:
+            game_by_rank.status = 'finish'
+            game_by_rank.save()
+            return JsonResponse({'message': f'Game by rank finish successfully!', 'game_id': game_by_rank.game_id }, status=200)
+
         try:
             receiver = Profile.objects.get(user__username=username)  # Sender of the invitation
             sender = request.user.profile  # Current user (receiver)
@@ -146,7 +152,7 @@ def start_game_by_rank(request):
             game_name = data.get('game_name')
 
             try:
-                currentUser = request.user.profile
+                currentUser = request.user
             except Profile.DoesNotExist:
                 return JsonResponse({'error': 'User profile not found'}, status=404)
 
@@ -166,10 +172,10 @@ def start_game_by_rank(request):
             ).order_by('created').first()
 
             if game_by_rank:
-                game_by_rank.receiver = currentUser
+                game_by_rank.receiver = currentUser.username
                 game_by_rank.status = 'accepted'
                 game_by_rank.save()
-                sender_username = game_by_rank.sender.user.username
+                sender_username = game_by_rank.sender
                 return JsonResponse({
                     'message': 'Game invitation found successfully!',
                     'game_id': game_by_rank.game_id,
@@ -181,10 +187,10 @@ def start_game_by_rank(request):
             ).order_by('created').first()
 
             if game_by_rank:
-                game_by_rank.receiver = currentUser
+                game_by_rank.receiver = currentUser.username
                 game_by_rank.status = 'accepted'
                 game_by_rank.save()
-                sender_username = game_by_rank.sender.user.username
+                sender_username = game_by_rank.sender
                 return JsonResponse({
                     'message': 'Game invitation found successfully!',
                     'game_id': game_by_rank.game_id,
@@ -194,14 +200,12 @@ def start_game_by_rank(request):
             random_number = random.randint(100, 999)
             game_id = f"{game_name}{random_number}"
             game_by_rank, created = GameByRank.objects.update_or_create(
-                sender=currentUser,
-                receiver=currentUser,
+                sender=currentUser.username,
+                receiver='undefined',
                 game_id=game_id,
-                defaults={
-                    'game_name': game_name,
-                    'rank': rank,
-                    'status': 'sent',
-                }
+                game_name=game_name,
+                rank=rank,
+                status='sent',
             )
             if created:
                 return JsonResponse({
@@ -225,16 +229,11 @@ def find_receiver(request):
         data = json.loads(request.body)
         game_id = data.get('game_id')
 
-        try:
-            game_invitation = GameInvitation.objects.get(game_id=game_id)
-            receiver_username = Profile.objects.get(user=game_invitation.receiver)
-            return JsonResponse({'message': f'Receiver found', 'receiver': receiver_username.username }, status=200)
-        except game_invitation.DoesNotExist:
-            try:
-                game_by_rank = GameByRank.objects.get(game_id=game_id)
-                receiver_username = Profile.objects.get(user=game_invitation.receiver)
-                return JsonResponse({'message': f'Receiver found', 'receiver': receiver_username.username }, status=200)
-            except GameInvitation.DoesNotExist:
-                return JsonResponse({'error': 'No receiver found'}, status=404)
+        game_by_rank = GameByRank.objects.get(game_id=game_id)
+        receiver_username = game_by_rank.receiver
+        if game_by_rank:
+            return JsonResponse({'message': f'Receiver found', 'receiver': receiver_username }, status=200)
+
+        return JsonResponse({'error': 'No receiver found'}, status=404)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)

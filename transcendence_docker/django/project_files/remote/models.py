@@ -31,8 +31,8 @@ class GameInvitation(models.Model):
 		return f"{self.sender}-{self.receiver}-{self.game_id}-{self.status}"
 
 class GameByRank(models.Model):
-	sender = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='game_by_rank_invites_sent')
-	receiver = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='game_by_rank_invites_received')
+	sender = models.CharField(max_length=255)
+	receiver = models.CharField(max_length=255)
 	game_id = models.CharField(max_length=255)
 	game_name = models.CharField(max_length=255)
 	status = models.CharField(max_length=8, null=True, choices=STATUS_CHOICES)

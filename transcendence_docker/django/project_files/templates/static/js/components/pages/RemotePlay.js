@@ -236,13 +236,11 @@ export default function RemotePlay() {
 				setTimeout(() => {
 					returnedMessageByRank.innerHTML = '<p </p>';
 				}, 2000);
-				if (result.message === 'Game invitation find successfully!') {
-					console.log('aqui 1', result);
+				if (result.message === 'Game invitation found successfully!') {
 					selectedGameID = result.game_id;
 					senderPlayer = result.sender;
 					otherPlayer = dataRemote.username;
 				} else if (result.message === 'Game created successfully!') {
-					console.log('aqui 2', result);
 					selectedGameID = result.game_id;
 					senderPlayer = dataRemote.username;
 					otherPlayer = null;
