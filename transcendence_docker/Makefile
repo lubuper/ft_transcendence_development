@@ -7,9 +7,10 @@ up:
 	@echo "Generating https certificates...\n"
 	@chmod +x nginx/cert_gen.sh
 	@./nginx/cert_gen.sh
-	@mv etc nginx
 	@echo "Certificates generated [OK]\n"
 	@echo "Starting containers..."
+	@docker-compose down
+	@docker-compose build --build-arg ALLOWED_HOST=$(grep ALLOWED_HOST .env | cut -d '=' -f2)
 	@docker-compose -p $(NAME) -f $(COMP) up --build
 	@echo "Containers started [OK]\n"
 

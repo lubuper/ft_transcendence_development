@@ -25,7 +25,12 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [ '0.0.0.0', 'localhost', '127.0.0.1' , '10.11.12.6' ]
+ALLOWED_HOSTS = [ '0.0.0.0', 'localhost', '127.0.0.1']
+
+# Get ALLOWED_HOST from environment variable and add to ALLOWED_HOSTS if it's set
+allowed_host_env = os.getenv('ALLOWED_HOST', '')  # Get ALLOWED_HOST, default to empty string if not found
+if allowed_host_env:
+    ALLOWED_HOSTS += allowed_host_env.split(',')
 
 
 # Application definition

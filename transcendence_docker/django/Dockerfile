@@ -17,12 +17,20 @@ RUN pip3 install channels daphne
 
 #RUN python3 manage.py migrate
 
+
+
 COPY wait_for_db.sh .
 RUN chmod +x wait_for_db.sh
 
 EXPOSE 8000 443
 
 #CMD ["tail", "-f", "/dev/null"]
+
+# Add this at the top to define a build argument
+ARG ALLOWED_HOST
+
+# Set the environment variable inside the Docker container
+ENV ALLOWED_HOST=$ALLOWED_HOST
 
 RUN python3 manage.py collectstatic --noinput
 
