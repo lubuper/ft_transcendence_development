@@ -28,7 +28,7 @@ function getCSRFToken() {
 	return null;
 }
 
-async function findReceiver(gameId) {
+export async function findReceiver(gameId) {
 	const response = await fetch('/find-receiver/', {
 		method: 'POST',
 		headers: {
