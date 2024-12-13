@@ -66,7 +66,7 @@ def accept_game_invitation(request):
             game_invitation.status = 'accepted'
             game_invitation.save()
 
-            return JsonResponse({'message': f'Game invitation accepted successfully!', 'game_id': game_invitation.game_id }, status=200)
+            return JsonResponse({'message': f'Game invitation accepted successfully!', 'game_id': game_invitation.game_id, 'sender': game_invitation.sender.user.username, 'receiver': game_invitation.receiver.user.username }, status=200)
         except Profile.DoesNotExist:
             return JsonResponse({'error': 'User not found'}, status=404)
         except GameInvitation.DoesNotExist:

@@ -316,8 +316,8 @@ export default function RemotePlay() {
 				if (response.ok) {
 					console.log('game id', result.game_id);
 					selectedGameID = result.game_id;
-					otherPlayer = remote_game_invitations.sender__user__username;
-					senderPlayer = otherPlayer;
+					otherPlayer = result.receiver;
+					senderPlayer = result.sender;
 					let gameNameExtracted = selectedGameID.match(/[a-zA-Z]+/)[0];
 					if (gameNameExtracted === 'Pong') {
 						navigate('/pongremote');
