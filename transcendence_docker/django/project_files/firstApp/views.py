@@ -37,7 +37,7 @@ def homepage(request):
 	return render(request, 'index.html')
 
 def lobby(request):
-	return render(request, 'remote/lobby.html')
+	return render(request, 'index.html')
 
 @login_required
 def profile(request):

@@ -11,6 +11,7 @@ from .views import create_account, login_view, current_user, logout_view, profil
 
 urlpatterns = [
     path('', views.homepage, name="homepage"),
+    path('remoteplay/', views.homepage, name='remoteplay'),
     path('create-account/', views.create_account, name='create_account'),
     path('login/', login_view, name='login'),
     path('current-user/', current_user, name='current_user'),
