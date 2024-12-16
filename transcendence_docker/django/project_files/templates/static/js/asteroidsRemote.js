@@ -22,7 +22,7 @@
 import { saveMatchHistory } from './components/pages/Dashboard.js';
 import { getOtherPlayer, getSelectedGameID, getSenderPlayer } from "./components/pages/RemotePlay.js";
 import { navigate } from "./helpers/App.js";
-import { findReceiver } from "./pongRemote.js";
+import {findReceiver, finishInvitation, finishRank} from "./pongRemote.js";
 
 let thisUser = null;
 let gameHost = null;
@@ -191,9 +191,15 @@ class Game {
 			if (thisUser === gameHost) {
 				document.body.removeChild(waitingModal);
 			}
-			const result = finishInvitation(getSenderPlayer(), getOtherPlayer(), getSelectedGameID());
-			console.log(result);
+			if (getOtherPlayer() === null) {
+				const resultRank = finishRank(getSenderPlayer(), getSelectedGameID());
+				console.log(resultRank);
+			} else {
+				const resultInv = finishInvitation(getSenderPlayer(), getOtherPlayer(), getSelectedGameID());
+				console.log(resultInv);
+			}
 			isWaiting = false;
+			flagFirstUser = false;
 			return;
 		}
 		thisUser = null;

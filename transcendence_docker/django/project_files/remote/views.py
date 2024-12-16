@@ -113,12 +113,6 @@ def finish_game_invitation(request):
         username = data.get('username')
         game_id = data.get('game_id')
 
-        game_by_rank = GameByRank.objects.get(game_id=game_id)
-        if game_by_rank:
-            game_by_rank.status = 'finish'
-            game_by_rank.save()
-            return JsonResponse({'message': f'Game by rank finish successfully!', 'game_id': game_by_rank.game_id }, status=200)
-
         try:
             receiver = Profile.objects.get(user__username=username)  # Sender of the invitation
             sender = request.user.profile  # Current user (receiver)
@@ -142,6 +136,21 @@ def finish_game_invitation(request):
             return JsonResponse({'error': 'Game invitation not found'}, status=404)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@csrf_exempt
+def finish_game_rank(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        game_id = data.get('game_id')
+
+        game_by_rank = GameByRank.objects.get(game_id=game_id)
+        if game_by_rank:
+            game_by_rank.status = 'finish'
+            game_by_rank.save()
+            return JsonResponse({'message': f'Game by rank finish successfully!', 'game_id': game_by_rank.game_id }, status=200)
+
+        if GameByRank.DoesNotExist:
+            return JsonResponse({'error': 'Game not found'}, status=404)
 
 @csrf_exempt
 def start_game_by_rank(request):

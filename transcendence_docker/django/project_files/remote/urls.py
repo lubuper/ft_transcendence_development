@@ -8,4 +8,5 @@ urlpatterns = [
     path('finish-game-invitation/', views.finish_game_invitation, name='finish_game_invitation'),
     path('start-game-by-rank/', views.start_game_by_rank, name='start_game_by_rank'),
     path('find-receiver/', views.find_receiver, name='find_receiver'),
+    path('finish-game-rank/', views.finish_game_rank, name='finish_game_rank'),
 ]

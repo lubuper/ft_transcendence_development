@@ -50,7 +50,7 @@ export async function findReceiver(gameId) {
 	}
 }
 
-async function finishInvitation(sender, receiver, gameId) {
+export async function finishInvitation(sender, receiver, gameId) {
 	const response = await fetch('/finish-game-invitation/', {
 		method: 'POST',
 		headers: {
@@ -65,6 +65,26 @@ async function finishInvitation(sender, receiver, gameId) {
 
 	if (response.ok) {
 		const resultGame = await response.json();
+		console.log('finish invitation', resultGame);
+		return (resultGame);
+	}
+}
+
+export async function finishRank(sender, gameId) {
+	const response = await fetch('/finish-game-rank/', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-CSRFToken': getCSRFToken() // Ensure CSRF token is sent
+		},
+		body: JSON.stringify({
+			'game_id': gameId
+		}),
+	})
+
+	if (response.ok) {
+		const resultGame = await response.json();
+		console.log('finish rank', resultGame);
 		return (resultGame);
 	}
 }
@@ -235,9 +255,15 @@ class Game {
 			if (thisUser === ballController) {
 				document.body.removeChild(waitingModal);
 			}
-			const result = finishInvitation(ballController, ballSpector, getSelectedGameID());
-			console.log(result);
+			if (getOtherPlayer() === null) {
+				const resultRank = finishRank(getSenderPlayer(), getSelectedGameID());
+				console.log(resultRank);
+			} else {
+				const resultInv = finishInvitation(getSenderPlayer(), getOtherPlayer(), getSelectedGameID());
+				console.log(resultInv);
+			}
 			isWaiting = false;
+			flagFirstUser = false;
 			return;
 		}
 		thisUser = null;
