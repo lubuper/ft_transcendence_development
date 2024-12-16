@@ -36,10 +36,8 @@ from .models import *
 def homepage(request):
 	return render(request, 'index.html')
 
-def lobby(request):
-	return render(request, 'remote/lobby.html')
-
 @login_required
+@csrf_exempt
 def profile(request):
 	user = request.user
 	try:
@@ -56,6 +54,7 @@ def profile(request):
 	})
 
 @login_required
+@csrf_exempt
 def current_user(request):
 	user = request.user
 	try:
@@ -198,6 +197,7 @@ def update_profile(request):
 
 @require_POST
 @login_required
+@csrf_exempt
 def save_match_history(request):
 	if request.method == 'POST':
 			try:
@@ -220,6 +220,7 @@ def save_match_history(request):
 
 
 @login_required
+@csrf_exempt
 def load_match_history(request):
 	try:
 			match_history = MatchHistory.objects.filter(user=request.user).values('timestamp', 'score', 'result', 'game')
@@ -249,6 +250,7 @@ def load_match_history(request):
 			return JsonResponse({'error': str(e)}, status=500)  # Return error as JSON
 
 @login_required
+@csrf_exempt
 def save_customization(request):
 	if request.method == 'POST':
 		try:
@@ -274,6 +276,7 @@ def save_customization(request):
 		except json.JSONDecodeError:
 			return JsonResponse({'error': 'Invalid JSON.'}, status=400)
 
+@csrf_exempt
 def get_ship_and_color(request):
 	if request.user.is_authenticated:
 		try:
@@ -291,6 +294,7 @@ def get_ship_and_color(request):
 		'color': hexagon_color,
 	})
 
+@csrf_exempt
 def get_profile_friend(request):
 	if request.method == 'POST':
 			data = json.loads(request.body)
@@ -314,6 +318,7 @@ def get_profile_friend(request):
 				return JsonResponse({'message': 'User not found'}, status=404)
 	return JsonResponse({'message': 'Invalid request'}, status=400)
 
+@csrf_exempt
 def get_data_remote(request):
 	try:
 			user = request.user
@@ -331,6 +336,7 @@ def get_data_remote(request):
 			return JsonResponse({'error': 'Not logged'}, status=404)  # Return error as JSON
 	return JsonResponse({'error': str(e)}, status=500)
 
+@csrf_exempt
 def get_ship_and_color_remote(request):
 	if request.method == 'POST':
 		try:

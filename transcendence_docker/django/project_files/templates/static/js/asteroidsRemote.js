@@ -1367,7 +1367,7 @@ class Game {
 
 export default function AsteroidsRemote() {
 	const gameId = getSelectedGameID();
-	const gameWebsocket = new WebSocket(`ws://${window.location.host}/ws/asteroids/${gameId}/?purpose=join`);
+	const gameWebsocket = new WebSocket(`wss://${window.location.host}/ws/asteroids/${gameId}/?purpose=join`);
 	waitingModal.innerHTML = `<div class="vh-100 d-flex flex-column align-items-center justify-content-center text-white">
 		<h5>Waiting for the other opponent...</h5>
 		</div>`;
