@@ -2,8 +2,6 @@
 - while gameHost:
 	- gameClient e gameHost nao estao a detectar os tiros um do outro.
 		R: verificar os updates e sends dos projecteis.
-	- gameClient perde as vidas todas se tiver um impacto.
-		R: implementar um delay para prevenir o comportamento.
 
 - while gameClient:
 	- gameClient nao esta a ir buscar a nave do adversario correctamente.
@@ -77,7 +75,7 @@ class Game {
 		this.player2VelocityY = 0;
 		this.player2IsActive = true;
 		this.lives2 = [];
-		this.ship2Number = 8;  // Player 2 ship - change here
+		this.ship2Number = 8;  // Player 2 ship - change here 
 		this.playerHasLost = false;
 		this.player1Loser;
 		this.ship1Number = 7; // Player 1 ship - change here
@@ -124,7 +122,7 @@ class Game {
 	}
 	async fetchShipAndColorRemote() {
 		let otherUser = gameClient;
-		if (flagFirstUser === false) {
+		if(flagFirstUser  === false) {
 			otherUser = gameHost;
 		}
 		try {
@@ -193,7 +191,7 @@ class Game {
 			}
 			if (getOtherPlayer() === null) {
 				const resultRank = finishRank(getSenderPlayer(), getSelectedGameID());
-				console.log(resultRank);
+				HTMLFormControlsCollection.log(resultRank);
 			} else {
 				const resultInv = finishInvitation(getSenderPlayer(), getOtherPlayer(), getSelectedGameID());
 				console.log(resultInv);
@@ -280,11 +278,11 @@ class Game {
 			}
 			}
 		});
-
+	
 		if (document.body.contains(this.renderer.domElement)) {
 		document.body.removeChild(this.renderer.domElement);
 		}
-
+	
 		this.renderer.dispose();
 		this.scene.clear();
 
@@ -309,7 +307,7 @@ class Game {
 		const match = {
 			result: `Loss`,
 			score: `Level ${this.level}`,
-			game: `Asteroids ${gameName}`,
+			game: `Asteroids Remote`,
 		};
 		saveMatchHistory(match);
 		this.cleanup();
@@ -349,7 +347,7 @@ class Game {
 			envMaterial.map = texture;
 			envMaterial.needsUpdate = true;
 			this.env = new THREE.Mesh(envGeometry, envMaterial);
-			this.scene.add(this.env);
+			this.scene.add(this.env);	
 		});
 		const frameGeometry = new THREE.PlaneGeometry(this.boundaryX * 2 * 1.1, this.boundaryY * 2 * 1.2, 1, 1);
 		this.loader.load('/static/media/assets/frame1.png', (frameTexture) => {
@@ -489,9 +487,9 @@ class Game {
 		this.fbxloader.load(ship1Mesh, (ship) => {
 			// Load the texture
 			this.loader.load(ship1Tex, (texture) => {
-				let trymesh = new THREE.MeshLambertMaterial({
+				let trymesh = new THREE.MeshLambertMaterial({ 
 					map: texture, // Apply the loaded texture
-					visible: true
+					visible: true 
 				});
 				let scaleValue = this.adjustShipScale(shipNumber);
 				ship.scale.set(scaleValue, scaleValue, scaleValue);
@@ -526,9 +524,9 @@ class Game {
 		this.fbxloader.load(ship2Mesh, (ship) => {
 			// Load the texture
 			this.loader.load(ship2Tex, (texture) => {
-				let trymesh = new THREE.MeshLambertMaterial({
+				let trymesh = new THREE.MeshLambertMaterial({ 
 					map: texture, // Apply the loaded texture
-					visible: true
+					visible: true 
 				});
 				let scaleValue = this.adjustShipScale(shipNumber);
 				ship.scale.set(scaleValue, scaleValue, scaleValue);
@@ -698,13 +696,13 @@ class Game {
 		};
 		this.scene.add(laser);
 		if (thisUser === gameHost) {
+			this.projectiles1.push(laser);
 			this.sendPlayerShoot({
 				position: { x: laser.position.x, y: laser.position.y },
 				velocity: { x: laser.velocity.x, y: laser.velocity.y },
 				lifetime: laser.lifetime,
 			});
-			this.projectiles1.push(laser);
-
+			
 		} else {
 			this.projectiles2.push(laser);
 			this.sendPlayerShoot({
@@ -722,13 +720,13 @@ class Game {
 
 	checkBoundaries(object) { // REMOTE: send positions
 		const offset = 5; // Define an offset to move the object beyond the boundary
-
+	
 		if (object.position.x > this.boundaryX + offset) {
 			object.position.x = -this.boundaryX - offset;
 		} else if (object.position.x < -this.boundaryX - offset) {
 			object.position.x = this.boundaryX + offset;
 		}
-
+	
 		if (object.position.y > this.boundaryY + offset) {
 			object.position.y = -this.boundaryY - offset;
 		} else if (object.position.y < -this.boundaryY - offset) {
@@ -737,11 +735,14 @@ class Game {
 	}
 
 	player1Death() { // REMOTE send player position and update lives
-		this.playSound('/static/media/assets/sounds/explosion2.mp3', 2);
-		this.scene.remove(this.player1);
-		this.player1Lives--;
-		if (this.checkLives()) {
+		if (this.player1IsActive) {
+			this.playSound('/static/media/assets/sounds/explosion2.mp3', 2);
+			this.scene.remove(this.player1);
+			this.player1Lives--;
+			this.sendScore();
 			this.player1IsActive = false;
+		}
+		if (this.checkLives()) {
 			if (this.player1Lives <= 0) {
 				return;
 			}
@@ -752,17 +753,23 @@ class Game {
 			}, 2000);
 			this.player1VelocityX = 0;
 			this.player1VelocityY = 0;
-			this.player1.position.set(0, 0, 5);
 			this.player1.position.set(-20, 0, 5);
+			this.sendPlayerMove({
+				thruster: 'off',
+				amount: {x: this.player1VelocityX, y: this.player1VelocityY},
+			})
 		}
 	}
 
 	player2Death() { // REMOTE send player position and update lives
-		this.playSound('/static/media/assets/sounds/explosion2.mp3', 2);
-		this.scene.remove(this.player2);
-		this.player2Lives--;
-		if (this.checkLives()) {
+		if (this.player2IsActive) {
+			this.playSound('/static/media/assets/sounds/explosion2.mp3', 2);
+			this.scene.remove(this.player2);
+			this.player2Lives--;
+			this.sendScore();
 			this.player2IsActive = false;
+		}
+		if (this.checkLives()) {
 			if (this.player2Lives <= 0) {
 				return;
 			}
@@ -774,18 +781,22 @@ class Game {
 			this.player2VelocityX = 0;
 			this.player2VelocityY = 0;
 			this.player2.position.set(20, 0, 5);
+			this.sendPlayerMove({
+				thruster: 'off',
+				amount: {x: this.player1VelocityX, y: this.player1VelocityY},
+			})
 		}
 	}
 
 	createShotDisplay() {
 		const geometry = new THREE.PlaneGeometry(0.3, 1);
 		const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-
+	
 		this.shotType1Display = new THREE.Mesh(geometry, material);
 		this.shotType1Display.scale.set(0.8, 2, 4);
 		this.shotType1Display.position.set(36, this.boundaryY + 2, 16);
 		this.scene.add(this.shotType1Display);
-
+	
 		this.shotType2Display = [];
 		const positions = [
 			{ x: 39, y: this.boundaryY + 2, z: 16 },
@@ -862,11 +873,11 @@ class Game {
 		}
 		return 1;
 	}
-
+	
 	displayLevel() {
 		const geometry = new THREE.PlaneGeometry(0.4, 1);
 		const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-
+	
 		if (this.level > 0) {
 				this.levelDisplay = new THREE.Mesh(geometry, material);
 				this.levelDisplay.scale.set(0.8, 2, 4);
@@ -899,7 +910,7 @@ class Game {
 			this.gameWin();
 		}
 	}
-
+	
 	clearObjects(objectArray) {
 		objectArray.forEach((object) => {
 			this.scene.remove(object);
@@ -960,7 +971,7 @@ class Game {
 			const particleSize = Math.random() * 0.2 + 0.1;
 			const particleSpeed = Math.random() * 0.4 + 0.6;
 			const color = colors[Math.floor(Math.random() * colors.length)];
-
+	
 			const particle = new THREE.Mesh(
 				new THREE.PlaneGeometry(particleSize, particleSize),
 				new THREE.MeshBasicMaterial({ color: color, transparent: true })
@@ -978,7 +989,7 @@ class Game {
 			explosion.particles.push(particle);
 			this.scene.add(particle);
 		}
-
+	
 		this.explosionGroup.push(explosion);
 	}
 
@@ -1046,6 +1057,15 @@ class Game {
 		});
 	}
 
+	/* updateProjectiles1 = (projectilesData) => {
+		projectilesData.forEach(proj => {
+			const projectile = createProjectile(this.player1.position, 0); // Recreate projectile
+			projectile.lifetime = proj.lifetime;
+			this.projectiles1.push(projectile); // Add to player's projectile list
+			this.scene.add(projectile); // Add to the Three.js scene
+		});
+	}; */ //this might not work -- review the logic of re-creating the projectile.
+
 	updateProjectiles1(projectilesData) {
 		console.log("projectiles1 array updated")
 		this.projectiles1.forEach((projectile, index) => {
@@ -1069,14 +1089,8 @@ class Game {
 	}
 
 	updateScoreOtherPlayer(scoreData) {
-		if (scoreData.score === thisUser) {
-			//this.lives1
-			//this.updateLives thingy
-		}
-		else {
-			//this.lives2
-			//this.updateLives thingy
-		}
+			this.player1Lives = scoreData.player1Lives;
+			this.player2Lives = scoreData.player2Lives;
 	}
 
 	animate() {
@@ -1196,10 +1210,10 @@ class Game {
 			}
 		}
 		//END OF PLAYER ONE
-		this.player1.position.x += this.player1VelocityX;
+		this.player1.position.x += this.player1VelocityX; 
 		this.player1.position.y += this.player1VelocityY;
 		this.checkBoundaries(this.player1);
-		this.player2.position.x += this.player2VelocityX;
+		this.player2.position.x += this.player2VelocityX; 
 		this.player2.position.y += this.player2VelocityY;
 		this.checkBoundaries(this.player2);
 		this.checkLevelComplete();
@@ -1353,7 +1367,7 @@ class Game {
 
 export default function AsteroidsRemote() {
 	const gameId = getSelectedGameID();
-	const gameWebsocket = new WebSocket(`wss://${window.location.host}/ws/asteroids/${gameId}/?purpose=join`);
+	const gameWebsocket = new WebSocket(`ws://${window.location.host}/ws/asteroids/${gameId}/?purpose=join`);
 	waitingModal.innerHTML = `<div class="vh-100 d-flex flex-column align-items-center justify-content-center text-white">
 		<h5>Waiting for the other opponent...</h5>
 		</div>`;
@@ -1445,7 +1459,7 @@ export default function AsteroidsRemote() {
 				game.updateScoreOtherPlayer(scoreData);
 			}
 		}
-
+	
 		game.sendPlayerMove = (moveData) => {
 			gameWebsocket.send(JSON.stringify({
 				action: 'player_move',
