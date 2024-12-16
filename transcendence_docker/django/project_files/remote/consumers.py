@@ -342,6 +342,16 @@ class GameAsteroidsConsumer(AsyncWebsocketConsumer):
                 }
             )
 
+        if action == 'update_projectiles':
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'update_projectiles',
+                    'player': data.get('player'),
+                    'projectiles': data.get('projectiles'),
+                }
+            )
+
     async def player_move(self, event):
         # Send the move to WebSocket clients
         await self.send(text_data=json.dumps({
@@ -379,6 +389,13 @@ class GameAsteroidsConsumer(AsyncWebsocketConsumer):
             'player': event['player'],
             'score': event['score'],
         }))
+
+    async def update_projectiles(self, event):
+            await self.send(text_data=json.dumps({
+                'action': 'update_projectiles',
+                'player': event['player'],
+                'projectiles': event['projectiles'],
+            }))
 
     async def start_game(self, event):
         await self.send(text_data=json.dumps({

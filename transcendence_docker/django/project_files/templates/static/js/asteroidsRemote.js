@@ -698,7 +698,8 @@ class Game {
 		if (thisUser === gameHost) {
 			this.projectiles1.push(laser);
 			this.sendPlayerShoot({
-				position: { x: laser.position.x, y: laser.position.y },
+				position: { x: laser.position.x, y: laser.position.y, z: laser.position.z },
+				rotation: { z: laser.rotation.z },
 				velocity: { x: laser.velocity.x, y: laser.velocity.y },
 				lifetime: laser.lifetime,
 			});
@@ -706,7 +707,8 @@ class Game {
 		} else {
 			this.projectiles2.push(laser);
 			this.sendPlayerShoot({
-				position: { x: laser.position.x, y: laser.position.y },
+				position: { x: laser.position.x, y: laser.position.y, z: laser.position.z },
+				rotation: { z: laser.rotation.z },
 				velocity: { x: laser.velocity.x, y: laser.velocity.y },
 				lifetime: laser.lifetime,
 			});
@@ -1057,35 +1059,48 @@ class Game {
 		});
 	}
 
-	/* updateProjectiles1 = (projectilesData) => {
-		projectilesData.forEach(proj => {
-			const projectile = createProjectile(this.player1.position, 0); // Recreate projectile
-			projectile.lifetime = proj.lifetime;
-			this.projectiles1.push(projectile); // Add to player's projectile list
-			this.scene.add(projectile); // Add to the Three.js scene
-		});
-	}; */ //this might not work -- review the logic of re-creating the projectile.
-
 	updateProjectiles1(projectilesData) {
-		console.log("projectiles1 array updated")
-		this.projectiles1.forEach((projectile, index) => {
-			projectile.position.x = projectilesData[index].position.x;
-			projectile.position.y = projectilesData[index].position.y;
-			projectile.velocity.x = projectilesData[index].velocity.x;
-			projectile.velocity.y = projectilesData[index].velocity.y;
-			projectile.lifetime = projectilesData[index].lifetime;
-		});
+		let proj_color = 0xff0000;
+		const geometry = new THREE.SphereGeometry(0.3, 3, 3);
+		const material = new THREE.MeshBasicMaterial({ color: proj_color });
+		const laser = new THREE.Mesh(geometry, material);
+		laser.scale.set(0.4, 1, 2);
+		laser.position.x = projectilesData.position.x;
+		laser.position.y = projectilesData.position.y;
+		laser.position.z = projectilesData.position.z;
+		let playerAngle = this.player1.rotation.z + THREE.Math.degToRad(0);
+		laser.rotation.z = playerAngle;
+		const speed = 2;
+		laser.lifetime = projectilesData.lifetime;
+		// laser.isPlayer = true;
+		laser.velocity = {
+			x: Math.sin(playerAngle) * speed,
+			y: -Math.cos(playerAngle) * speed
+		};
+		this.scene.add(laser);
+		this.projectiles1.push(laser);
 	}
 
 	updateProjectiles2(projectilesData) {
-		console.log("projectiles2 array updated")
-		this.projectiles2.forEach((projectile, index) => {
-			projectile.position.x = projectilesData[index].position.x;
-			projectile.position.y = projectilesData[index].position.y;
-			projectile.velocity.x = projectilesData[index].velocity.x;
-			projectile.velocity.y = projectilesData[index].velocity.y;
-			projectile.lifetime = projectilesData[index].lifetime;
-		});
+		let proj_color = 0xff0000;
+		const geometry = new THREE.SphereGeometry(0.3, 3, 3);
+		const material = new THREE.MeshBasicMaterial({ color: proj_color });
+		const laser = new THREE.Mesh(geometry, material);
+		laser.scale.set(0.4, 1, 2);
+		laser.position.x = projectilesData.position.x;
+		laser.position.y = projectilesData.position.y;
+		laser.position.z = projectilesData.position.z;
+		let playerAngle = this.player2.rotation.z + THREE.Math.degToRad(0);
+		laser.rotation.z = playerAngle;
+		const speed = 2;
+		laser.lifetime = projectilesData.lifetime;
+		laser.isPlayer = true;
+		laser.velocity = {
+			x: Math.sin(playerAngle) * speed,
+			y: -Math.cos(playerAngle) * speed
+		};
+		this.scene.add(laser);
+		this.projectiles2.push(laser);
 	}
 
 	updateScoreOtherPlayer(scoreData) {
@@ -1283,32 +1298,12 @@ class Game {
 						this.projectiles1.splice(i, 1);
 						break;
 					}
-				}// sAsteroid checks
-				for (let j = this.sAsteroids.length - 1; j >= 0; j--) {
-					const sAsteroid = this.sAsteroids[j];
-					if (this.checkCollision(projectile, sAsteroid)) {
-						this.playSound('/static/media/assets/sounds/hit.mp3', 0.3);
-						sAsteroid.velocity.x += projectile.velocity.x * 0.2;
-						sAsteroid.velocity.y += projectile.velocity.y * 0.2;
-						this.scene.remove(projectile);
-						this.projectiles1.splice(i, 1);
-						break;
-					}
 				}
 				if (projectile.lifetime <= 0) {
 					this.scene.remove(projectile);
 					this.projectiles1.splice(i, 1);
 				}
 			}
-			this.projectiles1.forEach(projectile => {
-				this.sendPlayerShoot({
-					position: { x: projectile.position.x, y: projectile.position.y },
-					velocity: { x: projectile.velocity.x, y: projectile.velocity.y },
-					lifetime: projectile.lifetime,
-				});
-			});
-		}
-		else {
 			for (let i = this.projectiles2.length - 1; i >= 0; i--) {
 				const projectile = this.projectiles2[i];
 				projectile.position.x += projectile.velocity.x;
@@ -1335,15 +1330,37 @@ class Game {
 						this.projectiles2.splice(i, 1);
 						break;
 					}
-				}// sAsteroid checks
-				for (let j = this.sAsteroids.length - 1; j >= 0; j--) {
-					const sAsteroid = this.sAsteroids[j];
-					if (this.checkCollision(projectile, sAsteroid)) {
-						this.playSound('/static/media/assets/sounds/hit.mp3', 0.3);
-						sAsteroid.velocity.x += projectile.velocity.x * 0.2;
-						sAsteroid.velocity.y += projectile.velocity.y * 0.2;
+				}
+				if (projectile.lifetime <= 0) {
+					this.scene.remove(projectile);
+					this.projectiles2.splice(i, 1);
+				}
+			}
+		}
+		else if (thisUser === gameClient) {
+			for (let i = this.projectiles1.length - 1; i >= 0; i--) {
+				const projectile = this.projectiles1[i];
+				projectile.position.x += projectile.velocity.x;
+				projectile.position.y += projectile.velocity.y;
+				this.checkBoundaries(projectile);
+				projectile.lifetime--;
+				for (let j = this.asteroids.length - 1; j >= 0; j--) {
+					const asteroid = this.asteroids[j];
+					if (this.checkCollision(projectile, asteroid)) {
+						this.playSound('/static/media/assets/sounds/explosion.mp3', 2);
+						this.createExplosion(asteroid.position.x, asteroid.position.y, 5);
+						if (asteroid.size > 1) {
+							asteroid.size -= 1;
+							for (let k = 0; k < 3; k++) {
+								const newAsteroid = this.spawnAsteroid('asteroid', asteroid.position, asteroid.size);
+								newAsteroid.size = asteroid.size;
+								this.asteroids.push(newAsteroid);
+							}
+						}
+						this.scene.remove(asteroid);
+						this.asteroids.splice(j, 1);
 						this.scene.remove(projectile);
-						this.projectiles2.splice(i, 1);
+						this.projectiles1.splice(i, 1);
 						break;
 					}
 				}
@@ -1352,13 +1369,37 @@ class Game {
 					this.projectiles2.splice(i, 1);
 				}
 			}
-			this.projectiles2.forEach(projectile => {
-				this.sendPlayerShoot({
-					position: { x: projectile.position.x, y: projectile.position.y },
-					velocity: { x: projectile.velocity.x, y: projectile.velocity.y },
-					lifetime: projectile.lifetime,
-				});
-			});
+			for (let i = this.projectiles2.length - 1; i >= 0; i--) {
+				const projectile = this.projectiles2[i];
+				projectile.position.x += projectile.velocity.x;
+				projectile.position.y += projectile.velocity.y;
+				this.checkBoundaries(projectile);
+				projectile.lifetime--;
+				for (let j = this.asteroids.length - 1; j >= 0; j--) {
+					const asteroid = this.asteroids[j];
+					if (this.checkCollision(projectile, asteroid)) {
+						this.playSound('/static/media/assets/sounds/explosion.mp3', 2);
+						this.createExplosion(asteroid.position.x, asteroid.position.y, 5);
+						if (asteroid.size > 1) {
+							asteroid.size -= 1;
+							for (let k = 0; k < 3; k++) {
+								const newAsteroid = this.spawnAsteroid('asteroid', asteroid.position, asteroid.size);
+								newAsteroid.size = asteroid.size;
+								this.asteroids.push(newAsteroid);
+							}
+						}
+						this.scene.remove(asteroid);
+						this.asteroids.splice(j, 1);
+						this.scene.remove(projectile);
+						this.projectiles1.splice(i, 1);
+						break;
+					}
+				}
+				if (projectile.lifetime <= 0) {
+					this.scene.remove(projectile);
+					this.projectiles2.splice(i, 1);
+				}
+			}
 		}
 		this.renderer.render(this.scene, this.camera);
 		this.animationFrameID = requestAnimationFrame(this.animate);
@@ -1444,12 +1485,12 @@ export default function AsteroidsRemote() {
 			)
 		} else if (data.action === 'update_projectiles') {
 			const projectilesData = data.projectiles;
-			/* if (data.player === thisUser) {
+			if (data.player === thisUser) {
 				return;
-			} else */ if (data.player === gameHost) {
-				game.updateProjectiles2(projectilesData);
-			} else if (data.player === gameClient) {
+			} else if (data.player === gameHost) {
 				game.updateProjectiles1(projectilesData);
+			} else if (data.player === gameClient) {
+				game.updateProjectiles2(projectilesData);
 			}
 		} else if (data.action === 'update_scores') {
 			const scoreData = data.score;
