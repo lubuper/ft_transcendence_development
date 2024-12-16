@@ -1,3 +1,24 @@
+/* ISSUES:
+- while gameHost:
+	- gameClient e gameHost nao estao a detectar os tiros um do outro.
+		R: verificar os updates e sends dos projecteis.
+	- gameClient perde as vidas todas se tiver um impacto.
+		R: implementar um delay para prevenir o comportamento.
+
+- while gameClient:
+	- gameClient nao esta a ir buscar a nave do adversario correctamente.
+		R: verificar a funcao de fetchship de acordo com o jogador
+	- gameClient e gameHost nao estao a detectar os tiros um do outro.
+		R: verificar os updates e sends dos projecteis.
+	- Asteroids do gameClient nao se dividem, em game logic desaparecem apos 1 tiro.
+		R: verificar a logica das colisoes dos asteroids, os updates de sends.
+	- gameClient nao tem colisoes
+		R: verificar os updates e sends dos projecteis.
+
+
+*/
+
+
 import { saveMatchHistory } from './components/pages/Dashboard.js';
 import { getOtherPlayer, getSelectedGameID, getSenderPlayer } from "./components/pages/RemotePlay.js";
 import { navigate } from "./helpers/App.js";
@@ -11,6 +32,7 @@ let gameFinished = false;
 let isWaiting = false;
 let waitingModal = document.createElement('div');
 let midGame = false;
+let flagFirstUser = false;
 
 function getCSRFToken() {
 	const name = 'csrftoken';
@@ -101,6 +123,10 @@ class Game {
 		this.animate = this.animate.bind(this);
 	}
 	async fetchShipAndColorRemote() {
+		let otherUser = gameClient;
+		if (flagFirstUser === false) {
+			otherUser = gameHost;
+		}
 		try {
 			const response = await fetch('/api/get-ship-and-color-remote/', {
 				method: 'POST',
@@ -109,16 +135,22 @@ class Game {
 					'X-CSRFToken': getCSRFToken() // Ensure CSRF token is sent
 				},
 				body: JSON.stringify({
-					'username_guest': gameClient // Send the username in the request body
+					'username_guest': otherUser // Send the username in the request body
 				}),
 			})
 			if (!response.ok) {
 				throw new Error('Failed to fetch ship and color');
 			}
 			const data = await response.json();
-			this.ship1Number = data.ship_player_one;
-			this.ship2Number = data.ship_player_two;
 			thisUser = data.username;
+			if (thisUser === gameHost) {
+				this.ship1Number = data.ship_player_one;
+				this.ship2Number = data.ship_player_two;
+			} else {
+				this.ship2Number = data.ship_player_one;
+				this.ship1Number = data.ship_player_two;
+			}
+			flagFirstUser = false;
 		} catch (error) {
 			console.error('Error fetching ship and color:', error);
 		}
@@ -593,7 +625,7 @@ class Game {
 	setupEventListeners() { // REMOTE: this.sendActions({
 		this.actionStates = {
 			projectile1: { pressed: false },
-			projectile2: {pressed: false}
+			projectile2: { pressed: false }
 		};
 		window.addEventListener('keydown', (event) => {
 			if (event.key === ' ' && this.player1IsActive && thisUser === gameHost) {
@@ -601,11 +633,6 @@ class Game {
 				if (!this.actionStates.projectile1.pressed && this.player1IsActive) {
 					this.createProjectile(this.player1, 0);
 					this.playSound('/static/media/assets/sounds/laser7.mp3', 0.9);
-					this.sendPlayerShoot({
-						position: { x: this.projectiles1.position.x, y: this.projectiles1.position.y },
-						velocity: { x: this.projectiles1.velocity.x, y: this.projectiles1.velocity.y },
-						lifetime: this.projectiles1.lifetime,
-					});
 				}
 				this.actionStates.projectile1.pressed = true;
 			}
@@ -614,11 +641,6 @@ class Game {
 				if (!this.actionStates.projectile2.pressed && this.player2IsActive) {
 					this.createProjectile(this.player2, 0);
 					this.playSound('/static/media/assets/sounds/laser7.mp3', 0.9);
-					this.sendPlayerShoot({
-						position: { x: this.projectiles2.position.x, y: this.projectiles2.position.y },
-						velocity: { x: this.projectiles2.velocity.x, y: this.projectiles2.velocity.y },
-						lifetime: this.projectiles2.lifetime,
-					});
 				}
 				this.actionStates.projectile2.pressed = true;
 			}
@@ -650,10 +672,6 @@ class Game {
 		}
 	};
 
-	shoot(isPlayer, player) {
-
-	}
-
 	createProjectile(origin, offsetAngle) {
 		let proj_color = 0xff0000;
 		const geometry = new THREE.SphereGeometry(0.3, 3, 3);
@@ -674,9 +692,20 @@ class Game {
 		};
 		this.scene.add(laser);
 		if (thisUser === gameHost) {
+			this.sendPlayerShoot({
+				position: { x: laser.position.x, y: laser.position.y },
+				velocity: { x: laser.velocity.x, y: laser.velocity.y },
+				lifetime: laser.lifetime,
+			});
 			this.projectiles1.push(laser);
+			
 		} else {
 			this.projectiles2.push(laser);
+			this.sendPlayerShoot({
+				position: { x: laser.position.x, y: laser.position.y },
+				velocity: { x: laser.velocity.x, y: laser.velocity.y },
+				lifetime: laser.lifetime,
+			});
 		}
 	}
 
@@ -1012,19 +1041,25 @@ class Game {
 	}
 
 	updateProjectiles1(projectilesData) {
-		this.projectiles1.position.x += projectilesData.position.x;
-		this.projectiles1.position.y += projectilesData.position.y;
-		this.projectiles1.velocity.x += projectilesData.velocity.x;
-		this.projectiles1.velocity.y += projectilesData.velocity.y;
-		this.projectiles1.lifetime += projectilesData.lifetime;
+		console.log("projectiles1 array updated")
+		this.projectiles1.forEach((projectile, index) => {
+			projectile.position.x = projectilesData[index].position.x;
+			projectile.position.y = projectilesData[index].position.y;
+			projectile.velocity.x = projectilesData[index].velocity.x;
+			projectile.velocity.y = projectilesData[index].velocity.y;
+			projectile.lifetime = projectilesData[index].lifetime;
+		});
 	}
 
 	updateProjectiles2(projectilesData) {
-		this.projectiles2.position.x += projectilesData.position.x;
-		this.projectiles2.position.y += projectilesData.position.y;
-		this.projectiles2.velocity.x += projectilesData.velocity.x;
-		this.projectiles2.velocity.y += projectilesData.velocity.y;
-		this.projectiles2.lifetime += projectilesData.lifetime;
+		console.log("projectiles2 array updated")
+		this.projectiles2.forEach((projectile, index) => {
+			projectile.position.x = projectilesData[index].position.x;
+			projectile.position.y = projectilesData[index].position.y;
+			projectile.velocity.x = projectilesData[index].velocity.x;
+			projectile.velocity.y = projectilesData[index].velocity.y;
+			projectile.lifetime = projectilesData[index].lifetime;
+		});
 	}
 
 	updateScoreOtherPlayer(scoreData) {
@@ -1087,6 +1122,7 @@ class Game {
 				})
 			}
 		}
+		//END OF PLAYER TWO
 		if (thisUser === gameHost) {
 			for (let i = this.asteroids.length - 1; i >= 0; i--) {
 				const asteroid = this.asteroids[i];
@@ -1105,10 +1141,6 @@ class Game {
 				}
 			}
 		}
-		this.player2.position.x += this.player2VelocityX; //devemos mandar??
-		this.player2.position.y += this.player2VelocityY;//devemos mandar??
-		this.checkBoundaries(this.player2);
-		//END OF PLAYER TWO
 		// PLAYER ONE
 		if (this.player1IsActive && thisUser === gameHost) {  // REMOTE: player1 position
 			if (this.keysPressed['a']) {
@@ -1157,10 +1189,13 @@ class Game {
 				}
 			}
 		}
-		this.player1.position.x += this.player1VelocityX; //devemos mandar??
-		this.player1.position.y += this.player1VelocityY;//devemos mandar??
-		this.checkBoundaries(this.player1);
 		//END OF PLAYER ONE
+		this.player1.position.x += this.player1VelocityX; 
+		this.player1.position.y += this.player1VelocityY;
+		this.checkBoundaries(this.player1);
+		this.player2.position.x += this.player2VelocityX; 
+		this.player2.position.y += this.player2VelocityY;
+		this.checkBoundaries(this.player2);
 		this.checkLevelComplete();
 		this.asteroids.forEach(sphere => {
 			sphere.position.x += sphere.velocity.x;
@@ -1200,7 +1235,7 @@ class Game {
 		if (this.explosionGroup.length > 0) {
 			this.updateExplosion();
 		}
-		// projectilewise code
+		// projectiles code part
 		if (thisUser === gameHost) {
 			for (let i = this.projectiles1.length - 1; i >= 0; i--) {
 				const projectile = this.projectiles1[i];
@@ -1228,7 +1263,7 @@ class Game {
 						this.projectiles1.splice(i, 1);
 						break;
 					}
-				}
+				}// sAsteroid checks
 				for (let j = this.sAsteroids.length - 1; j >= 0; j--) {
 					const sAsteroid = this.sAsteroids[j];
 					if (this.checkCollision(projectile, sAsteroid)) {
@@ -1245,6 +1280,15 @@ class Game {
 					this.projectiles1.splice(i, 1);
 				}
 			}
+			this.projectiles1.forEach(projectile => {
+				this.sendPlayerShoot({
+					position: { x: projectile.position.x, y: projectile.position.y },
+					velocity: { x: projectile.velocity.x, y: projectile.velocity.y },
+					lifetime: projectile.lifetime,
+				});
+			});
+		}
+		else {
 			for (let i = this.projectiles2.length - 1; i >= 0; i--) {
 				const projectile = this.projectiles2[i];
 				projectile.position.x += projectile.velocity.x;
@@ -1271,7 +1315,7 @@ class Game {
 						this.projectiles2.splice(i, 1);
 						break;
 					}
-				}
+				}// sAsteroid checks
 				for (let j = this.sAsteroids.length - 1; j >= 0; j--) {
 					const sAsteroid = this.sAsteroids[j];
 					if (this.checkCollision(projectile, sAsteroid)) {
@@ -1288,6 +1332,13 @@ class Game {
 					this.projectiles2.splice(i, 1);
 				}
 			}
+			this.projectiles2.forEach(projectile => {
+				this.sendPlayerShoot({
+					position: { x: projectile.position.x, y: projectile.position.y },
+					velocity: { x: projectile.velocity.x, y: projectile.velocity.y },
+					lifetime: projectile.lifetime,
+				});
+			});
 		}
 		this.renderer.render(this.scene, this.camera);
 		this.animationFrameID = requestAnimationFrame(this.animate);
@@ -1307,6 +1358,7 @@ export default function AsteroidsRemote() {
 		if (data.action === 'waiting') {
 			isWaiting = true;
 			midGame = false;
+			flagFirstUser = true;
 			document.body.appendChild(waitingModal);
 		} else if (data.action === 'start_game') {
 			isWaiting = false;
@@ -1372,12 +1424,12 @@ export default function AsteroidsRemote() {
 			)
 		} else if (data.action === 'update_projectiles') {
 			const projectilesData = data.projectiles;
-			if (data.player === thisUser) {
+			/* if (data.player === thisUser) {
 				return;
-			} else if (data.player === gameHost) {
-				game.updateProjectiles1(projectilesData);
-			} else if (data.player === gameClient) {
+			} else */ if (data.player === gameHost) {
 				game.updateProjectiles2(projectilesData);
+			} else if (data.player === gameClient) {
+				game.updateProjectiles1(projectilesData);
 			}
 		} else if (data.action === 'update_scores') {
 			const scoreData = data.score;

@@ -13,6 +13,7 @@ let gameAbandoned = false;
 let gameFinished = false;
 let isWaiting = false;
 let midGame = false;
+let flagFirstUser = false;
 
 let waitingModal = document.createElement('div');
 
@@ -133,6 +134,10 @@ class Game {
 	}
 
 	async fetchShipAndColorRemote() {
+		let otherUser = ballSpector;
+		if (flagFirstUser === false) {
+			otherUser = ballController;
+		}
 		try {
 			const response = await fetch('/api/get-ship-and-color-remote/', {
 				method: 'POST',
@@ -141,7 +146,7 @@ class Game {
 					'X-CSRFToken': getCSRFToken() // Ensure CSRF token is sent
 				},
 				body: JSON.stringify({
-					'username_guest': ballSpector // Send the username in the request body
+					'username_guest': otherUser // Send the username in the request body
 				}),
 			})
 			if (!response.ok) {
@@ -152,6 +157,7 @@ class Game {
 			this.ship2Number = data.ship_player_two;
 			this.hexagoncolor = data.color;
 			thisUser = data.username;
+			flagFirstUser = false;
 		} catch (error) {
 			console.error('Error fetching ship and color:', error);
 		}
@@ -1013,6 +1019,7 @@ export default function PongRemote() {
 		if (data.action === 'waiting') {
 			isWaiting = true;
 			midGame = false;
+			flagFirstUser = true;
 			document.body.appendChild(waitingModal);
 		} else if (data.action === 'start_game') {
 			isWaiting = false;
