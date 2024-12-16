@@ -30,8 +30,8 @@ const base = `
 			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative">
                 <div class="card bg-dark text-white mb-3" style="width: 400px;">
                 <div class="card-body text-center">
-                <img src="/static/media/sadAlien.jpg" 
-                     alt="Sad Alien" 
+                <img src="/static/media/sadAlien.jpg"
+                     alt="Sad Alien"
                      style="width: 300px; height: 300px; border-radius: 10px; margin-bottom: 20px;">
                 <h5 class="card-title">You must be logged to play remote!</h5>
                 </div>
@@ -133,7 +133,7 @@ export default function RemotePlay() {
 								<div class="d-flex justify-content-center mt-4" id="currentGameRank">
 								<p class="card-text">
 									Your rank:
-									<img src="/static/media/rank/${currentGameRank.rank}.png" 
+									<img src="/static/media/rank/${currentGameRank.rank}.png"
 										alt="${currentGameRank.rank}"
 										style="width: 64px; height: 64px; margin-right: 2px;">
 									${currentGameRank.rank}
@@ -203,7 +203,7 @@ export default function RemotePlay() {
 		rankContainer.innerHTML = `
 			<p class="card-text">
 				Your rank:
-				<img src="/static/media/rank/${currentGameRank.rank}.png" 
+				<img src="/static/media/rank/${currentGameRank.rank}.png"
 					alt="${currentGameRank.rank}"
 					style="width: 64px; height: 64px; margin-right: 2px;">
 				${currentGameRank.rank}
@@ -356,7 +356,7 @@ export default function RemotePlay() {
 					else if (gameNameExtracted === 'Asteroids') {
 						gamePath = 'asteroids'
 					}
-					const gameRejectWebsocket = new WebSocket(`ws://${window.location.host}/ws/${gamePath}/${result.game_id}/?purpose=reject`);
+					const gameRejectWebsocket = new WebSocket(`wss://${window.location.host}/ws/${gamePath}/${result.game_id}/?purpose=reject`);
 					gameRejectWebsocket.onopen = function () {
 						console.log(`WebSocket connected for rejection`);
 						gameRejectWebsocket.close(1001, "Player rejected the game");
@@ -387,8 +387,8 @@ export default function RemotePlay() {
 			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative">
                 <div class="card bg-dark text-white mb-3" style="width: 400px;">
                 <div class="card-body text-center">
-                <img src="/static/media/sadAlien.jpg" 
-                     alt="Sad Alien" 
+                <img src="/static/media/sadAlien.jpg"
+                     alt="Sad Alien"
                      style="width: 300px; height: 300px; border-radius: 10px; margin-bottom: 20px;">
                 <h5 class="card-title">Something went wrong! Try again</h5>
                 </div>

@@ -272,7 +272,7 @@ export default function DashBoard() {
 											<span style="color: ${match.result === 'Winner' ? 'green' : 'red'};">
 												${match.result}
 											</span>
-											: ${match.score} 
+											: ${match.score}
 											at ${new Date(match.timestamp).toLocaleString('en-GB', {
 												day: '2-digit',
 												month: '2-digit',
@@ -359,7 +359,7 @@ export default function DashBoard() {
 			</div>
 		</div>
 	`;
-	
+
 	const pongRemoteGamesPlayed = matchHistory.match_history.filter(match => match.game === "Pong Remote").length;
 	const pongRemoteGamesWon = matchHistory.match_history.filter(match => match.game === "Pong Remote" && match.result === 'Win').length;
 	const pongRemoteGamesLost = pongRemoteGamesPlayed - pongRemoteGamesWon;
@@ -441,7 +441,7 @@ export default function DashBoard() {
 			]
 		});
 	}
-	
+
 	createPieChart(document.getElementById('pongRemoteStatsChart').getContext('2d'), 'Pong Remote Game Statistics', [pongRemoteGamesWon, pongRemoteGamesLost]);
 	createPieChart(document.getElementById('pongAIStatsChart').getContext('2d'), 'Pong AI Game Statistics', [pongAIGamesWon, pongAIGamesLost]);
 	createPieChart(document.getElementById('pongLocalStatsChart').getContext('2d'), 'Pong Local Game Statistics', [pongLocalGamesWon, pongLocalGamesLost]);
@@ -467,12 +467,12 @@ export default function DashBoard() {
 		icon.addEventListener('click', (event) => {
 			const friendName = event.currentTarget.getAttribute('data-friend');
 			const userName = event.currentTarget.getAttribute('user');
-	
+
 			if (!icon.classList.contains('display-none')) {
 				chatIcons[index].classList.remove('display-none');
 				icon.classList.add('display-none');
 			}
-	
+
 			openChatBox(friendName, userName);
 		});
 	});
@@ -494,20 +494,20 @@ export default function DashBoard() {
 			currentChatBox.remove();
 			currentChatBox = null;
 		}
-	
+
 		currentFriend = friendName;
 		const shortName = friendName.length > 6 ? friendName.slice(0, 6) : friendName;
 		const chatBox = document.createElement('div');
 		chatBox.classList.add('chat-popup');
 		chatBox.id = `chat-box-${userName}-${friendName}`;
-	
+
 		chatBox.innerHTML = `
 			<div class="chat-box">
 				<div class="chat-header">
 					<span>${shortName} Live-Chat</span>
-					<img src="/static/media/icons/pongIcon.png" class="invite-btn" 
+					<img src="/static/media/icons/pongIcon.png" class="invite-btn"
 					title="Invite to a Pong game"
-                     style="width: 20px; height: 20px; cursor: pointer; 
+                     style="width: 20px; height: 20px; cursor: pointer;
                             filter: invert(29%) sepia(81%) saturate(2034%) hue-rotate(186deg) brightness(95%) contrast(101%);">
 					<div>
 						<button class="minimize-btn">-</button>
@@ -523,13 +523,13 @@ export default function DashBoard() {
 				</div>
 			</div>
 		`;
-	
+
 		document.getElementsByClassName('friends-column')[0].appendChild(chatBox);
 		currentChatBox = chatBox;
-	
+
 		// Display cached messages for the friend, if available
 		displayMessages(friendName, userName);
-	
+
 		// Close the chat box with animation when the X button is clicked
 		chatBox.querySelector('.close-btn').addEventListener('click', () => {
 			chatBox.remove();
@@ -545,7 +545,7 @@ export default function DashBoard() {
 				// Send a WebSocket message to notify the friend
 				const chatKey = `${userName}-${friendName}`;
 				const chatSocket = chatSockets[chatKey];
-		
+
 				if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
 					chatSocket.send(JSON.stringify({
 						type: "game_invitation",
@@ -556,7 +556,7 @@ export default function DashBoard() {
 				navigate('/pongremote');
 			}
 		});
-	
+
 		// Minimize/maximize functionality for the chat box
 		const minimizeButton = chatBox.querySelector('.minimize-btn');
 		const chatContent = chatBox.querySelector('.chat-content');
@@ -564,12 +564,12 @@ export default function DashBoard() {
 			chatContent.classList.toggle('hidden');
 			minimizeButton.textContent = chatContent.classList.contains('hidden') ? '+' : '-';
 		});
-	
+
 		// Initialize WebSocket or reuse existing connection
 		setupChat(friendName, userName);
 	}
 
-	const socket = new WebSocket('ws://' + window.location.host + '/ws/friend-status/');
+	const socket = new WebSocket('wss://' + window.location.host + '/ws/friend-status/');
 
 	// Listen for messages from the server
 	socket.onmessage = function(e) {

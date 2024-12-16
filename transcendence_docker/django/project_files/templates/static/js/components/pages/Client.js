@@ -1,4 +1,4 @@
-const messageCache = {};   
+const messageCache = {};
 export const chatSockets = {}; // Track active WebSocket connections
 const blockedUsers = []; // Array to store blocked users
 
@@ -15,13 +15,13 @@ export function Initialize(friendName, userName) {
 
     const chatKey = `${userName}-${friendName}`;
     const chat = document.getElementsByClassName('chat-popup')
-    
+
     if (chatSockets[chatKey]) {
         console.log(`WebSocket for ${chatKey} already exists.`);
         return; // Prevent multiple connections for the same user-friend pair
     }
 
-    const chatSocket2 = new WebSocket(`ws://${window.location.host}/ws/chat/${userName}/${friendName}/`);
+    const chatSocket2 = new WebSocket(`wss://${window.location.host}/ws/chat/${userName}/${friendName}/`);
     chatSockets[chatKey] = chatSocket2; // Store the WebSocket connection
 
     chatSocket2.addEventListener('message', function (e) {
@@ -69,7 +69,7 @@ export function setupChat(friendName, userName) {
         console.log(`WebSocket already active for ${chatKey}`);
         chatSocket = chatSockets[chatKey]
     }else{
-        chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${userName}/${friendName}/`);
+        chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/${userName}/${friendName}/`);
         chatSockets[chatKey] = chatSocket;
     }
 

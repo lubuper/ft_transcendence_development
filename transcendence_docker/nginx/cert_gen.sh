@@ -10,66 +10,50 @@ DOMAIN_NAME="local.ftranscendence.local"  # You can change this
 
 # Path where you want to store the certificates
 CERT_DIR="./nginx/etc/certs"
-CERT_FILE="$CERT_DIR/self_signed_cert.pem"
-KEY_FILE="$CERT_DIR/self_signed_key.pem"
-OPENSSL_CONF="$CERT_DIR/openssl.cnf"
+CERT_FILE="$CERT_DIR/self_signed_cert.crt"
+KEY_FILE="$CERT_DIR/self_signed_key.key"
 
 # Create the certs directory if it doesn't exist
 mkdir -p $CERT_DIR
 
-# Create a temporary OpenSSL configuration template with placeholders
-cat > $OPENSSL_CONF <<EOF
-[ req ]
-default_bits        = 2048
-default_keyfile     = privkey.pem
-distinguished_name  = req_distinguished_name
-req_extensions      = v3_req
-x509_extensions     = v3_ca
-prompt              = no
+openssl genrsa -out ./nginx/etc/certs/ca.key 2048
+openssl req -x509 -new -nodes -key ./nginx/etc/certs/ca.key -sha256 -days 365 -out ./nginx/etc/certs/ca.crt \
+  -subj "/C=PT/ST=Porto/L=Porto/O=42Porto/OU=IT/CN=MyCustomCA"
 
-[ req_distinguished_name ]
-countryName         = PT
-stateOrProvinceName = Porto
-localityName        = Porto
-organizationName    = 42 Porto
-commonName          = ${HOST_IP}
-emailAddress        = ftranscendence-no-reply@example.com
+openssl genrsa -out ./nginx/etc/certs/server.key 2048
+openssl req -new -key ./nginx/etc/certs/server.key -out ./nginx/etc/certs/server.csr \
+  -subj "/C=PT/ST=Porto/L=Porto/O=42Porto/OU=IT/CN=$HOST_IP"
 
-[ v3_req ]
-basicConstraints    = CA:FALSE
-keyUsage            = digitalSignature, keyEncipherment
-extendedKeyUsage    = serverAuth, clientAuth
-subjectAltName      = @alt_names
+echo "subjectAltName=IP:$HOST_IP" > ./nginx/etc/certs/extfile.cnf
 
-[ v3_ca ]
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid,issuer
-basicConstraints     = critical,CA:true
-keyUsage             = digitalSignature, keyCertSign, cRLSign
-subjectAltName       = @alt_names
+openssl x509 -req -in ./nginx/etc/certs/server.csr -CA ./nginx/etc/certs/ca.crt -CAkey ./nginx/etc/certs/ca.key -CAcreateserial \
+  -out ./nginx/etc/certs/server.crt -days 365 -sha256 -extfile ./nginx/etc/certs/extfile.cnf
 
-[ alt_names ]
-DNS.1 = ${HOST_IP}
-IP.1  = ${HOST_IP}
-EOF
+rm ./nginx/etc/certs/extfile.cnf
 
-echo "Check the content of openssl.cnf before substitution:"
-cat $OPENSSL_CONF
+#openssl req -x509 -nodes -newkey rsa:2048 -keyout $KEY_FILE -out $CERT_FILE -days 365 -config $CERT_DIR/openssl.cnf
 
-echo "Check file path"
-echo $OPENSSL_CONF
-ls -l $CERT_DIR
-cat $CERT_DIR/openssl.cnf
+#if [ -f "$CERT_FILE" ] && [ -f "$KEY_FILE" ]; then
+#    echo "Self-signed certificate generated for IP: $HOST_IP"
+#else
+#    echo "Error: Certificate generation failed."
+#    exit 1
+#fi
+
+#sudo cp $CERT_FILE /usr/local/share/ca-certificates/
+#sudo update-ca-certificates --verbose
+
+#openssl x509 -in ./nginx/etc/certs/self_signed_cert.pem -out ./nginx/etc/certs/self_signed_cert.crt
 
 # Generate the self-signed certificate using the dynamically generated config file
-openssl req -x509 -nodes -newkey rsa:2048 -keyout $KEY_FILE -out $CERT_FILE -days 365 -config $CERT_DIR/openssl.cnf
+#openssl req -x509 -nodes -newkey rsa:2048 -keyout $KEY_FILE -out $CERT_FILE -days 365 -config $CERT_DIR/openssl.cnf
 
-if [ -f "$CERT_FILE" ] && [ -f "$KEY_FILE" ]; then
-    echo "Self-signed certificate generated for IP: $HOST_IP"
-else
-    echo "Error: Certificate generation failed."
-    exit 1
-fi
+#if [ -f "$CERT_FILE" ] && [ -f "$KEY_FILE" ]; then
+#    echo "Self-signed certificate generated for IP: $HOST_IP"
+#else
+#    echo "Error: Certificate generation failed."
+#    exit 1
+#fi
 
 # Path to the .env file
 ENV_FILE=".env"

@@ -62,7 +62,7 @@ CHANNEL_LAYERS = {
     },
 }
 
-SECURE_SSL_REDIRECT = False  # Redirect HTTP to HTTPS
+SECURE_SSL_REDIRECT = True  # Redirect HTTP to HTTPS
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Trust X-Forwarded-Proto header from NGINX
 
 # Ensure cookies are only sent over HTTPS
