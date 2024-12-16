@@ -149,7 +149,7 @@ def finish_game_rank(request):
             game_by_rank.save()
             return JsonResponse({'message': f'Game by rank finish successfully!', 'game_id': game_by_rank.game_id }, status=200)
 
-        if GameByRank.DoesNotExist:c
+        if GameByRank.DoesNotExist:
             return JsonResponse({'error': 'Game not found'}, status=404)
 
 @csrf_exempt
