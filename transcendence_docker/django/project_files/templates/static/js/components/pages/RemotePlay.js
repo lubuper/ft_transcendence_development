@@ -67,6 +67,7 @@ export async function getDataRemote() {
 }
 
 export default function RemotePlay() {
+	selectedGameType = 'Pong';
 	const $games = document.createElement('div');
 	getDataRemote().then(dataRemote => {
 		console.log("dataRemote: ", dataRemote);
@@ -327,7 +328,7 @@ export default function RemotePlay() {
 					}
 				} else {
 					setTimeout(() => {
-						console.log('passou aqui 2', result);
+						console.log(response);
 					}, 2000);
 				}
 			});

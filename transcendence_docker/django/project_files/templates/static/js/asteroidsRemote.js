@@ -32,6 +32,7 @@ let gameFinished = false;
 let isWaiting = false;
 let waitingModal = document.createElement('div');
 let midGame = false;
+let flagFirstUser = false;
 
 function getCSRFToken() {
 	const name = 'csrftoken';
@@ -121,7 +122,11 @@ class Game {
 		this.animationFrameID;
 		this.animate = this.animate.bind(this);
 	}
-	async fetchShipAndColorRemote() { 
+	async fetchShipAndColorRemote() {
+		let otherUser = gameClient;
+		if (flagFirstUser === false) {
+			otherUser = gameHost;
+		}
 		try {
 			const response = await fetch('/api/get-ship-and-color-remote/', {
 				method: 'POST',
@@ -130,16 +135,22 @@ class Game {
 					'X-CSRFToken': getCSRFToken() // Ensure CSRF token is sent
 				},
 				body: JSON.stringify({
-					'username_guest': gameClient // Send the username in the request body
+					'username_guest': otherUser // Send the username in the request body
 				}),
 			})
 			if (!response.ok) {
 				throw new Error('Failed to fetch ship and color');
 			}
 			const data = await response.json();
-			this.ship1Number = data.ship_player_one;
-			this.ship2Number = data.ship_player_two;
 			thisUser = data.username;
+			if (thisUser === gameHost) {
+				this.ship1Number = data.ship_player_one;
+				this.ship2Number = data.ship_player_two;
+			} else {
+				this.ship2Number = data.ship_player_one;
+				this.ship1Number = data.ship_player_two;
+			}
+			flagFirstUser = false;
 		} catch (error) {
 			console.error('Error fetching ship and color:', error);
 		}
@@ -1347,6 +1358,7 @@ export default function AsteroidsRemote() {
 		if (data.action === 'waiting') {
 			isWaiting = true;
 			midGame = false;
+			flagFirstUser = true;
 			document.body.appendChild(waitingModal);
 		} else if (data.action === 'start_game') {
 			isWaiting = false;
