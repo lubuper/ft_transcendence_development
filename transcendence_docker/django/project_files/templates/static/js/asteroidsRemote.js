@@ -31,6 +31,7 @@ let isWaiting = false;
 let waitingModal = document.createElement('div');
 let midGame = false;
 let flagFirstUser = false;
+let asteroidIndex = 0;
 
 function getCSRFToken() {
 	const name = 'csrftoken';
@@ -45,27 +46,26 @@ function getCSRFToken() {
 }
 
 class Level {
-	constructor(number, asteroids, sAsteroids) {
+	constructor(number, asteroids) {
 		this.number = number;
 		this.asteroids = asteroids;
-		this.sAsteroids = sAsteroids;
 	}
 }
 
 class Game {
 	constructor() {
 		this.levels = [
-			new Level(0, 1, 0),
-			new Level(1, 2, 0),
-			new Level(2, 3, 1),
-			new Level(3, 2, 1),
-			new Level(4, 2, 2),
-			new Level(5, 3, 2),
-			new Level(6, 4, 2),
-			new Level(7, 4, 2),
-			new Level(8, 5, 3),
-			new Level(9, 7, 4),
-			new Level(10, 0, 0)
+			new Level(0, 1),
+			new Level(1, 2),
+			new Level(2, 3),
+			new Level(3, 2),
+			new Level(4, 2),
+			new Level(5, 3),
+			new Level(6, 4),
+			new Level(7, 4),
+			new Level(8, 5),
+			new Level(9, 7),
+			new Level(10, 0)
 		];
 		this.nextLevelTimer = 0;
 		this.player1Lives = 5;
@@ -101,7 +101,6 @@ class Game {
 		this.camera.add(this.listener);
 		this.renderer = new THREE.WebGLRenderer();
 		this.asteroids = [];
-		this.sAsteroids = [];
 		this.projectiles1 = [];
 		this.projectiles2 = [];
 		this.lives1 = [];
@@ -170,7 +169,6 @@ class Game {
 		this.createShotDisplay();
 		this.displayLevel();
 		this.spawnAsteroids(this.levels[this.level].asteroids, 'asteroid');
-		this.spawnAsteroids(this.levels[this.level].sAsteroids, 'sAsteroid');
 		this.scene.add(light);
 		this.setupEventListeners();
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -287,8 +285,6 @@ class Game {
 		this.scene.clear();
 
 		this.asteroids = [];
-		this.sAsteroids = [];
-		// this.AIShips = [];
 		this.projectiles1 = [];
 		this.projectiles2 = [];
 		this.lives = [];
@@ -553,23 +549,23 @@ class Game {
 		let geometry;
 		let material;
 		let heightSegments;
+		let mathRandom;
 
 		if (size >= 3) {
 			heightSegments = 8;
+			mathRandom = 0.3
 		}
 		else if (size == 2) {
 			heightSegments = 4;
+			mathRandom = 0.5
 		}
 		else {
 			heightSegments = 3;
+			mathRandom = 0.9
 		}
 		if (type === 'asteroid') {
 			material = new THREE.MeshLambertMaterial({ map: this.loader.load('/static/media/assets/asteroid.jpg'), side: THREE.DoubleSide });
 			geometry = new THREE.SphereGeometry(size, 7, heightSegments, 0, 6.283185307179586, 0, 6.283185307179586);
-		}
-		else if (type === 'sAsteroid') {
-			geometry = new THREE.SphereGeometry(size + 0.5, 7, 8, 0, 6.28, 3.4, 6.28);
-			material = new THREE.MeshLambertMaterial({ map: this.loader.load('/static/media/assets/clouds.jpg'), side: THREE.DoubleSide });
 		}
 		const asteroid = new THREE.Mesh(geometry, material);
 		asteroid.size = size;
@@ -577,41 +573,43 @@ class Game {
 			asteroid.position.copy(position);
 		}
 		else { // REMOTE: passar posicao dos asteroids criados
-			const boundary = Math.floor(Math.random() * 4);
+			const boundary = asteroidIndex % 4;
 			switch (boundary) {
 			case 0: // Top boundary
-				asteroid.position.x = (Math.random() - 0.5) * this.boundaryX;
+				asteroid.position.x = (mathRandom) * this.boundaryX;
 				asteroid.position.y = this.boundaryY;
 				asteroid.position.z = 5;
 				break;
 			case 1: // Right boundary
 				asteroid.position.x = this.boundaryX;
-				asteroid.position.y = (Math.random() - 0.5) * this.boundaryY;
+				asteroid.position.y = (mathRandom) * this.boundaryY;
 				asteroid.position.z = 5;
 				break;
 			case 2: // Bottom boundary
-				asteroid.position.x = (Math.random() - 0.5) * this.boundaryX;
+				asteroid.position.x = (mathRandom) * this.boundaryX;
 				asteroid.position.y = -this.boundaryY;
 				asteroid.position.z = 5;
 				break;
 			case 3: // Left boundary
 				asteroid.position.x = -this.boundaryX;
-				asteroid.position.y = (Math.random() - 0.5) * this.boundaryY;
+				asteroid.position.y = (mathRandom) * this.boundaryY;
 				asteroid.position.z = 5;
 				break;
 			}
 		}
-		const speed = 0.05 + Math.random() * 0.2;
-		const angle = Math.random() * Math.PI * 2;
+
+		const speed = 0.05 + mathRandom * 0.2;
+		const angle = mathRandom * Math.PI * 2;
 		asteroid.velocity = {
 		x: Math.cos(angle) * speed,
 		y: Math.sin(angle) * speed
 		};
 		asteroid.rotationSpeed = {
-			x: Math.random() * 0.1 - 0.05,
-			y: Math.random() * 0.1 - 0.05,
-			z: Math.random() * 0.1 - 0.05
+			x: mathRandom * 0.1 - 0.05,
+			y: mathRandom * 0.1 - 0.05,
+			z: mathRandom * 0.1 - 0.05
 		};
+		asteroid.uniqid = asteroidIndex++;
 		this.scene.add(asteroid);
 		return asteroid;
 	}
@@ -620,8 +618,6 @@ class Game {
 		for (let i = 0; i < count; i++) {
 			if (type === 'asteroid') {
 				this.asteroids.push(this.spawnAsteroid(type));
-			} else if (type === 'sAsteroid') {
-				this.sAsteroids.push(this.spawnAsteroid(type));
 			}
 		}
 	}
@@ -890,13 +886,11 @@ class Game {
 
 	levelUp() { // REMOTE: major update of objects and positions
 		this.clearObjects(this.asteroids);
-		this.clearObjects(this.sAsteroids);
 		this.clearObjects(this.projectiles1);
 		this.clearObjects(this.projectiles2);
 		this.level++;
 		if (this.level < this.levels.length) {
 			this.spawnAsteroids(this.levels[this.level].asteroids, 'asteroid');
-			this.spawnAsteroids(this.levels[this.level].sAsteroids, 'sAsteroid');
 			this.player1VelocityX = 0;
 			this.player1VelocityY = 0;
 			this.player2VelocityX = 0;
@@ -1037,28 +1031,6 @@ class Game {
 		}
 	}
 
-	updateAsteroids(asteroidsData) {
-		this.asteroids.forEach(sphere => {
-			sphere.position.x += asteroidsData.position.x;
-			sphere.position.y += asteroidsData.position.y;
-			sphere.rotation.x += asteroidsData.rotation.x;
-			sphere.rotation.y += asteroidsData.rotation.y;
-			sphere.rotation.z += asteroidsData.rotation.z;
-			// this.checkBoundaries(sphere);
-		});
-	}
-
-	updateSAsteroids(sAsteroidsData){
-		this.sAsteroids.forEach(sphere => {
-			sphere.position.x += sAsteroidsData.position.x;
-			sphere.position.y += sAsteroidsData.position.y;
-			sphere.rotation.x += sAsteroidsData.rotation.x;
-			sphere.rotation.y += sAsteroidsData.rotation.y;
-			sphere.rotation.z += sAsteroidsData.rotation.z;
-			// this.checkBoundaries(sphere);
-		});
-	}
-
 	updateProjectiles1(projectilesData) {
 		let proj_color = 0xff0000;
 		const geometry = new THREE.SphereGeometry(0.3, 3, 3);
@@ -1101,6 +1073,25 @@ class Game {
 		};
 		this.scene.add(laser);
 		this.projectiles2.push(laser);
+	}
+
+	updateExplosions(explosionsData) {
+		this.playSound('/static/media/assets/sounds/explosion.mp3', 2);
+		this.createExplosion(explosionsData.position.x, explosionsData.position.y, 5);
+		if (explosionsData.size > 1) {
+			explosionsData.size -= 1;
+			for (let k = 0; k < 3; k++) {
+				const newAsteroid = this.spawnAsteroid('asteroid', explosionsData.position, explosionsData.size);
+				newAsteroid.size = explosionsData.size;
+				this.asteroids.push(newAsteroid);
+			}
+		}
+		for (let j = this.asteroids.length - 1; j >= 0; j--) {
+			if (explosionsData.uniqid === this.asteroids[j].uniqid) {
+				this.scene.remove(this.asteroids[j]);
+				this.asteroids.splice( j,1);
+			}
+		}
 	}
 
 	updateScoreOtherPlayer(scoreData) {
@@ -1167,11 +1158,11 @@ class Game {
 					break;
 				}
 			}
-			for (let i = this.sAsteroids.length - 1; i >= 0; i--) {
-				const sAsteroid = this.sAsteroids[i];
-				if (this.checkCollision(this.player2, sAsteroid)) {
-					this.createExplosion(this.player2.position.x, this.player2.position.y, 3);
-					this.player2Death();
+			for (let i = this.asteroids.length - 1; i >= 0; i--) {
+				const asteroid = this.asteroids[i];
+				if (this.checkCollision(this.player1, asteroid)) {
+					this.createExplosion(this.player1.position.x, this.player1.position.y, 2);
+					this.player1Death();
 					break;
 				}
 			}
@@ -1207,22 +1198,6 @@ class Game {
 					amount: {x: this.player1VelocityX, y: this.player1VelocityY},
 				})
 			}
-			for (let i = this.asteroids.length - 1; i >= 0; i--) {
-				const asteroid = this.asteroids[i];
-				if (this.checkCollision(this.player1, asteroid)) {
-					this.createExplosion(this.player1.position.x, this.player1.position.y, 2);
-					this.player1Death();
-					break;
-				}
-			}
-			for (let i = this.sAsteroids.length - 1; i >= 0; i--) {
-				const sAsteroid = this.sAsteroids[i];
-				if (this.checkCollision(this.player1, sAsteroid)) {
-					this.createExplosion(this.player1.position.x, this.player1.position.y, 3);
-					this.player1Death();
-					break;
-				}
-			}
 		}
 		//END OF PLAYER ONE
 		this.player1.position.x += this.player1VelocityX; 
@@ -1238,35 +1213,15 @@ class Game {
 			sphere.rotation.x += sphere.rotationSpeed.x;
 			sphere.rotation.y += sphere.rotationSpeed.y;
 			sphere.rotation.z += sphere.rotationSpeed.z;
+			this.checkBoundaries(sphere);
 			if (thisUser === gameHost) {
-				this.checkBoundaries(sphere);
 				this.sendAsteroidsMove({
 					position: {x: sphere.position.x, y: sphere.position.y},
 					rotation: {x: sphere.rotation.x, y: sphere.rotation.y, z: sphere.rotation.z},
+					uniqid: { uniqid: sphere.uniqid },
 				});
 			}
 		});
-		this.sAsteroids.forEach(sphere => {
-			sphere.position.x += sphere.velocity.x;
-			sphere.position.y += sphere.velocity.y;
-			sphere.rotation.x += sphere.rotationSpeed.x;
-			sphere.rotation.y += sphere.rotationSpeed.y;
-			sphere.rotation.z += sphere.rotationSpeed.z;
-			if (thisUser === gameHost) {
-				this.checkBoundaries(sphere);
-				this.sendSAsteroidsMove({
-					position: {x: sphere.position.x, y: sphere.position.y},
-					rotation: {x: sphere.rotation.x, y: sphere.rotation.y, z: sphere.rotation.z},
-				});
-			}
-		});
-		// if (thisUser === gameHost) {
-		// const projectilesData = this.projectiles1.map(projectile => ({
-		// 		position: { x: projectile.position.x, y: projectile.position.y },
-		// 		velocity: { x: projectile.velocity.x, y: projectile.velocity.y },
-		// 		lifetime: projectile.lifetime,
-		// }));
-		// }
 		if (this.explosionGroup.length > 0) {
 			this.updateExplosion();
 		}
@@ -1294,8 +1249,13 @@ class Game {
 						}
 						this.scene.remove(asteroid);
 						this.asteroids.splice(j, 1);
-						this.scene.remove(projectile);
-						this.projectiles1.splice(i, 1);
+						// this.scene.remove(projectile);
+						// this.projectiles1.splice(i, 1);
+						this.sendAsteroidsExplosion({
+							position: { x: asteroid.position.x, y: asteroid.position.y },
+							size: { size: asteroid.size + 1 },
+							uniqid: { uniqid: asteroid.uniqid },
+						});
 						break;
 					}
 				}
@@ -1326,8 +1286,12 @@ class Game {
 						}
 						this.scene.remove(asteroid);
 						this.asteroids.splice(j, 1);
-						this.scene.remove(projectile);
-						this.projectiles2.splice(i, 1);
+						// this.scene.remove(projectile);
+						// this.projectiles2.splice(i, 1);
+						this.sendAsteroidsExplosion({
+							position: { x: asteroid.position.x, y: asteroid.position.y },
+							uniqid: { uniqid: asteroid.uniqid },
+						});
 						break;
 					}
 				}
@@ -1344,26 +1308,6 @@ class Game {
 				projectile.position.y += projectile.velocity.y;
 				this.checkBoundaries(projectile);
 				projectile.lifetime--;
-				for (let j = this.asteroids.length - 1; j >= 0; j--) {
-					const asteroid = this.asteroids[j];
-					if (this.checkCollision(projectile, asteroid)) {
-						this.playSound('/static/media/assets/sounds/explosion.mp3', 2);
-						this.createExplosion(asteroid.position.x, asteroid.position.y, 5);
-						if (asteroid.size > 1) {
-							asteroid.size -= 1;
-							for (let k = 0; k < 3; k++) {
-								const newAsteroid = this.spawnAsteroid('asteroid', asteroid.position, asteroid.size);
-								newAsteroid.size = asteroid.size;
-								this.asteroids.push(newAsteroid);
-							}
-						}
-						this.scene.remove(asteroid);
-						this.asteroids.splice(j, 1);
-						this.scene.remove(projectile);
-						this.projectiles1.splice(i, 1);
-						break;
-					}
-				}
 				if (projectile.lifetime <= 0) {
 					this.scene.remove(projectile);
 					this.projectiles2.splice(i, 1);
@@ -1375,26 +1319,6 @@ class Game {
 				projectile.position.y += projectile.velocity.y;
 				this.checkBoundaries(projectile);
 				projectile.lifetime--;
-				for (let j = this.asteroids.length - 1; j >= 0; j--) {
-					const asteroid = this.asteroids[j];
-					if (this.checkCollision(projectile, asteroid)) {
-						this.playSound('/static/media/assets/sounds/explosion.mp3', 2);
-						this.createExplosion(asteroid.position.x, asteroid.position.y, 5);
-						if (asteroid.size > 1) {
-							asteroid.size -= 1;
-							for (let k = 0; k < 3; k++) {
-								const newAsteroid = this.spawnAsteroid('asteroid', asteroid.position, asteroid.size);
-								newAsteroid.size = asteroid.size;
-								this.asteroids.push(newAsteroid);
-							}
-						}
-						this.scene.remove(asteroid);
-						this.asteroids.splice(j, 1);
-						this.scene.remove(projectile);
-						this.projectiles1.splice(i, 1);
-						break;
-					}
-				}
 				if (projectile.lifetime <= 0) {
 					this.scene.remove(projectile);
 					this.projectiles2.splice(i, 1);
@@ -1428,6 +1352,7 @@ export default function AsteroidsRemote() {
 			gameHost = null;
 			gameAbandoned = false;
 			gameFinished = false;
+			asteroidIndex = 0;
 			gameHost = getSenderPlayer();
 			gameClient = getOtherPlayer();
 			if (gameClient === null) {
@@ -1457,11 +1382,12 @@ export default function AsteroidsRemote() {
 				game.updatePlayer2Move(moveData);
 			}
 		} else if (data.action === 'update_asteroids') {
+			const asteroidsData = data.asteroids_state;
 			if (thisUser === gameHost) {
 				return;
 			}
-			const asteroidsData = data.asteroids_state;
 			game.asteroids.forEach(sphere => {
+				if (asteroidsData.uniqid === sphere.uniqid) {
 					sphere.size = asteroidsData.size;
 					sphere.position.x = asteroidsData.position.x;
 					sphere.position.y = asteroidsData.position.y;
@@ -1469,20 +1395,8 @@ export default function AsteroidsRemote() {
 					sphere.rotation.y = asteroidsData.rotation.y;
 					sphere.rotation.z = asteroidsData.rotation.z;
 				}
-			);
-		} else if (data.action === 'update_sasteroids') {
-			if (thisUser === gameHost) {
-				return;
 			}
-			const sAsteroidsData = data.sasteroids_state;
-			game.asteroids.forEach(sphere => {
-					sphere.position.x = sAsteroidsData.position.x;
-					sphere.position.y = sAsteroidsData.position.y;
-					sphere.rotation.x = sAsteroidsData.rotation.x;
-					sphere.rotation.y = sAsteroidsData.rotation.y;
-					sphere.rotation.z = sAsteroidsData.rotation.z;
-				}
-			)
+			);
 		} else if (data.action === 'update_projectiles') {
 			const projectilesData = data.projectiles;
 			if (data.player === thisUser) {
@@ -1492,6 +1406,12 @@ export default function AsteroidsRemote() {
 			} else if (data.player === gameClient) {
 				game.updateProjectiles2(projectilesData);
 			}
+		} else if (data.action === 'update_explosions') {
+			const explosionsData = data.asteroids_explosions;
+			if (thisUser === gameHost) {
+				return;
+			}
+			game.updateExplosions(explosionsData);
 		} else if (data.action === 'update_scores') {
 			const scoreData = data.score;
 			if (data.player === thisUser) {
@@ -1532,11 +1452,12 @@ export default function AsteroidsRemote() {
 				asteroids_state: moveAsteroidsData,
 			}));
 		};
-		game.sendSAsteroidsMove = (moveSAsteroidsData) => {
+
+		game.sendAsteroidsExplosion = (moveExplosionData) => {
 			gameWebsocket.send(JSON.stringify({
-				action: 'update_sasteroids',
+				action: 'update_explosions',
 				player: gameHost,
-				sasteroids_state: moveSAsteroidsData,
+				asteroids_explosions: moveExplosionData,
 			}));
 		};
 

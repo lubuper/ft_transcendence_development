@@ -321,14 +321,14 @@ class GameAsteroidsConsumer(AsyncWebsocketConsumer):
                     'asteroids_state': data.get('asteroids_state'),
                 }
             )
-            
-        if action == 'update_sasteroids':
-            # Broadcast SPECIAL asteroids state to all clients
+
+        if action == 'update_explosions':
+            # Broadcast asteroids state to all clients
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
-                    'type': 'update_sasteroids',
-                    'sasteroids_state': data.get('sasteroids_state'),
+                    'type': 'update_explosions',
+                    'asteroids_explosions': data.get('asteroids_explosions'),
                 }
             )
 
@@ -365,6 +365,13 @@ class GameAsteroidsConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'action': 'update_asteroids',
             'asteroids_state': event['asteroids_state'],
+        }))
+
+    async def update_explosions(self, event):
+        # Send asteroids state to WebSocket clients
+        await self.send(text_data=json.dumps({
+            'action': 'update_explosions',
+            'asteroids_explosions': event['asteroids_explosions'],
         }))
 
     async def notify_players(self):
