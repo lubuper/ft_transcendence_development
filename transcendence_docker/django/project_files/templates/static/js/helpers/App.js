@@ -10,7 +10,6 @@ import AboutUs from '../components/pages/AboutUs.js';
 import Asteroids from '../asteroids.js';
 import Pong from '../pong.js';
 import PongRemote, {getGameFinished, getMidGame} from '../pongRemote.js';
-import AsteroidsRemote from '../asteroidsRemote.js'
 import Profile from "../components/pages/Profile.js";
 import ProfileFriend from "../components/pages/ProfileFriend.js";
 import LocalPlay, { getSelectedGameMode, getSelectedGameType } from '../components/pages/LocalPlay.js';
@@ -45,7 +44,6 @@ const routes = {
 	'/profile': Profile,
 	'/profileFriend': ProfileFriend,
 	'/pongremote' : PongRemote,
-	'/asteroidsremote' : AsteroidsRemote,
 	'/gamelost' : GameLost,
 	'/gamewon' : GameWon,
 	'/tournamentover' : TournamentOver
@@ -91,8 +89,6 @@ export function navigate(path) {
 					gameName = 'Pong';
 				} else if (path === '/pongremote'){
 					gameName = 'Pong Remote';
-				} else if (path === '/asteroidsremote'){
-					gameName = 'Asteroids Remote';
 				}
 			} else {
 				if (gameIsActive && currentGameI && typeof currentGameI.cleanup === 'function') {
@@ -105,16 +101,8 @@ export function navigate(path) {
 						};
 						saveMatchHistory(match);
 					}
-					else if (gameName === 'Asteroids Remote') { // && getGameFinished() === false) {
-						const match = {
-							result: `Loss`,
-							score: `Forfeit`,
-							game: gameName,
-						};
-						saveMatchHistory(match);
-					}
 				}
-				gameIsActive = false; // Reset the flag
+				gameIsActive = false;
 				currentGameI = null;
 			}
 		}

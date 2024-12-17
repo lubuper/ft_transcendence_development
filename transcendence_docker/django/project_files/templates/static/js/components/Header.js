@@ -34,7 +34,6 @@ export default function Header() {
 			}
 		})
 		.catch((error) => {
-			console.log("error", error);
 			$header.innerHTML = `
 				<nav class="navbar navbar-expand-lg d-flex justify-content-between" style="background: transparent;">
 					<h1 class="fw-bold text-center text-white display-6 ms-3" data-path="/">ft_transcendence</h1>

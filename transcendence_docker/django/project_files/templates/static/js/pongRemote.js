@@ -875,12 +875,6 @@ class Game {
 			}
 			// Adjust the ball's position to avoid sticking
 			this.ball.position.x = player1Bounds.right + this.ball.geometry.parameters.radius + 0.05;
-			if (this.keysPressed['a']) {
-				this.ball.velocity.y -= 0.02;
-			}
-			if (this.keysPressed['d']) {
-				this.ball.velocity.y += 0.02;
-			}
 		}
 		// Player 2
 		const player2Bounds = {
@@ -900,12 +894,6 @@ class Game {
 			}
 			// Adjust the ball's position to avoid sticking
 			this.ball.position.x = player2Bounds.left - this.ball.geometry.parameters.radius - 0.05;
-			if (this.keysPressed['l']) {
-				this.ball.velocity.y -= 0.02;
-			}
-			if (this.keysPressed['j']) {
-				this.ball.velocity.y += 0.02;
-			}
 		}
 		this.sendBallMove({
 			velocity: { x: -this.ball.velocity.x, y: this.ball.velocity.y},
