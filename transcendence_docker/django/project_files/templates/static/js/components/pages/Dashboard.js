@@ -119,7 +119,6 @@ export default function DashBoard() {
 		console.log("matchHistory: ", matchHistory)
 
 		const pongRank = calculateRankedStats(matchHistory.match_history, "Pong Remote")
-		const astRank = calculateRankedStats(matchHistory.match_history, "Asteroids Remote")
 		localStorage.setItem('selectedAvatarId', matchHistory.game_customization[0].ship);
 		localStorage.setItem('selectedColorId', matchHistory.game_customization[0].color);
 	$dashboard.innerHTML = `
@@ -138,13 +137,6 @@ export default function DashBoard() {
 									<span class="tooltiptext">The game ranking starts after 5 remote matches, Good luck!</span>
 								</p>
 								<p class="card-text">${pongRank.result}</p>
-								<p class="card-text">
-									<img src="/static/media/rank/${astRank.rank}.png"
-										alt="${astRank.rank}"
-										style="width: 64px; height: 64px; margin-right: 2px;">
-									<span class="tooltiptext">The game ranking starts after 5 remote matches, Good luck!</span>
-								</p>
-								<p class="card-text">${astRank.result}</p>
 							</div>
 						</div>
 						<div class="card bg-dark text-white mb-3">
@@ -183,16 +175,16 @@ export default function DashBoard() {
 											<span class="badge bg-danger">Games Lost</span>
 										</div>
 										<div class="col-md-4 text-center">
-											<canvas id="pongRemoteStatsChart" width="200" height="200"></canvas> <!-- Canvas for Pong Remote Chart -->
-											<p>Remote Play</p>
-										</div>
-										<div class="col-md-4 text-center">
 											<canvas id="pongAIStatsChart" width="200" height="200"></canvas> <!-- Canvas for Pong AI Chart -->
 											<p>Player vs AI</p>
 										</div>
 										<div class="col-md-4 text-center">
 											<canvas id="pongLocalStatsChart" width="200" height="200"></canvas> <!-- Canvas for Pong Local Chart -->
 											<p>Local PvP</p>
+										</div>
+										<div class="col-md-4 text-center">
+											<canvas id="pongRemoteStatsChart" width="200" height="200"></canvas> <!-- Canvas for Pong Remote Chart -->
+											<p>Remote Play</p>
 										</div>
 									</div>
 								</div>
@@ -210,10 +202,6 @@ export default function DashBoard() {
 										<div class="col-md-12 text-center mb-3">
 											<span class="badge bg-success">Games Won</span>
 											<span class="badge bg-danger">Games Lost</span>
-										</div>
-										<div class="col-md-4 text-center">
-											<canvas id="asteroidsRemoteStatsChart" width="200" height="200"></canvas> <!-- Canvas for Asteroids Remote Chart -->
-											<p>Remote Play</p>
 										</div>
 										<div class="col-md-4 text-center">
 											<canvas id="asteroidsAIStatsChart" width="200" height="200"></canvas> <!-- Canvas for Asteroids AI Chart -->
@@ -372,10 +360,6 @@ export default function DashBoard() {
 	const pongLocalGamesWon = matchHistory.match_history.filter(match => match.game === "Pong Player vs Player" && match.result === 'Win').length;
 	const pongLocalGamesLost = pongLocalGamesPlayed - pongLocalGamesWon;
 
-	const asteroidsRemoteGamesPlayed = matchHistory.match_history.filter(match => match.game === "Asteroids Remote").length;
-	const asteroidsRemoteGamesWon = matchHistory.match_history.filter(match => match.game === "Asteroids Remote" && match.result === 'Win').length;
-	const asteroidsRemoteGamesLost = asteroidsRemoteGamesPlayed - asteroidsRemoteGamesWon;
-
 	const asteroidsAIGamesPlayed = matchHistory.match_history.filter(match => match.game === "Asteroids Play vs AI").length;
 	const asteroidsAIGamesWon = matchHistory.match_history.filter(match => match.game === "Asteroids Play vs AI" && match.result === 'Win').length;
 	const asteroidsAIGamesLost = asteroidsAIGamesPlayed - asteroidsAIGamesWon;
@@ -445,7 +429,6 @@ export default function DashBoard() {
 	createPieChart(document.getElementById('pongRemoteStatsChart').getContext('2d'), 'Pong Remote Game Statistics', [pongRemoteGamesWon, pongRemoteGamesLost]);
 	createPieChart(document.getElementById('pongAIStatsChart').getContext('2d'), 'Pong AI Game Statistics', [pongAIGamesWon, pongAIGamesLost]);
 	createPieChart(document.getElementById('pongLocalStatsChart').getContext('2d'), 'Pong Local Game Statistics', [pongLocalGamesWon, pongLocalGamesLost]);
-	createPieChart(document.getElementById('asteroidsRemoteStatsChart').getContext('2d'), 'Asteroids Remote Game Statistics', [asteroidsRemoteGamesWon, asteroidsRemoteGamesLost]);
 	createPieChart(document.getElementById('asteroidsAIStatsChart').getContext('2d'), 'Asteroids AI Game Statistics', [asteroidsAIGamesWon, asteroidsAIGamesLost]);
 	createPieChart(document.getElementById('asteroidsLocalStatsChart').getContext('2d'), 'Asteroids Local Game Statistics', [asteroidsLocalGamesWon, asteroidsLocalGamesLost]);
 

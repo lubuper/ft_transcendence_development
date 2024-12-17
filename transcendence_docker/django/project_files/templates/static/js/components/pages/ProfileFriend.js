@@ -37,7 +37,6 @@ export default function ProfileFriend() {
             }
             const userFriend = await response.json();
             const pongRank = calculateRankedStats(userFriend.match_history, "Pong Remote")
-            const astRank = calculateRankedStats(userFriend.match_history, "Asteroids Remote")
             $ProfileFriendForm.innerHTML = `
             <div class="vh-100 d-flex align-items-center justify-content-start position-relative">
 			<div class="container mt-3 col-md-3">
@@ -54,12 +53,6 @@ export default function ProfileFriend() {
 										style="width: 64px; height: 64px; margin-right: 2px;">
 								</p>
 								<p class="card-text">${pongRank.result}</p>
-								<p class="card-text">
-									<img src="/static/media/rank/${astRank.rank}.png"
-										alt="${astRank.rank}"
-										style="width: 64px; height: 64px; margin-right: 2px;">
-								</p>
-								<p class="card-text">${astRank.result}</p>
 							</div>
 						</div>
 						<div class="card bg-dark text-white mb-3">

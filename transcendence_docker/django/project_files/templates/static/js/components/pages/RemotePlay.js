@@ -77,54 +77,11 @@ export default function RemotePlay() {
 		if (event.target.name === 'gameType') {
 			event.preventDefault();
 			selectedGameType = document.querySelector('input[name="gameType"]:checked').value;
-			if (selectedGameType === 'Pong') {
-				currentGameRank = calculateRankedStats(dataRemote.match_history, "Pong Remote");
-			} else if (selectedGameType === 'Asteroids') {
-				currentGameRank = calculateRankedStats(dataRemote.match_history, "Asteroids Remote");
-			}
-			updateRankDisplay(currentGameRank);
 		}
 	});
 
 		$games.innerHTML = `
 		<div class="container vh-100 d-flex flex-column align-items-center justify-content-start pt-3">
-			<!-- Top Row for Game Mode and Game Type Cards -->
-			<div class="row w-100 mb-3">
-				<!-- Select Game Card -->
-				<div class="col-md-6 d-flex align-items-stretch">
-					<div class="card bg-dark text-white w-100" style="border: 1px solid #343a40; opacity: 0.8;">
-						<div class="card-body" id="divGameType">
-							<h5 class="card-title text-center">Select Game</h5>
-							<div class="form-check">
-								<input class="form-check-input" type="radio" name="gameType" id="Pong" value="Pong" checked>
-								<label class="form-check-label" for="Pong" >Pong</label>
-							</div>
-							<div class="form-check">
-								<input class="form-check-input" type="radio" name="gameType" id="Asteroids" value="Asteroids">
-								<label class="form-check-label" for="Asteroids" >Asteroids</label>
-							</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-6 d-flex align-items-stretch">
-					<div class="card bg-dark text-white w-100" style="border: 1px solid #343a40; opacity: 0.8;">
-						<div class="card-body">
-							<h5 class="card-title text-center">Invitations</h5>
-								<div class="card-body">
-								${dataRemote.remote_game_invitations.length > 0 ?
-			dataRemote.remote_game_invitations.map(remote_game_invitations => `
-										<p>${remote_game_invitations.sender__user__username} #${remote_game_invitations.game_id}
-										<button id="AcceptRequest-${remote_game_invitations.game_id}" value="${remote_game_invitations.game_id}" type="button" class="btn btn-success btn-sm ml-2">✔️</button>
-            							<button id="RejectRequest-${remote_game_invitations.game_id}" value="${remote_game_invitations.game_id}" type="button" class="btn btn-danger btn-sm ml-2">X</button>
-            							</p>
-									`).join('') :
-			'<p>You currently have no game invitations.</p>'
-		}
-								</div>
-						</div>
-					</div>
-					</div>
-				</div>
 			<!-- Send invitation -->
 			<div class="row w-100 mb-3">
 				<div class="col-md-6 d-flex align-items-stretch">
@@ -147,6 +104,12 @@ export default function RemotePlay() {
 						</div>
 					</div>
 				</div>
+				<div class="col-md-6 text-center d-flex flex-column align-items-center">
+					<img src="/static/media/assets/pongsplash.png" alt="Pong Game" class="img-fluid" style="width: 100%; height: auto;">
+				</div>
+			</div>
+			<div class="row w-100 mb-3">
+				<!-- invitations -->
 				<div class="col-md-6 d-flex align-items-stretch">
 					<div class="card bg-dark text-white w-100" style="border: 1px solid #343a40; opacity: 0.8;">
 						<div class="card-body">
@@ -162,55 +125,49 @@ export default function RemotePlay() {
 						</div>
 					</div>
 				</div>
+				<div class="col-md-6 d-flex align-items-stretch">
+					<div class="card bg-dark text-white w-100" style="border: 1px solid #343a40; opacity: 0.8;">
+						<div class="card-body">
+						<h5 class="card-title text-center">How To Play</h5>
+							<div class="card-text">
+								<div class="row">
+									<div class="text-center">
+										<ul class="list-unstyled">
+											<li><i class="fas fa-arrow-left"></i> Move left/top: A</li>
+											<li><i class="fas fa-arrow-right"></i> Move right/bottom: D</li>
+											<li><i class="fas fa-camera"></i> Cameras toggle: C</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 			<!-- Game Especifications -->
 			<div class="row w-100 mb-3">
 				<!-- Pong Section -->
-				<div class="col-md-6 text-center d-flex flex-column align-items-center">
-					<img src="/static/media/assets/pongsplash.png" alt="Pong Game" class="img-fluid mt-2" style="width: 100%; height: auto;">
-					<div class="card bg-dark text-white mt-3 w-100" style="border: 1px solid #343a40; opacity: 0.8;">
+				<div class="col-md-6 d-flex align-items-stretch">
+					<div class="card bg-dark text-white w-100" style="border: 1px solid #343a40; opacity: 0.8;">
 						<div class="card-body">
-							<h5 class="card-title text-center">How To Play</h5>
-							<p class="card-text">
-								Move left/top: A<br>
-								Move right/bottom: D<br>
-								To change the camera: C<br>
-							</p>
-						</div>
-					</div>
-				</div>
-				<!-- Asteroids Section -->
-				<div class="col-md-6 text-center d-flex flex-column align-items-center">
-					<img src="/static/media/assets/asteroidssplash.png" alt="Asteroids Game" class="img-fluid mt-2" style="width: 100%; height: auto;">
-					<div class="card bg-dark text-white mt-3 w-100" style="border: 1px solid #343a40; opacity: 0.8;">
-						<div class="card-body">
-							<h5 class="card-title text-center">How To Play</h5>
-							<p class="card-text">
-								Rotate left: A<br>
-								Rotate right: D<br>
-								Fire: Space<br>
-								Shields: E
-							</p>
+							<h5 class="card-title text-center">Invitations</h5>
+								<div class="card-body">
+								${dataRemote.remote_game_invitations.length > 0 ?
+										dataRemote.remote_game_invitations.map(remote_game_invitations => `
+										<p>${remote_game_invitations.sender__user__username} #${remote_game_invitations.game_id}
+										<button id="AcceptRequest-${remote_game_invitations.game_id}" value="${remote_game_invitations.game_id}" type="button" class="btn btn-success btn-sm ml-2">✔️</button>
+										<button id="RejectRequest-${remote_game_invitations.game_id}" value="${remote_game_invitations.game_id}" type="button" class="btn btn-danger btn-sm ml-2">X</button>
+										</p>
+									`).join('') :
+								'<p>You currently have no game invitations.</p>'
+								}
+								</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	`;
-
-	function updateRankDisplay(currentGameRank) {
-		const rankContainer = document.getElementById('currentGameRank');
-
-		rankContainer.innerHTML = `
-			<p class="card-text">
-				Your rank:
-				<img src="/static/media/rank/${currentGameRank.rank}.png"
-					alt="${currentGameRank.rank}"
-					style="width: 64px; height: 64px; margin-right: 2px;">
-				${currentGameRank.rank}
-			</p>
-	`;
-	}
 
 	document.getElementById('startGameByRank').addEventListener('click', async function() {
 			event.preventDefault();
@@ -228,10 +185,8 @@ export default function RemotePlay() {
 				'rank': currentGameRank.rank
 			})
 		})
-		console.log('response:', response);
 		const result = await response.json();
 
-		console.log('result:', result);
 		if (response.ok) {
 				returnedMessageByRank.innerHTML = '<p class="text-success">Game invitation sent successfully!</p>';
 				setTimeout(() => {
@@ -248,9 +203,6 @@ export default function RemotePlay() {
 				}
 				if (selectedGameType === 'Pong') {
 					navigate('/pongremote');
-				}
-				else if (selectedGameType === 'Asteroids') {
-					navigate('/asteroidsremote');
 				}
 		} else {
 				returnedMessageByRank.innerHTML = `<p class="text-danger">Failed to send game invitation! ${result.message} </p>`;
@@ -284,9 +236,6 @@ export default function RemotePlay() {
 			if (selectedGameType === 'Pong') {
 				navigate('/pongremote');
 			}
-			else if (selectedGameType === 'Asteroids') {
-				navigate('/asteroidsremote');
-			}
 		} else {
 			returnedMessage.innerHTML = `<p class="text-danger">Failed to send game invitation! ${result.message} </p>`;
 			setTimeout(() => {
@@ -296,10 +245,7 @@ export default function RemotePlay() {
 	});
 
 		dataRemote.remote_game_invitations.forEach(remote_game_invitations => {
-			// Adding event listener for the accept button
 			document.getElementById(`AcceptRequest-${remote_game_invitations.game_id}`).addEventListener('click', async function() {
-				console.log('user que vai:', remote_game_invitations.sender__user__username)
-				// const game_id = document.getElementById('AcceptRequest-${remote_game_invitations.game_id}').value;
 				const response = await fetch('/accept-game-invitation/', {
 					method: 'POST',
 					headers: {
@@ -315,16 +261,12 @@ export default function RemotePlay() {
 				const result = await response.json();
 
 				if (response.ok) {
-					console.log('game id', result.game_id);
 					selectedGameID = result.game_id;
 					otherPlayer = result.receiver;
 					senderPlayer = result.sender;
 					let gameNameExtracted = selectedGameID.match(/[a-zA-Z]+/)[0];
 					if (gameNameExtracted === 'Pong') {
 						navigate('/pongremote');
-					}
-					else if (gameNameExtracted === 'Asteroids') {
-						navigate('/asteroidsremote');
 					}
 				} else {
 					setTimeout(() => {
@@ -334,7 +276,6 @@ export default function RemotePlay() {
 			});
 
 			document.getElementById(`RejectRequest-${remote_game_invitations.game_id}`).addEventListener('click', async function() {
-				// const game_id = document.getElementById('RejectRequest-${remote_game_invitations.sender__user__username}').value;
 				const response = await fetch('/reject-game-invitation/', {
 					method: 'POST',
 					headers: {
@@ -343,21 +284,13 @@ export default function RemotePlay() {
 					},
 					body: JSON.stringify({
 						'username': remote_game_invitations.sender__user__username,
-						'game_id': remote_game_invitations.game_id// Send the username in the request body
+						'game_id': remote_game_invitations.game_id
 					}),
 				})
 				const result = await response.json();
 
 				if (response.ok) {
-					let gamePath;
-					let gameNameExtracted = result.game_id.match(/[a-zA-Z]+/)[0];
-					if (gameNameExtracted === 'Pong') {
-						gamePath = 'pong';
-					}
-					else if (gameNameExtracted === 'Asteroids') {
-						gamePath = 'asteroids'
-					}
-					const gameRejectWebsocket = new WebSocket(`wss://${window.location.host}/ws/${gamePath}/${result.game_id}/?purpose=reject`);
+					const gameRejectWebsocket = new WebSocket(`wss://${window.location.host}/ws/pong/${result.game_id}/?purpose=reject`);
 					gameRejectWebsocket.onopen = function () {
 						console.log(`WebSocket connected for rejection`);
 						gameRejectWebsocket.close(1001, "Player rejected the game");
