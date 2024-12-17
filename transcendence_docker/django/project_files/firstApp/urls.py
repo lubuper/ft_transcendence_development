@@ -26,8 +26,8 @@ urlpatterns = [
     path('api/get-ship-and-color-remote/', get_ship_and_color_remote, name='get-ship-and-color_remote'),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 urlpatterns += [re_path(r'^(?!static/|media/).*$', views.homepage)]

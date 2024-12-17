@@ -1,0 +1,12 @@
+POSTGRES_USER=admin
+POSTGRES_PASSWORD=admin
+DJANGO_SUPERUSER_USERNAME=rafael #works
+DJANGO_SUPERUSER_PASSWORD=rafael
+#transcendence/settings.py
+SECRET_KEY=django-insecure-oo@oma8qn$u6t@ws^%i576%p(7)@qj!ql0psqhq8fyqsta&(!9
+DB_NAME=transcendence_db
+DB_USER=admin
+DB_PASSWORD=admin
+DB_HOST=transcendence_db
+DB_PORT=5432
+ALLOWED_HOST=
