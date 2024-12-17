@@ -133,6 +133,8 @@ function initSPA() {
 	window.addEventListener('popstate', function(event) {
 		if (event.state && event.state.path && routes[event.state.path]) {
 			navigate(event.state.path);
+		} else {
+			navigate('/');
 		}
 	});
 
