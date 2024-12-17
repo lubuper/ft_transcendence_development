@@ -731,14 +731,12 @@ class Game {
 		};
 		window.addEventListener('keydown', (event) => {
 			if (event.key === ' ' && this.player1IsActive && this.unpaused) {
-				event.preventDefault();
 				if (!this.actionStates.projectile1.pressed && this.player1IsActive) {
 					this.shoot(this.shotType, true, this.player1);
 				}
 				this.actionStates.projectile1.pressed = true;
 			}
 			if (event.key === 'e' && this.player1IsActive && this.shield1.lifetime > 0 && this.unpaused) {
-				event.preventDefault();
 				if (!this.actionStates.shield1.pressed) {
 					this.playSound('/static/media/assets/sounds/shield.mp3', 0.4);
 				}
@@ -747,7 +745,6 @@ class Game {
 			}
 			if (this.gameMode === '1' || this.gameMode === '6') {
 				if (event.key === 'o' && this.player2IsActive && this.shield2.lifetime > 0 && this.unpaused) {
-					event.preventDefault();
 					if (!this.actionStates.shield2.pressed) {
 						this.playSound('/static/media/assets/sounds/shield.mp3', 0.4);
 					}
@@ -755,7 +752,6 @@ class Game {
 					this.actionStates.shield2.pressed = true;
 				}
 				if (event.key === 'p' && this.unpaused) {
-					event.preventDefault();
 					if (!this.actionStates.projectile2.pressed && this.player2IsActive) {
 						this.shoot(this.shotType, true, this.player2);
 					}
@@ -815,8 +811,6 @@ class Game {
 			winner = player2;
 			loser = player1;
 		}
-		console.log("winner is ", winner);
-		console.log("loser is ", loser);
 		alert(`Congratulations ${winner}, you have won the match!`);
 		// After player names are exhausted (moving to winners phase)
 		if (this.currentPlayerIndex >= playerNames.length) {
@@ -1233,7 +1227,7 @@ class Game {
 				this.nextLevelTimer = 0;
 			}
 			else {
-				console.log("cannot find lvlCompleteScreen");
+				console.warn("cannot find lvlCompleteScreen");
 			}
 			this.displayLevel();
 		}
