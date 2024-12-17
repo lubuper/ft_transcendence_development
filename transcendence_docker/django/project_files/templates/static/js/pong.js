@@ -757,10 +757,10 @@ class Game {
 	gameOver() {
 		if (this.gameMode === '6') {
 			if (this.player1 && this.player2) {
-				this.player1.position.set(-2.7, 0, 0);
-				this.ship1.position.set(-2.7, 0, 0);
-				this.player2.position.set(2.7, 0, 0);
-				this.ship2.position.set(2.7, 0, 0);
+				this.player1.position.set((-this.geox / 2) + 0.1, 0.2, 0);
+				this.ship1.position.set(-2.7, this.player1.position.y, this.player1.z);
+				this.player2.position.set((this.geox / 2) - 0.1, -0.2, 0);
+				this.ship2.position.set(2.7, this.player2.position.y, this.player2.z);
 			}
 			this.tournamentHandler();
 		}
@@ -780,10 +780,10 @@ class Game {
 	gameWin() {
 		if (this.gameMode === '6') {
 			if (this.player1 && this.player2) {
-				this.player1.position.set(-2.7, 0.2, 0);
-				this.ship1.position.set(-2.7, 0.2, 0);
-				this.player2.position.set(2.7, -0.2, 0);
-				this.ship2.position.set(2.7, 0.2, 0);
+				this.player1.position.set((-this.geox / 2) + 0.1, 0.2, 0);
+				this.ship1.position.set(-2.7, this.player1.position.y, this.player1.z);
+				this.player2.position.set((this.geox / 2) - 0.1, -0.2, 0);
+				this.ship2.position.set(2.7, this.player2.position.y, this.player2.z);
 				
 			}
 			this.tournamentHandler();
