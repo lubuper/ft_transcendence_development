@@ -17,6 +17,8 @@ services:
     build:
       context: ./django
       dockerfile: Dockerfile
+    volumes:
+    - ./django/project_files/templates/static/media:/transcendence/templates/static/media
     ports:
       - "8000:8000"
     networks:
@@ -35,6 +37,9 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile
+    volumes:
+      - ./django/project_files/templates/static:/django
+      - ./django/project_files/templates/static/media:/media
     ports:
       - "8080:80"
       - "8443:443"
