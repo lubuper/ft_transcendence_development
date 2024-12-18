@@ -13,7 +13,6 @@ function getCSRFToken() {
 	return null;
 }
 
-console.log('friend que chega na pagina', currentFriend);
 export default function ProfileFriend() {
     const $ProfileFriendForm = document.createElement('profileFriend');
 

@@ -4,11 +4,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from .views import create_account, login_view, current_user, logout_view, profile, update_profile, save_match_history, load_match_history, save_customization, get_ship_and_color, get_profile_friend, get_data_remote, get_ship_and_color_remote
 
-#urlpatterns = [
-#    path('', views.homepage, name="homepage"),
-#    re_path(r'^.*$', views.homepage)
-#]
-
 urlpatterns = [
     path('', views.homepage, name="homepage"),
     path('create-account/', views.create_account, name='create_account'),
@@ -29,5 +24,6 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
 
 urlpatterns += [re_path(r'^(?!static/|media/).*$', views.homepage)]

@@ -65,7 +65,6 @@ export async function finishInvitation(sender, receiver, gameId) {
 
 	if (response.ok) {
 		const resultGame = await response.json();
-		console.log('finish invitation', resultGame);
 		return (resultGame);
 	}
 }
@@ -84,7 +83,6 @@ export async function finishRank(sender, gameId) {
 
 	if (response.ok) {
 		const resultGame = await response.json();
-		console.log('finish rank', resultGame);
 		return (resultGame);
 	}
 }
@@ -257,10 +255,8 @@ class Game {
 			}
 			if (getOtherPlayer() === null) {
 				const resultRank = finishRank(getSenderPlayer(), getSelectedGameID());
-				console.log(resultRank);
 			} else {
 				const resultInv = finishInvitation(getSenderPlayer(), getOtherPlayer(), getSelectedGameID());
-				console.log(resultInv);
 			}
 			isWaiting = false;
 			flagFirstUser = false;
@@ -1055,13 +1051,13 @@ export default function PongRemote() {
 				}
 				game.init();
 			});
-		} else if (data.action === 'player_left') {
-			alert(data.message);
-			gameAbandoned = true;
-			game.gameWin();
-		} else if (data.action === 'player_reject') {
-			alert(data.message);
-			navigate('/');
+		} else if (data.action === 'update_scores') {
+			const scoreData = data.score;
+			if (data.player === thisUser) {
+				return;
+			} else {
+				game.updateScoreOtherPlayer(scoreData);
+			}
 		} else if (data.action === 'player_move') {
 			const moveData = data.move_data;
 			if (data.player === thisUser) {
@@ -1079,13 +1075,13 @@ export default function PongRemote() {
 				game.ball.velocity.x = ballData.velocity.x;
 				game.ball.velocity.y = ballData.velocity.y;
 			}
-		} else if (data.action === 'update_scores') {
-			const scoreData = data.score;
-			if (data.player === thisUser) {
-				return;
-			} else {
-				game.updateScoreOtherPlayer(scoreData);
-			}
+		} else if (data.action === 'player_left') {
+			alert(data.message);
+			gameAbandoned = true;
+			game.gameWin();
+		} else if (data.action === 'player_reject') {
+			alert(data.message);
+			navigate('/');
 		}
 
 		game.sendPlayerMove = (moveData) => {
@@ -1116,13 +1112,11 @@ export default function PongRemote() {
 			if (gameFinished === true) {
 				gameWebsocket.close();
 				gameWebsocket.onclose = function () {
-					console.log(`game socket closed for ${gameId}`);
 					delete gameWebsocket[gameId];
 				};
 			} else {
 				gameWebsocket.close(1000, "Player left the page");
 				gameWebsocket.onclose = function () {
-					console.log(`game socket closed for left ${gameId}`);
 					delete gameWebsocket[gameId];
 				};
 			}

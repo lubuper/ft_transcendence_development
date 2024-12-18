@@ -9,7 +9,6 @@ function saveBlockedUsers() {
 export function Initialize(friendName, userName) {
 
     if (blockedUsers.includes(friendName)) {
-        console.log(`${friendName} is blocked.`);
         return;
     }
 
@@ -17,7 +16,6 @@ export function Initialize(friendName, userName) {
     const chat = document.getElementsByClassName('chat-popup')
 
     if (chatSockets[chatKey]) {
-        console.log(`WebSocket for ${chatKey} already exists.`);
         return; // Prevent multiple connections for the same user-friend pair
     }
 
@@ -48,7 +46,6 @@ export function Initialize(friendName, userName) {
     })
 
     chatSocket2.onclose = function () {
-        console.log(`Chat socket closed for ${chatKey}`);
         delete chatSockets[chatKey]; // Clean up the WebSocket reference
     };
 }
@@ -58,7 +55,6 @@ export function setupChat(friendName, userName) {
     const messageContainer = document.getElementById(`messages-${userName}-${friendName}`);
 
     if (!messageContainer) {
-        console.error(`Message container for ${chatKey} not found`);
         return;
     }
 
@@ -66,7 +62,6 @@ export function setupChat(friendName, userName) {
 
     // Prevent reopening WebSocket for the same user-friend pair
     if (chatSockets[chatKey]) {
-        console.log(`WebSocket already active for ${chatKey}`);
         chatSocket = chatSockets[chatKey]
     }else{
         chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/${userName}/${friendName}/`);
@@ -136,7 +131,6 @@ export function setupChat(friendName, userName) {
     });
 
         chatSocket.onclose = function () {
-            console.log(`Chat socket closed for ${chatKey}`);
             delete chatSockets[chatKey];
         };
 
@@ -236,13 +230,11 @@ export function toggleBlockStatus(friendName, userName) {
     if (index !== -1) {
         // Unblock user
         blockedUsers.splice(index, 1);
-        console.log(`Unblocked ${friendName}`);
         saveBlockedUsers();
         showChatIcon(friendName);
     } else {
         // Block user
         blockedUsers.push(friendName);
-        console.log(`Blocked ${friendName}`);
         saveBlockedUsers();
         hideChatIcon(friendName);
 
@@ -257,7 +249,6 @@ function stopWebSocket(friendName, userName) {
     if (chatSockets[chatKey]) {
         chatSockets[chatKey].close();
         delete chatSockets[chatKey];
-        console.log(`Stopped WebSocket for ${friendName}`);
     }
 }
 

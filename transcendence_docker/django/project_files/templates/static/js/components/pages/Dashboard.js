@@ -41,7 +41,7 @@ export function saveMatchHistory(match) {
 		return response.json(); // Parse the JSON response
 	})
 	.then(data => {
-		console.log('Match history saved successfully:', data);
+		console.log('Match history saved successfully:');
 	})
 	.catch(error => {
 		console.error('Error saving match history:', error);
@@ -116,7 +116,6 @@ export default function DashBoard() {
 
 	const $dashboard = document.createElement('dashboard');
 	getMatchHistory().then(matchHistory => {
-		console.log("matchHistory: ", matchHistory)
 
 		const pongRank = calculateRankedStats(matchHistory.match_history, "Pong Remote")
 		localStorage.setItem('selectedAvatarId', matchHistory.game_customization[0].ship);
@@ -559,13 +558,9 @@ export default function DashBoard() {
 		const data = JSON.parse(e.data);
 
 		// Log the raw data to the browser console for debugging
-		console.log("WebSocket Message Received:", data);
 
 		const friendUsername = data.friend_;
 		const status = data.status;
-
-		// Log specific status update details
-		console.log(`Friend username: ${friendUsername}, Status: ${status}`);
 
 		// Update the status dot dynamically
 		const statusDot = document.getElementById(`friend-status-${friendUsername}`);
@@ -577,7 +572,6 @@ export default function DashBoard() {
 				statusDot.setAttribute('data-status', status);
 
 			// Log confirmation of status dot update
-			console.log(`Updated friend ${friendUsername}'s status icon to ${status}`);
 		} else {
 			console.warn(`Status dot for friend ${friendUsername} not found in the DOM.`);
 		}

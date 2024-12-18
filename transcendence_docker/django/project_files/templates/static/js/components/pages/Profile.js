@@ -16,7 +16,6 @@ export default function Profile() {
                 throw new Error('Failed to fetch profile data');
             }
             const user = await response.json();
-            // console.log(user)
 
             const profilePicHTML = user.profile_picture
                 ? `<img src="${user.profile_picture}" alt="${user.username}'s profile picture" 
@@ -430,18 +429,13 @@ export default function Profile() {
             formP.addEventListener('submit', async (event) => {
                 event.preventDefault(); // Prevent default form submission
 
-                console.log('aqui============')
-
                 const form = document.getElementById('profile-form');
 
                 const formPData = new FormData(form);
 
                 const data = Object.fromEntries(formPData.entries());
 
-                console.log('data: ', data)
-
                 if (profilePictureFinal) {
-                    console.log('profilePictureFinal: ', profilePictureFinal)
                     formPData.set('profile-picture', profilePictureFinal, 'user.jpeg');
                 }
 

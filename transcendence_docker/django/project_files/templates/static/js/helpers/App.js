@@ -54,7 +54,6 @@ let gameIsActive = false;
 let currentPath = null;
 
 export function navigate(path) {
-	console.log(`DEBUG: Navigating to: ${path}`);
 	if (path === currentPath && path !== '/dashboard' && !document.getElementById('user-logged-in')) {
 		refreshHeader();
 		return;
@@ -133,8 +132,6 @@ function initSPA() {
 	window.addEventListener('popstate', function(event) {
 		if (event.state && event.state.path && routes[event.state.path]) {
 			navigate(event.state.path);
-		} else {
-			navigate('/');
 		}
 	});
 
