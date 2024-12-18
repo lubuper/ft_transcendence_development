@@ -120,7 +120,7 @@ export default function ProfileFriend() {
 
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.log('Error:', error);
             $ProfileFriendForm.innerHTML = `
 			${base}
 			`

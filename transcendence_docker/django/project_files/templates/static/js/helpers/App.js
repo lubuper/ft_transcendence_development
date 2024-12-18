@@ -54,7 +54,6 @@ let gameIsActive = false;
 let currentPath = null;
 
 export function navigate(path, pushState = true) {
-    console.log(`DEBUG: Navigating to: ${path}`);
     if (path === currentPath && path !== '/dashboard' && !document.getElementById('user-logged-in')) {
         refreshHeader();
         return;

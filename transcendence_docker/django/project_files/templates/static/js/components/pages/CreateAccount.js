@@ -61,7 +61,7 @@ export default function CreateAccount() {
 				CAMessage.innerHTML = `<p class="text-danger">Failed to create account: ${result.message || 'Unknown error'}</p>`;
 			}
 		} catch (error) {
-			console.error('Error:', error);
+			console.log('Error:', error);
 		}
 	});
 

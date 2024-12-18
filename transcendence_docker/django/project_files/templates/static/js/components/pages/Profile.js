@@ -462,7 +462,7 @@ export default function Profile() {
                         UPMessage.innerHTML = `<p class="text-danger">Failed to update account: ${result.message || 'Unknown error'}</p>`;
                     }
                 } catch (error) {
-                    console.error('Error:', error);
+                    console.log('Error:', error);
                 }
             });
 

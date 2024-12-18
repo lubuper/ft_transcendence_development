@@ -124,7 +124,7 @@ class Game {
 			if (this.ship1Number === 8)
 				this.ship2Number = 9;
 		} catch (error) {
-			console.error('Error fetching ship and color:', error);
+			console.log('Error fetching ship and color:', error);
 		}
 	}
 
@@ -905,7 +905,7 @@ class Game {
 			alert(`Next Match: ${player1} vs ${player2}! Press 'T' to return to the game`);
 		}
 		else {
-			console.error("Unable to determine next match players.");
+			console.log("Unable to determine next match players.");
 		}
 		this.unpaused = false;
 	}

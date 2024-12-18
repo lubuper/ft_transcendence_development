@@ -145,7 +145,7 @@ export function setupChat(friendName, userName) {
                 chatSockets[chatKey].send(JSON.stringify({ message })); // Send message through WebSocket
                 inputField.value = ''; // Clear input field
             } else {
-                console.error('WebSocket is not open or message is empty');
+                console.log('WebSocket is not open or message is empty');
             }
         };
 
@@ -169,7 +169,7 @@ export function setupChat(friendName, userName) {
             }
         };
     } else {
-        console.error('Sender button or input field not found');
+        console.log('Sender button or input field not found');
     }
 }
 

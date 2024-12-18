@@ -44,7 +44,7 @@ export function saveMatchHistory(match) {
 		console.log('Match history saved successfully:');
 	})
 	.catch(error => {
-		console.error('Error saving match history:', error);
+		console.log('Error saving match history:', error);
 	});
 }
 
@@ -107,7 +107,7 @@ export async function getMatchHistory() {
 		const matchHistory = await response.json();
 		return matchHistory;
 	} catch (error) {
-		console.error('Error fetching match history:', error);
+		console.log('Error fetching match history:', error);
 		throw error; // Rethrow or handle the error as needed
 	}
 }
@@ -634,11 +634,11 @@ export default function DashBoard() {
 						if (data.status === 'success') {
 							//console.log('Customization saved');
 						} else {
-							console.error('Error saving customization:', data.error);
+							console.log('Error saving customization:', data.error);
 						}
 					});
 			} else {
-				console.error('Missing ship or color selection.');
+				console.log('Missing ship or color selection.');
 			}
 		}
 

@@ -179,7 +179,7 @@ class Game {
 			thisUser = data.username;
 			flagFirstUser = false;
 		} catch (error) {
-			// console.error('Error fetching ship and color:', error);
+			// console.log('Error fetching ship and color:', error);
 		}
 	}
 

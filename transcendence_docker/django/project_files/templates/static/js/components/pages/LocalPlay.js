@@ -281,7 +281,7 @@ function startTournament(navigate) {
         localStorage.setItem('tournamentWinners', JSON.stringify([])); // Initialize winners
 		navigate(gamePath);
 	} else {
-		console.error('Tournament game type element not found when starting the tournament.');
+		console.log('Tournament game type element not found when starting the tournament.');
 	}
 }
 
