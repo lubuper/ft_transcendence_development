@@ -632,7 +632,7 @@ export default function DashBoard() {
 				}).then(response => response.json())
 					.then(data => {
 						if (data.status === 'success') {
-							console.log('Customization saved');
+							//console.log('Customization saved');
 						} else {
 							console.error('Error saving customization:', data.error);
 						}
