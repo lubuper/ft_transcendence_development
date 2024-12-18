@@ -70,6 +70,7 @@ export default function RemotePlay() {
 	selectedGameType = 'Pong';
 	const $games = document.createElement('div');
 	getDataRemote().then(dataRemote => {
+		console.log("dataRemote: ", dataRemote);
 
 		let currentGameRank = calculateRankedStats(dataRemote.match_history, "Pong Remote");
 	$games.addEventListener('change', (event) => {
