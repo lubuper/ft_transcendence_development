@@ -53,96 +53,99 @@ let currentGameI = null;
 let gameIsActive = false;
 let currentPath = null;
 
-export function navigate(path) {
-	if (path === currentPath && path !== '/dashboard' && !document.getElementById('user-logged-in')) {
-		refreshHeader();
-		return;
-	}
-	currentPath = path;
-	const allowedPaths = Object.keys(routes); // list of allowed paths for validation
-	if (allowedPaths.includes(path)) {
-		const existingCanvas = document.querySelector('canvas');
-		if (existingCanvas) {
-			if (currentGameI && typeof currentGameI.cleanup === 'function' && path !== '/asteroids' && path !== '/pong' && path !== '/pongremote') {
-				currentGameI.cleanup();
-			}
-			if (existingCanvas.parentNode !== null) {
-				existingCanvas.parentNode.removeChild(existingCanvas);
-			}
-		}
-		const PageComponent = routes[path];
-		$dynamic.innerHTML = '';
-		if (PageComponent) {
-			const gameMode = getSelectedGameMode();
-			const gameType = getSelectedGameType();
-			const page = PageComponent(gameMode, gameType);
-			if (page instanceof HTMLElement) {
-				$dynamic.appendChild(page);
-			}
-			if (path === '/asteroids' || path === '/pong' || path === '/pongremote' || path === '/asteroidsremote') {
-				currentGameI = page;
-				gameIsActive = true;
-				if (path === '/asteroids'){
-					gameName = 'Asteroids';
-				} else if (path === '/pong'){
-					gameName = 'Pong';
-				} else if (path === '/pongremote'){
-					gameName = 'Pong Remote';
-				}
-			} else {
-				if (gameIsActive && currentGameI && typeof currentGameI.cleanup === 'function') {
-					currentGameI.cleanup();
-					if (gameName === 'Pong Remote' && getGameFinished() === false && getMidGame() === true) {
-						const match = {
-							result: `Loss`,
-							score: `Forfeit`,
-							game: gameName,
-						};
-						saveMatchHistory(match);
-					}
-				}
-				gameIsActive = false;
-				currentGameI = null;
-			}
-		}
-		history.pushState({ path: path }, '', path);
-		// Conditionally render the footer
-		const $footer = document.querySelector('footer');
-		const $header = document.querySelector('header');
-		if (path === '/') {
-			$header.remove();
-			$root.appendChild(Header());
-			if (!$footer) {
-				$root.appendChild(Footer());
-			}
-		} else {
-			if ($footer) {
-				$footer.remove();
-			}
-		}
-	}
-	else {
-		navigate('/error');
-	}
+export function navigate(path, pushState = true) {
+    console.log(`DEBUG: Navigating to: ${path}`);
+    if (path === currentPath && path !== '/dashboard' && !document.getElementById('user-logged-in')) {
+        refreshHeader();
+        return;
+    }
+    currentPath = path;
+    const allowedPaths = Object.keys(routes); // List of allowed paths for validation
+    if (allowedPaths.includes(path)) {
+        const existingCanvas = document.querySelector('canvas');
+        if (existingCanvas) {
+            if (currentGameI && typeof currentGameI.cleanup === 'function' && path !== '/asteroids' && path !== '/pong' && path !== '/pongremote') {
+                currentGameI.cleanup();
+            }
+            if (existingCanvas.parentNode !== null) {
+                existingCanvas.parentNode.removeChild(existingCanvas);
+            }
+        }
+        const PageComponent = routes[path];
+        $dynamic.innerHTML = '';
+        if (PageComponent) {
+            const gameMode = getSelectedGameMode();
+            const gameType = getSelectedGameType();
+            const page = PageComponent(gameMode, gameType);
+            if (page instanceof HTMLElement) {
+                $dynamic.appendChild(page);
+            }
+            if (path === '/asteroids' || path === '/pong' || path === '/pongremote' || path === '/asteroidsremote') {
+                currentGameI = page;
+                gameIsActive = true;
+                if (path === '/asteroids') {
+                    gameName = 'Asteroids';
+                } else if (path === '/pong') {
+                    gameName = 'Pong';
+                } else if (path === '/pongremote') {
+                    gameName = 'Pong Remote';
+                }
+            } else {
+                if (gameIsActive && currentGameI && typeof currentGameI.cleanup === 'function') {
+                    currentGameI.cleanup();
+                    if (gameName === 'Pong Remote' && getGameFinished() === false && getMidGame() === true) {
+                        const match = {
+                            result: `Loss`,
+                            score: `Forfeit`,
+                            game: gameName,
+                        };
+                        saveMatchHistory(match);
+                    }
+                }
+                gameIsActive = false;
+                currentGameI = null;
+            }
+        }
+        if (pushState) {
+            history.pushState({ path: path }, '', path);
+        }
+        // Conditionally render the footer
+        const $footer = document.querySelector('footer');
+        const $header = document.querySelector('header');
+        if (path === '/') {
+            if ($header) {
+                $header.remove();
+            }
+            $root.appendChild(Header());
+            if (!$footer) {
+                $root.appendChild(Footer());
+            }
+        } else {
+            if ($footer) {
+                $footer.remove();
+            }
+        }
+    } else {
+        navigate('/error');
+    }
 }
 
 function initSPA() {
 	const initialPath = window.location.pathname;
-	history.replaceState({ path: initialPath }, '', initialPath); // to set the initial browser to history state
-	window.addEventListener('popstate', function(event) {
-		if (event.state && event.state.path && routes[event.state.path]) {
-			navigate(event.state.path);
-		}
-	});
+    history.replaceState({ path: initialPath }, '', initialPath); // Set the initial browser history state
+
+    window.addEventListener('popstate', function(event) {
+        const path = event.state?.path || '/';
+        navigate(path, false); // Pass false to avoid pushing state again
+    });
 
 	document.addEventListener('click', function(event) {
-		if (event.target.matches('[data-path]')) {
-			event.preventDefault();
-			const path = event.target.getAttribute('data-path');
-			navigate(path);
-		}
-	});
-
+        if (event.target.matches('[data-path]')) {
+            event.preventDefault();
+            const path = event.target.getAttribute('data-path');
+            navigate(path);
+        }
+    });
 	const videoMusicPlayer = background();
 	document.body.appendChild(videoMusicPlayer);
 
@@ -161,7 +164,7 @@ function initSPA() {
 			currentPath = initialPath;
 		}
 	} else {
-		navigate(initialPath);
+		navigate(initialPath, false);
 	}
 }
 
