@@ -65,9 +65,9 @@ def accept_game_invitation(request):
 
             return JsonResponse({'message': f'Game invitation accepted successfully!', 'game_id': game_invitation.game_id, 'sender': game_invitation.sender.user.username, 'receiver': game_invitation.receiver.user.username }, status=200)
         except Profile.DoesNotExist:
-            return JsonResponse({'error': 'User not found'}, status=404)
+            return JsonResponse({'message': 'User not found'}, status=400)
         except GameInvitation.DoesNotExist:
-            return JsonResponse({'error': 'Game invitation not found'}, status=404)
+            return JsonResponse({'message': 'Game invitation not found'}, status=400)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
@@ -95,9 +95,9 @@ def reject_game_invitation(request):
 
             return JsonResponse({'message': f'Game invitation rejected successfully!', 'game_id': game_invitation.game_id }, status=200)
         except Profile.DoesNotExist:
-            return JsonResponse({'error': 'User not found'}, status=404)
+            return JsonResponse({'message': 'User not found'}, status=400)
         except GameInvitation.DoesNotExist:
-            return JsonResponse({'error': 'Game invitation not found'}, status=404)
+            return JsonResponse({'message': 'Game invitation not found'}, status=400)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
@@ -124,9 +124,9 @@ def finish_game_invitation(request):
 
             return JsonResponse({'message': f'Game invitation finish successfully!', 'game_id': game_invitation.game_id }, status=200)
         except Profile.DoesNotExist:
-            return JsonResponse({'error': 'User not found'}, status=404)
+            return JsonResponse({'message': 'User not found'}, status=400)
         except GameInvitation.DoesNotExist:
-            return JsonResponse({'error': 'Game invitation not found'}, status=404)
+            return JsonResponse({'message': 'Game invitation not found'}, status=400)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
@@ -143,7 +143,7 @@ def finish_game_rank(request):
             return JsonResponse({'message': f'Game by rank finish successfully!', 'game_id': game_by_rank.game_id }, status=200)
 
         if GameByRank.DoesNotExist:
-            return JsonResponse({'error': 'Game not found'}, status=404)
+            return JsonResponse({'message': 'Game not found'}, status=400)
 
 @csrf_exempt
 def start_game_by_rank(request):
@@ -236,6 +236,6 @@ def find_receiver(request):
         if game_by_rank:
             return JsonResponse({'message': f'Receiver found', 'receiver': receiver_username }, status=200)
 
-        return JsonResponse({'error': 'No receiver found'}, status=404)
+        return JsonResponse({'message': 'User not found'}, status=400)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)

@@ -267,9 +267,10 @@ export default function RemotePlay() {
 						navigate('/pongremote');
 					}
 				} else {
+					alert('Other user already close the game');
 					setTimeout(() => {
-						console.log(response);
-					}, 2000);
+						navigate('/');
+					}, 100);
 				}
 			});
 
@@ -304,8 +305,8 @@ export default function RemotePlay() {
 					navigate('/');
 				} else {
 					setTimeout(() => {
-						console.log('some error happened', result);
-					}, 1000);
+						navigate('/');
+					}, 100);
 				}
 			});
 		});

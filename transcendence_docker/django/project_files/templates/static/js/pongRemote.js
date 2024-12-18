@@ -66,7 +66,6 @@ export async function finishInvitation(sender, receiver, gameId) {
 
 	if (response.ok) {
 		const resultGame = await response.json();
-		console.log('result', resultGame);
 		return (resultGame);
 	}
 }
