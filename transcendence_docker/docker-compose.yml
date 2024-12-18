@@ -18,7 +18,7 @@ services:
       context: ./django
       dockerfile: Dockerfile
     volumes:
-    - ./django/project_files/media/profile_pics:/django/project_files/media/profile_pics
+    - ./django/project_files/templates/static/media:/transcendence/templates/static/media
     ports:
       - "8000:8000"
     networks:
