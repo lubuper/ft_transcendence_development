@@ -17,9 +17,6 @@ export default function AboutUs() {
 			<br>contact@solarsystemscope.com
 			<br>rubberduck
 			</p>
-			<div class="mt-4">
-				<p class="text-white">BlaBlaBla</p>
-			</div>
 			<button class="btn btn-purple btn-lg text-white shadow-lg mt-3" onclick="window.history.back()">Go Back</button>
 		</div>
 	`

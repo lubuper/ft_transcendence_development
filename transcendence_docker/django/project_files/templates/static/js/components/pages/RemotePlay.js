@@ -111,7 +111,7 @@ export default function RemotePlay() {
 				<div class="col-md-6 d-flex align-items-stretch">
 					<div class="card bg-dark text-white w-100" style="border: 1px solid #343a40; opacity: 0.8;">
 						<div class="card-body">
-							<h5 class="card-title text-center">Invite a Friend</h5>
+							<h5 class="card-title text-center">Invite other user</h5>
 							<form id="send-friend-invitation">
 								<input type="text" class="form-control mb-3" id="playerNameInvitation" name="username" placeholder="Enter Player Name" required>
 								<div id="playerNamesContainer" class="mt-3"></div>

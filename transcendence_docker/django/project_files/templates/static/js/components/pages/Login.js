@@ -49,6 +49,9 @@ export default function Login() {
 			}, 1000);
 		} else {
 			loginMessage.innerHTML = `<p class="text-danger">Login failed: ${result.message}</p>`;
+			setTimeout(() => {
+				loginMessage.innerHTML = `<p </p>`;
+			}, 500);
 		}
 	});
 

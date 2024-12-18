@@ -535,7 +535,9 @@ export default function DashBoard() {
 						message: `${userName} invited you to a Pong game!`
 					}));
 				}
-				navigate('/pongremote');
+				setTimeout(() => {
+					navigate('/pongremote');
+				}, 100);
 			}
 		});
 
