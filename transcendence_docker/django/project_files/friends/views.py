@@ -36,7 +36,7 @@ def send_friend_request(request):
                 return JsonResponse({'message': 'Friend request already sent!'}, status=400)
 
         except Profile.DoesNotExist:
-            return JsonResponse({'message': 'User not found'}, status=404)
+            return JsonResponse({'message': 'User not found'}, status=400)
 
     return JsonResponse({'message': 'Invalid request'}, status=400)
 
@@ -108,6 +108,6 @@ def remove_friend(request):
 
             return JsonResponse({'message': 'Friend removed successfully!'}, status=200)
         except Profile.DoesNotExist:
-            return JsonResponse({'error': 'User not found'}, status=404)
+            return JsonResponse({'error': 'User not found'}, status=400)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)

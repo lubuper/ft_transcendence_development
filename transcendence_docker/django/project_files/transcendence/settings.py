@@ -66,14 +66,20 @@ SECURE_SSL_REDIRECT = True  # Redirect HTTP to HTTPS
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Trust X-Forwarded-Proto header from NGINX
 
 # Ensure cookies are only sent over HTTPS
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 # HSTS settings (optional)
 SECURE_HSTS_SECONDS = 31536000  # 1 year in seconds
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
+ALLOWED_HOST = os.getenv('ALLOWED_HOST')
+
+CSRF_TRUSTED_ORIGINS = [
+    f'https://{ALLOWED_HOST}:8443',
+    # Add other trusted origins here
+]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

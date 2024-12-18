@@ -18,7 +18,6 @@ class StatusConsumer(AsyncWebsocketConsumer):
         # Join a channel group (e.g., based on user ID or friends group)
         self.user = self.scope["user"]
         self.group_name = f"user_{self.user.username}"
-        logger.info(f"Group name of user connected: {self.group_name}")
         if self.user.is_authenticated:
             # Add the user to a WebSocket group
             await self.channel_layer.group_add(self.group_name, self.channel_name)
@@ -54,7 +53,6 @@ class StatusConsumer(AsyncWebsocketConsumer):
         # This part will depend on any specific requests, if necessary
 
     async def status_update(self, event):
-        logger.info(f"Received event in status_update: {event}")
         await self.send(text_data=json.dumps({
             'friend_': event['username'],
             'status': event['status']
@@ -62,16 +60,12 @@ class StatusConsumer(AsyncWebsocketConsumer):
 
 @receiver(status_change_signal)
 def status_change_handler(sender, username, status, **kwargs):
-    logger.info(f"Entered status_change_handler: {username}, {status}")
     channel_layer = get_channel_layer()
     friend_group_name = f"user_{username}"
-    logger.info(f"Group name of user that entered status_change_signal: {friend_group_name}")
     profile = Profile.objects.get(user__username=username)
     friends = profile.get_friends()  # Assuming `get_friends` returns a QuerySet or list of `User` objects
     for friend in friends:
         friend_group_name = f"user_{friend}"  # Using friend's user ID for the group name
-        logger.info(f"sending info to group: {friend_group_name}")
-        logger.info(f"Sending status update to group: {friend_group_name}")
         async_to_sync(channel_layer.group_send)(
             friend_group_name,
             {
