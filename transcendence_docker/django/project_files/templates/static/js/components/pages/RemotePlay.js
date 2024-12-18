@@ -17,13 +17,12 @@ export async function sendInvitation(sender, receiver, gameName) {
 			'game_name': gameName
 		})
 	})
-	if (response.ok) {
+
 		const resultGame = await response.json();
 		selectedGameID = resultGame.game_id;
 		senderPlayer = sender;
 		otherPlayer = receiver;
 		return resultGame;
-	}
 }
 
 const base = `
@@ -70,7 +69,6 @@ export default function RemotePlay() {
 	selectedGameType = 'Pong';
 	const $games = document.createElement('div');
 	getDataRemote().then(dataRemote => {
-		console.log("dataRemote: ", dataRemote);
 
 		let currentGameRank = calculateRankedStats(dataRemote.match_history, "Pong Remote");
 	$games.addEventListener('change', (event) => {

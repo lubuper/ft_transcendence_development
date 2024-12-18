@@ -11,23 +11,20 @@ logger = logging.getLogger(__name__)
 @csrf_exempt
 def send_game_invitation(request):
     if request.method == 'POST':
-        # Parse the JSON body
+
         data = json.loads(request.body)
-        sender = request.user  # User who is sending the invitation
-        receiver_username = data.get('username')  # Extract username from JSON
-        game_name = data.get('game_name')  # Game name from the invitation
+        sender = request.user
+        receiver_username = data.get('username')
+        game_name = data.get('game_name')
         random_number = random.randint(100, 999)
         game_id = f"{game_name}{random_number}"
 
-        # Check if the receiver username and game name are provided
         if not receiver_username or not game_name:
             return JsonResponse({'error': 'Username and game name are required'}, status=400)
 
-        # Find the receiver user and create a game invitation
         try:
             receiver = Profile.objects.get(user__username=receiver_username)
 
-            # Create a game invitation instance with status 'sent'
             game_invitation, created = GameInvitation.objects.update_or_create(
                 sender=Profile.objects.get(user=sender),
                 receiver=receiver,
@@ -40,7 +37,7 @@ def send_game_invitation(request):
                 return JsonResponse({'message': f'Game invitation already sent!'}, status=400)
 
         except Profile.DoesNotExist:
-            return JsonResponse({'message': 'User not found'}, status=404)
+            return JsonResponse({'message': 'User not found'}, status=400)
 
     return JsonResponse({'message': 'Invalid request'}, status=400)
 
@@ -54,9 +51,9 @@ def accept_game_invitation(request):
         receiver_username = request.user
 
         try:
-            receiver = request.user.profile  # Current user (receiver)
-            sender = Profile.objects.get(user__username=sender_username)  # Sender of the invitation
-            # Update the GameInvitation model to set status to 'accepted'
+            receiver = request.user.profile
+            sender = Profile.objects.get(user__username=sender_username)
+
             game_invitation = GameInvitation.objects.get(
                 sender=sender,
                 receiver=receiver,
@@ -83,10 +80,9 @@ def reject_game_invitation(request):
         game_id = data.get('game_id')
 
         try:
-            receiver = request.user.profile  # Current user (receiver)
-            sender = Profile.objects.get(user__username=username)  # Sender of the invitation
+            receiver = request.user.profile
+            sender = Profile.objects.get(user__username=username)
 
-            # Attempt to get the existing game invitation
             game_invitation = GameInvitation.objects.get(
                 sender=sender,
                 receiver=receiver,
@@ -94,7 +90,6 @@ def reject_game_invitation(request):
                 status='sent'
             )
 
-            # Update the GameInvitation model to set status to 'rejected'
             game_invitation.status = 'rejected'
             game_invitation.save()
 
@@ -114,10 +109,9 @@ def finish_game_invitation(request):
         game_id = data.get('game_id')
 
         try:
-            receiver = Profile.objects.get(user__username=username)  # Sender of the invitation
-            sender = request.user.profile  # Current user (receiver)
+            receiver = Profile.objects.get(user__username=username)
+            sender = request.user.profile
 
-            # Attempt to get the existing game invitation
             game_invitation = GameInvitation.objects.get(
                 sender=sender,
                 receiver=receiver,
@@ -125,7 +119,6 @@ def finish_game_invitation(request):
                 status='sent'
             )
 
-            # Update the GameInvitation model to set status to 'rejected'
             game_invitation.status = 'finish'
             game_invitation.save()
 

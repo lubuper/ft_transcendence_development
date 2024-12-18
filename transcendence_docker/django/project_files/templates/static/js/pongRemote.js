@@ -14,6 +14,7 @@ let gameFinished = false;
 let isWaiting = false;
 let midGame = false;
 let flagFirstUser = false;
+let gameRejected = false;
 
 let waitingModal = document.createElement('div');
 
@@ -65,6 +66,7 @@ export async function finishInvitation(sender, receiver, gameId) {
 
 	if (response.ok) {
 		const resultGame = await response.json();
+		console.log('result', resultGame);
 		return (resultGame);
 	}
 }
@@ -177,7 +179,7 @@ class Game {
 			thisUser = data.username;
 			flagFirstUser = false;
 		} catch (error) {
-			console.error('Error fetching ship and color:', error);
+			// console.error('Error fetching ship and color:', error);
 		}
 	}
 
@@ -253,13 +255,14 @@ class Game {
 			if (thisUser === ballController) {
 				document.body.removeChild(waitingModal);
 			}
-			if (getOtherPlayer() === null) {
+			if (getOtherPlayer() === null && gameRejected === false) {
 				const resultRank = finishRank(getSenderPlayer(), getSelectedGameID());
-			} else {
+			} else if (gameRejected === false) {
 				const resultInv = finishInvitation(getSenderPlayer(), getOtherPlayer(), getSelectedGameID());
 			}
 			isWaiting = false;
 			flagFirstUser = false;
+			gameRejected = false
 			return;
 		}
 		thisUser = null;
@@ -1039,6 +1042,7 @@ export default function PongRemote() {
 			ballSpector = null;
 			gameAbandoned = false;
 			gameFinished = false;
+			gameRejected = false;
 			ballController = getSenderPlayer();
 			ballSpector = getOtherPlayer();
 			if (ballSpector === null) {
@@ -1080,6 +1084,7 @@ export default function PongRemote() {
 			gameAbandoned = true;
 			game.gameWin();
 		} else if (data.action === 'player_reject') {
+			gameRejected = true;
 			alert(data.message);
 			navigate('/');
 		}
