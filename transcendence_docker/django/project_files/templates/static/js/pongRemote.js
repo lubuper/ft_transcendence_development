@@ -1105,6 +1105,9 @@ export default function PongRemote() {
 		};
 
 		game.sendBallMove = (moveBallData) => {
+			if (gameFinished === true) {
+				return;
+			}
 			gameWebsocket.send(JSON.stringify({
 				action: 'update_ball',
 				player: ballController,
