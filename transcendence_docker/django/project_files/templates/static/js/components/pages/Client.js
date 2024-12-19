@@ -38,7 +38,8 @@ export function Initialize(friendName, userName) {
             messageCache[friendName].push({
                 sender: data.sender,
                 message: data.message,
-                timestamp
+                timestamp,
+                destination: userName
             });
         }
 
@@ -94,7 +95,7 @@ export function setupChat(friendName, userName) {
         // Cache messages and update UI
         if (data.sender === friendName) {
             newMessage.classList.add('friend-message');
-            messageCache[friendName].push({ sender: data.sender, message: data.message, timestamp });
+            messageCache[friendName].push({ sender: data.sender, message: data.message, timestamp, destination: userName });
             updateChatIcons(friendName);
         } else if (data.sender === userName) {
             newMessage.classList.add('my-message');
@@ -182,7 +183,7 @@ export function displayMessages(friendName, userName) {
 
     // Combine and sort messages by timestamp
     const combinedMessages = [
-        ...(messageCache[friendName] || []),
+        ...(messageCache[friendName]?.filter(msg => msg.destination === userName) || []),
         ...(messageCache[userName]?.filter(msg => msg.destination === friendName) || [])
     ].sort((a, b) => a.timestamp - b.timestamp);
 
