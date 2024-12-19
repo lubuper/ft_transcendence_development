@@ -643,9 +643,9 @@ class Game {
 
 	setupEventListeners() {
 		window.addEventListener('keydown', (event) => {
-			if (event.key === ' ') {
+			/* if (event.key === ' ') {
 				event.preventDefault();
-			}
+			} */
 			this.keysPressed[event.key] = true;
 		});
 		window.addEventListener('keyup', (event) => {
