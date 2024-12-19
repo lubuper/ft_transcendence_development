@@ -267,7 +267,7 @@ export default function RemotePlay() {
 						navigate('/pongremote');
 					}
 				} else {
-					alert('Other user already close the game');
+					alert('Other user already closed the game');
 					setTimeout(() => {
 						navigate('/');
 					}, 100);

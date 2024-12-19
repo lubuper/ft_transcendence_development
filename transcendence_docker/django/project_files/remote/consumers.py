@@ -88,7 +88,7 @@ class GamePongConsumer(AsyncWebsocketConsumer):
                          self.room_group_name,
                          {
                               'type': 'player_left',
-                              'message': 'A player close the game.',
+                              'message': 'A player has closed the game.',
                          }
                     )
                 elif close_code == 1000 and len(self.connected_players[self.game_id]) == 1:
