@@ -313,22 +313,7 @@ export default function RemotePlay() {
 
 	})
 	.catch((error) => {
-		if (error.toString() === 'Error: Not logged') {
-			$games.innerHTML = base;
-		} else {
-			$games.innerHTML = `
-			<div class="vh-100 d-flex flex-column align-items-center justify-content-center position-relative">
-                <div class="card bg-dark text-white mb-3" style="width: 400px;">
-                <div class="card-body text-center">
-                <img src="/static/media/sadAlien.jpg"
-                     alt="Sad Alien"
-                     style="width: 300px; height: 300px; border-radius: 10px; margin-bottom: 20px;">
-                <h5 class="card-title">Something went wrong! Try again</h5>
-                </div>
-                </div>
-            </div>
-			`;
-		}
+		$games.innerHTML = base;
 	});
 	return $games;
 }
