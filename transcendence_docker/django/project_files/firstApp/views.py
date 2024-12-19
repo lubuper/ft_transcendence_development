@@ -85,6 +85,11 @@ def login_view(request):
 
 			user = authenticate(request, username=username, password=password)
 
+			profile = Profile.objects.get(user=user)
+
+			if profile.online_status:
+				return JsonResponse({'message': 'User already logged in'}, status=400)
+
 			if user is not None:
 				login(request, user)
 				return JsonResponse({'message': 'Login successful'}, status=200)
